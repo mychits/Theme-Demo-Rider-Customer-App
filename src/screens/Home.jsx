@@ -28,7 +28,8 @@ import Toast from 'react-native-toast-message';
 import { useFocusEffect, StackActions } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ContextProvider } from '../context/UserProvider';
-import Group400 from '../../assets/Group400.png';
+import CityChits from '../../assets/CityChits.png';
+
 
 
 const screenWidth = Dimensions.get('window').width;
@@ -526,26 +527,26 @@ const Home = ({ route, navigation }) => {
     );
 
     const services = [
-        { navigateTo: 'Mygroups', icon: 'group', title: 'My Groups', bgColor: '#E8F5E9', iconBg: '#2E7D32', disabled: false },
-        { navigateTo: 'EnrollTab', screen: 'EnrollScreenMain', icon: 'group-add', title: 'New Groups', bgColor: '#E3F2FD', iconBg: '#053B90', filter: 'New Groups', disabled: false },
-        { navigateTo: 'PaymentScreen', icon: 'payment', title: 'My Payments', bgColor: '#FFF3E0', iconBg: '#EF6C00', disabled: false },
-        { navigateTo: 'ReportScreen', icon: 'bar-chart', title: 'Reports', bgColor: '#F3E5F5', iconBg: '#6A1B9A', disabled: false },
+        { navigateTo: 'Mygroups', icon: 'group', title: 'My Groups', bgColor: '#d6cce8ff', iconBg: '#783105ff', disabled: false },
+        { navigateTo: 'EnrollTab', screen: 'EnrollScreenMain', icon: 'group-add', title: 'New Groups', bgColor: '#d6cce8ff', iconBg: '#1407ceff', filter: 'New Groups', disabled: false },
+        { navigateTo: 'PaymentScreen', icon: 'payment', title: 'My Payments', bgColor: '#d6cce8ff', iconBg: '#ff7707ff', disabled: false },
+        { navigateTo: 'ReportScreen', icon: 'bar-chart', title: 'Reports', bgColor: '#d6cce8ff', iconBg: '#475a07ff', disabled: false },
         // START OF MODIFICATION: Swapped My Profile with My Passbook for the main grid
-        { navigateTo: 'MyPassbook', icon: 'book', title: 'My Passbook', bgColor: '#E0F7FA', iconBg: '#006064', disabled: false },
+        { navigateTo: 'MyPassbook', icon: 'book', title: 'My Passbook', bgColor: '#d6cce8ff', iconBg: '#04595cff', disabled: false },
         // END OF MODIFICATION
-        { navigateTo: 'AuctionList', icon: 'gavel', title: 'Auction', bgColor: '#F1F8E9', iconBg: '#558B2F', disabled: false, featureTitle: 'Auction' },
-        { navigateTo: 'IntroduceNewCustomers', icon: 'person-add', title: 'Introduce New Customers', bgColor: '#FFFDE7', iconBg: '#F9A825', disabled: false },
-        { navigateTo: 'MyLoan', screen: 'MyLoan', icon: 'account-balance-wallet', title: 'My Loan', bgColor: '#EDE7F6', iconBg: '#5E35B1', filter: 'My Loan', disabled: false },
-        { navigateTo: 'PayYourDues', icon: 'currency-rupee', title: 'Pay Your Dues', bgColor: '#FFEBEE', iconBg: '#B71C1C', disabled: false },
+        { navigateTo: 'AuctionList', icon: 'gavel', title: 'Auction', bgColor: '#d6cce8ff', iconBg: '#8e8c05ff', disabled: false, featureTitle: 'Auction' },
+        { navigateTo: 'IntroduceNewCustomers', icon: 'person-add', title: 'Introduce New Customers', bgColor: '#d6cce8ff', iconBg: '#a16400ff', disabled: false },
+        { navigateTo: 'MyLoan', screen: 'MyLoan', icon: 'account-balance-wallet', title: 'My Loan', bgColor: '#d6cce8ff', iconBg: '#e40000ff', filter: 'My Loan', disabled: false },
+        { navigateTo: 'PayYourDues', icon: 'currency-rupee', title: 'Pay Your Dues', bgColor: '#d6cce8ff', iconBg: '#9d00a5a3', disabled: false },
     ];
 
     const mychitsAdvantages = [
-        { icon: 'lock-clock', text1: '2 mins onboarding', text2: '& 24Hrs Payouts', iconColor: '#EF6C00' },
+        { icon: 'lock-clock', text1: '2 mins onboarding', text2: '& 24Hrs Payouts', iconColor: '#ff0000ff' },
         {
             icon: 'gavel',
             text1: 'In app ',
             text2: 'Auctions',
-            iconColor: '#795548',
+            iconColor: '#581c06ff',
             action: 'navigate',
             targetScreen: 'AuctionList'
         },
@@ -553,7 +554,7 @@ const Home = ({ route, navigation }) => {
             icon: 'event-note',
             text1: ' Auctions',
             text2: 'every month',
-            iconColor: '#FBC02D',
+            iconColor: '#ffb701ff',
             action: 'navigate',
             targetScreen: 'AuctionList'
         },
@@ -561,12 +562,12 @@ const Home = ({ route, navigation }) => {
             icon: 'support-agent',
             text1: '1 Click customer',
             text2: 'support',
-            iconColor: '#607D8B',
+            iconColor: '#00aaffff',
             action: 'call',
             phoneNumber: '+919483900777'
         },
-        { icon: 'verified', text1: 'Fully Compliant as', text2: 'per Chit Act 1998', iconColor: '#3F51B5' },
-        { icon: 'groups', text1: 'Chit Plans for', text2: 'everyone', iconColor: '#4CAF50' },
+        { icon: 'verified', text1: 'Fully Compliant as', text2: 'per Chit Act 1998', iconColor: '#0026ffff' },
+        { icon: 'groups', text1: 'Chit Plans for', text2: 'everyone', iconColor: '#00ff08ff' },
     ];
 
     const customerReviews = [
@@ -972,7 +973,7 @@ const Home = ({ route, navigation }) => {
                                             }
                                         }}
                                     >
-                                        <View style={[styles.advantageIconContainer, { borderColor: '#FFFFFF' }]}>
+                                        <View style={[styles.advantageIconContainer, { borderColor: 'black' }]}>
                                             <MaterialIcons name={item.icon} size={30} color={item.iconColor} />
                                         </View>
                                         <Text style={styles.advantageText1}>{item.text1}</Text>
@@ -1097,7 +1098,7 @@ const Home = ({ route, navigation }) => {
                             {/* Header */}
                             <View style={styles.sideMenuHeader}>
                                 <Image
-                                    source={Group400}
+                                    source={CityChits}
                                     style={styles.headerImage}
                                     resizeMode="contain"
                                 />
@@ -1186,37 +1187,38 @@ const Home = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#053B90' },
-    header: { flexDirection: 'row', alignItems: 'center', paddingBottom: 10, paddingHorizontal: 15, justifyContent: 'space-between', backgroundColor: '#053B90' },
-    headerTitle: { color: '#fff', fontSize: 20, fontWeight: 'bold', marginLeft: 10, marginTop: 10 },
+    container: { flex: 1, backgroundColor: '#6E30CF' },
+    header: { flexDirection: 'row', alignItems: 'center', paddingBottom: 10, paddingHorizontal: 15, justifyContent: 'space-between', backgroundColor: '#6E30CF' },
+    headerTitle: { color: '#FFD700', fontSize: 20, fontWeight: 'bold', marginLeft: 10, marginTop: 10 },
     hamburgerIconContainer: { flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginTop: 10, marginLeft: 7 },
-    hamburgerLine: { width: 23, height: 2, backgroundColor: '#fff', borderRadius: 2, marginVertical: 3 },
-    helpButton: { flexDirection: 'row', alignItems: 'center', paddingVertical: 5, paddingHorizontal: 9, backgroundColor: '#B3E5FC', borderRadius: 15, marginTop: 10 },
-    helpText: { color: '#053B90', fontSize: 12 },
+    hamburgerLine: { width: 23, height: 2, backgroundColor: 'white', borderRadius: 2, marginVertical: 3 },
+    helpButton: { flexDirection: 'row', alignItems: 'center', paddingVertical: 5, paddingHorizontal: 9, backgroundColor: 'white', borderRadius: 15, marginTop: 10 },
+    helpText: { color: 'black', fontSize: 12 },
     loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFFFFF' },
     mainScrollView: { flex: 1 },
     contentContainer: { overflow: 'hidden', paddingBottom: 85 },
-    skyBlueSection: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#B3E5FC', borderRadius: 15, marginTop: 5, width: '92%', height: 100, alignSelf: 'center', padding: 15 },
+    skyBlueSection: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#dbccf1ff', borderRadius: 15, marginTop: 5, width: '92%', height: 100, alignSelf: 'center', padding: 15 },
     welcomeContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flex: 1, },
 
-    servicesSection: { borderColor: '#053B90', borderWidth: 5, marginTop: 25, backgroundColor: '#FFFFFF', borderRadius: 15, paddingTop: 30, width: '97%', alignSelf: 'center', alignItems: 'center', paddingBottom: 13, borderColor: '#053B90' },
-    servicesTitle: { position: 'absolute', top: -20, alignSelf: 'center', backgroundColor: '#B3E5FC', width: 230, height: 40, borderRadius: 11, textAlign: 'center', textAlignVertical: 'center', color: '#053B90', fontWeight: '900', fontSize: 20, lineHeight: 22, textTransform: 'capitalize', borderWidth: 1, borderColor: '#053B90' },
-    gridItemBox: { width: '27%', alignItems: 'center', marginBottom: 8, paddingVertical: 8, paddingHorizontal: 5, borderRadius: 12, marginHorizontal: 5.8, marginLeft: 14, borderWidth: 3, borderColor: '#ddd' },
+    servicesSection: { borderColor: '#2bef1aff', borderWidth: 5, marginTop: 25, backgroundColor: '#fafafaff', borderRadius: 15, paddingTop: 30, width: '97%', alignSelf: 'center', alignItems: 'center', paddingBottom: 13, borderColor: '#053B90' },
+    servicesTitle: { position: 'absolute', top: -20, alignSelf: 'center', backgroundColor: '#b2b0f3ff', width: 230, height: 40, borderRadius: 11, textAlign: 'center', textAlignVertical: 'center', color: 'black', fontWeight: '900', fontSize: 20, lineHeight: 22, textTransform: 'capitalize', borderWidth: 1, borderColor: '#053B90' },
+    gridItemBox: { width: '27%', alignItems: 'center', marginBottom: 8, paddingVertical: 8, paddingHorizontal: 5, borderRadius: 12, marginHorizontal: 5.8, marginLeft: 14, borderWidth: 3, borderColor: '#8159e8ff' },
     iconCircle: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center', marginBottom: -2 },
-    serviceTitle: { fontSize: 10, textAlign: 'center', fontWeight: '800', color: '#000', marginTop: 1 },
-    blueContainer: { backgroundColor: '#053B90', borderRadius: 10, marginTop: 5, paddingVertical: 8, paddingHorizontal: 3, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around', alignItems: 'center', width: '93%' },
+    serviceTitle: { fontSize: 12
+        , textAlign: 'center', fontWeight: '800', color: '#black', marginTop: 1 },
+    blueContainer: { backgroundColor: '#d6cce8ff', borderRadius: 10, marginTop: 5, paddingVertical: 8, paddingHorizontal: 3, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around', alignItems: 'center', width: '93%' },
     blueGridItem: { width: '20%', alignItems: 'center', marginBottom: 1, borderRadius: 8, paddingVertical: 5, marginHorizontal: 2 },
-    iconCircleBlue: { width: 50, height: 50, borderRadius: 25, backgroundColor: '#B3E5FC', justifyContent: 'center', alignItems: 'center', marginBottom: -2 },
+    iconCircleBlue: { width: 50, height: 50, borderRadius: 25, backgroundColor: '#d5d0dbff', justifyContent: 'center', alignItems: 'center', marginBottom: -2 },
     blueGridItemText: { marginTop: 2, fontSize: 10, color: '#fff', textAlign: 'center', fontWeight: '600' },
     bottomContainer: { marginTop: -1, paddingVertical: 12, paddingHorizontal: 10, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around', alignItems: 'center', width: '102%', alignSelf: 'center' },
-    bottomGridItem: { width: '22%', alignItems: 'center', marginBottom: 10, paddingHorizontal: 8, justifyContent: 'center', borderWidth: 1, borderRadius: 12, borderColor: '#ddd' },
+    bottomGridItem: { width: '22%', alignItems: 'center', marginBottom: 10, paddingHorizontal: 8, justifyContent: 'center', borderWidth: 1, borderRadius: 12, borderColor: '#8159e8ff' },
     bottomIcon: { justifyContent: 'center', alignItems: 'center', marginBottom: 0 },
     bottomServiceTitle: { marginTop: -2, fontSize: 10, color: '#000', textAlign: 'center', fontWeight: '600' },
     sideMenuScrollContent: {
         paddingBottom: 30, // avoid cut-off at bottom
     },
-    welcomeText: { fontSize: 20, fontWeight: 'bold', color: '#053B90', marginBottom: 0, textAlign: 'left', marginLeft: 15 },
-    userNameText: { fontSize: 19, fontWeight: '600', color: '#053B90', textAlign: 'left', marginTop: 4, marginLeft: 15 },
+    welcomeText: { fontSize: 20, fontWeight: 'bold', color: 'black', marginBottom: 0, textAlign: 'left', marginLeft: 15 },
+    userNameText: { fontSize: 19, fontWeight: '600', color: 'blaxk', textAlign: 'left', marginTop: 4, marginLeft: 15 },
     errorTextSmall: { fontSize: 12, color: 'red', textAlign: 'center' },
     offlineContainer: { flex: 1, backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center' },
     offlineContent: { justifyContent: 'center', alignItems: 'center', padding: 20 },
@@ -1227,7 +1229,7 @@ const styles = StyleSheet.create({
     modalOverlay: { flex: 1, justifyContent: 'flex-end', alignItems: 'center', backgroundColor: 'rgba(12,12,12,0.6)' },
     modalContent: { width: '97%', backgroundColor: '#FFFFFF', borderTopLeftRadius: 30, borderTopRightRadius: 30, paddingHorizontal: 25, paddingBottom: 0, shadowColor: 'transparent', elevation: 0 },
     modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 15, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
-    modalTitle: { fontSize: 22, fontWeight: '800', color: '#1A237E' },
+    modalTitle: { fontSize: 22, fontWeight: '800', color: 'black' },
     modalMenuItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 13, borderBottomWidth: 1, borderBottomColor: '#f5f5f5', backgroundColor: 'transparent' },
     modalMenuItemLeft: { flexDirection: 'row', alignItems: 'center' },
     modalMenuText: { fontSize: 17, color: '#424242', marginLeft: 20, fontWeight: '500' },
@@ -1273,7 +1275,7 @@ const styles = StyleSheet.create({
     },
     sideMenuHeader: {
         width: '100%',
-        backgroundColor: '#7cc4eeff',
+        backgroundColor: '#6E30CF',
         borderTopRightRadius: 30,
         paddingHorizontal: 25,
         justifyContent: 'center',
@@ -1287,21 +1289,22 @@ const styles = StyleSheet.create({
         paddingBottom: 20
     },
     headerImage: {
-        width: 50,
-        height: 50,
+        width: 300,
+        height: 80,
         alignSelf: 'center',
-        marginTop: 50, // increase value to move further down
+        marginTop: 40, // increase value to move further down
     },
     sideMenuUserName: {
-        fontSize: 17,
+        fontSize: 25,
         fontWeight: 'bold',
-        color: '#333',
+        color: 'white',
         marginTop: 10,
         textAlign: 'center', // centers text
     },
     sideMenuOnTrackText: {
-        fontSize: 14,
-        color: '#666',
+        fontSize: 17,
+        color: 'white',
+        
         marginTop: 5,
         textAlign: 'center', // centers text
     },
@@ -1423,12 +1426,12 @@ const styles = StyleSheet.create({
         position: 'relative',
         overflow: 'visible'
     },
-    benefitsTitle: { position: 'absolute', top: -20, left: '60%', transform: [{ translateX: -150 }], backgroundColor: '#053B90', width: 300, height: 55, borderRadius: 30, textAlign: 'center', textAlignVertical: 'center', color: 'white', fontWeight: '900', fontSize: 16, lineHeight: 22, textTransform: 'uppercase', letterSpacing: 1.5, shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 12, zIndex: 10, borderWidth: 2, borderColor: '#F8F9FA' },
-    benefitItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 20, padding: 12, backgroundColor: '#F8F9FA', borderRadius: 18, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 6, borderWidth: 1, borderColor: '#EFEFEF' },
+    benefitsTitle: { position: 'absolute', top: -20, left: '60%', transform: [{ translateX: -150 }], backgroundColor: '#520590ff', width: 300, height: 55, borderRadius: 30, textAlign: 'center', textAlignVertical: 'center', color: 'white', fontWeight: '900', fontSize: 16, lineHeight: 22, textTransform: 'uppercase', letterSpacing: 1.5, shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 12, zIndex: 10, borderWidth: 2, borderColor: '#1e1c1fff' },
+    benefitItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 20, padding: 12, backgroundColor: '#bf77e0ff', borderRadius: 18, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 6, borderWidth: 1, borderColor: '#8e03ffff' },
     benefitIconCircle: { width: 45, height: 45, borderRadius: 32.5, justifyContent: 'center', alignItems: 'center', marginRight: 18, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, shadowRadius: 4, elevation: 3 },
     benefitTextContent: { flex: 1 },
-    benefitHeading: { fontSize: 15, fontWeight: 'bold', color: '#212121', marginBottom: 6 },
-    benefitDescription: { fontSize: 10, color: '#424242', lineHeight: 16 },
+    benefitHeading: { fontSize: 16, fontWeight: 'bold', color: '#212121', marginBottom: 6 },
+    benefitDescription: { fontSize: 10, color: '#ffffffff', lineHeight: 20 },
     viewLicenseLink: { alignSelf: 'flex-start', marginTop: 15, paddingVertical: 5, marginLeft: 20, },
     viewLicenseContent: { flexDirection: 'row', alignItems: 'center', marginLeft: 13 },
     viewLicenseText: { color: '#053B90', fontSize: 16, fontWeight: '600', textDecorationLine: 'underline', marginLeft: 5 },
@@ -1441,14 +1444,14 @@ const styles = StyleSheet.create({
         width: '85%',
         alignSelf: 'center',
         borderRadius: 22,
-        borderWidth: 1,
-        borderColor: '#EFEFEF',
+        borderWidth: 2,
+        borderColor: 'black',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 10 },
         shadowOpacity: 0.15,
         shadowRadius: 20,
         elevation: 18,
-        overflow: 'hidden'
+        overflow: 'hidden',
     },
     appInfoWebsiteLink: { fontSize: 17, color: '#004', textDecorationLine: 'underline', marginBottom: 8, textAlign: 'center', fontWeight: '500', letterSpacing: 0.5, textShadowColor: 'rgba(0,0,0,0.05)', textShadowOffset: { width: 0.5, height: 0.5 }, textShadowRadius: 1 },
     madeWithLoveContainer: { flexDirection: 'row', alignItems: 'center', marginTop: 10, justifyContent: 'center' },
@@ -1457,7 +1460,7 @@ const styles = StyleSheet.create({
     advantagesHeadline: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#053B90',
+        color: 'black',
         marginBottom: 15,
         textAlign: 'center',
         marginTop: 20,
@@ -1474,15 +1477,18 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         paddingVertical: 10,
         paddingHorizontal: 5,
-        backgroundColor: '#FFFFFF',
-        borderRadius: 10,
+        backgroundColor: '#be71f2ff',
+        borderRadius: 20,
         elevation: 3,
+        borderWidth:2,
+        borderColor:'black',
     },
     advantageIconContainer: {
         width: 40,
         height: 40,
-        borderRadius: 25,
+        borderRadius: 30,
         borderWidth: 2,
+        
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 5,
@@ -1491,12 +1497,12 @@ const styles = StyleSheet.create({
         fontSize: 10,
         fontWeight: 'bold',
         textAlign: 'center',
-        color: '#333',
+        color: 'black',
     },
     advantageText2: {
         fontSize: 9,
         textAlign: 'center',
-        color: '#555',
+        color: 'white',
     },
     reviewsContainer: {
         marginTop: 20,
@@ -1507,18 +1513,18 @@ const styles = StyleSheet.create({
     reviewTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#053B90',
+        color: 'black',
         marginBottom: 15,
         textAlign: 'center',
     },
     reviewCard: {
-        backgroundColor: '#E3F2FD',
+        backgroundColor: '#ba74dfff',
         borderRadius: 15,
         padding: 15,
         marginHorizontal: 10,
         width: 250,
         borderWidth: 1,
-        borderColor: '#B3E5FC',
+        borderColor: 'black',
     },
     reviewHeader: {
         flexDirection: 'column',
@@ -1528,12 +1534,12 @@ const styles = StyleSheet.create({
     reviewName: {
         fontSize: 17,
         fontWeight: 'bold',
-        color: '#1A237E',
+        color: '#000000ff',
         textAlign: 'center',
     },
     reviewLocation: {
         fontSize: 13,
-        color: '#555',
+        color: '#ffffffff',
         marginBottom: 5,
         textAlign: 'center',
     },
@@ -1546,7 +1552,7 @@ const styles = StyleSheet.create({
     reviewText: {
         fontSize: 13,
         lineHeight: 20,
-        color: '#455A64',
+        color: '#000000ff',
         fontWeight: 600,
         fontStyle: 'italic'
     },

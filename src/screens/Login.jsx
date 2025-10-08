@@ -17,13 +17,62 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
+
+// Assuming these imports are correct for your project structure
 import url from "../data/url";
 import { NetworkContext } from "../context/NetworkProvider";
 import { ContextProvider } from "../context/UserProvider";
 
 const { height: screenHeight } = Dimensions.get("window");
 
+// --- Animated Login Text Component (The Unique Part) ---
+const AnimatedLoginText = ({ text = "Login", style }) => {
+  const letters = text.split("");
+  const animatedValues = useRef(letters.map(() => new Animated.Value(0))).current;
 
+  useEffect(() => {
+    // Staggered animation for each letter
+    const animations = letters.map((_, index) =>
+      Animated.timing(animatedValues[index], {
+        toValue: 1,
+        duration: 150, // Duration for each letter
+        delay: index * 100, // Staggered delay
+        useNativeDriver: true,
+      })
+    );
+
+    Animated.sequence(animations).start();
+  }, [text]);
+
+  return (
+    <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+      {letters.map((letter, index) => (
+        <Animated.Text
+          key={index}
+          style={[
+            style,
+            {
+              opacity: animatedValues[index],
+              transform: [
+                {
+                  translateY: animatedValues[index].interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [10, 0], // Start 10 points lower and move up
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
+          {letter}
+        </Animated.Text>
+      ))}
+    </View>
+  );
+};
+// ----------------------------------------------------
+
+// --- Toast Component ---
 const Toast = React.forwardRef(({ duration = 2000 }, ref) => {
   const [visible, setVisible] = useState(false);
   const [message, setMessage] = useState("");
@@ -71,9 +120,11 @@ const Toast = React.forwardRef(({ duration = 2000 }, ref) => {
   );
 });
 
+// --- Login Screen Component ---
 export default function Login() {
   const navigation = useNavigation();
-  const [appUser, setAppUser] = useContext(ContextProvider);
+  // Ensure the ContextProvider returns an array [state, setState] if you use array destructuring
+  const [appUser, setAppUser] = useContext(ContextProvider); 
   const route = useRoute();
   const { isConnected, isInternetReachable } = useContext(NetworkContext);
 
@@ -122,7 +173,7 @@ export default function Login() {
     if (!isConnected || !isInternetReachable) {
       showAppToast(
         "No internet connection. Please connect to the internet to log in.",
-        require("../../assets/Group400.png")
+        require("../../assets/CityChits.png")
       );
       return;
     }
@@ -133,7 +184,7 @@ export default function Login() {
     if (!trimmedPhoneNumber || !trimmedPassword) {
       showAppToast(
         "Please enter both phone number and password",
-        require("../../assets/Group400.png")
+        require("../../assets/CityChits.png")
       );
       return;
     }
@@ -141,7 +192,7 @@ export default function Login() {
     if (trimmedPhoneNumber.length !== 10 || isNaN(trimmedPhoneNumber)) {
       showAppToast(
         "Phone number must be exactly 10 digits.",
-        require("../../assets/Group400.png")
+        require("../../assets/CityChits.png")
       );
       return;
     }
@@ -150,7 +201,7 @@ export default function Login() {
 
     try {
       const loginUrl = `${url}/user/signin-user`;
-      console.log("Attempting to log in to:", loginUrl,trimmedPhoneNumber,trimmedPassword);
+      console.log("Attempting to log in to:", loginUrl, trimmedPhoneNumber, trimmedPassword);
       const response = await fetch(loginUrl, {
         method: "POST",
         headers: {
@@ -167,28 +218,30 @@ export default function Login() {
         const data = await response.json();
         showAppToast(
           data.message || "Login Successful!",
-          require("../../assets/Group400.png")
+          require("../../assets/CityChits.png")
         );
+        // Assuming setAppUser is a setter function from context
         setAppUser((prev) => ({ ...prev, userId: data.userId }));
         navigation.replace("BottomTab", { userId: data.userId });
       } else {
         let errorMessage = "An unexpected error occurred. Please try again.";
         if (contentType && contentType.includes("application/json")) {
-            const errorData = await response.json();
-            errorMessage = errorData.message || errorMessage;
-            console.error("Login error (JSON response):", errorData);
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+          console.error("Login error (JSON response):", errorData);
         } else {
-            const errorText = await response.text();
-            console.error("Login error (non-JSON response):", response.status, errorText);
-            errorMessage = `Server Error (${response.status}): ${errorText.substring(0, 100)}... Please check your backend route or server logs.`;
+          const errorText = await response.text();
+          console.error("Login error (non-JSON response):", response.status, errorText);
+          // Simplified server error message for user
+          errorMessage = `Server Error (${response.status}). Please try again later.`; 
         }
-        showAppToast(errorMessage, require("../../assets/Group400.png"));
+        showAppToast(errorMessage, require("../../assets/CityChits.png"));
       }
     } catch (error) {
       console.error("Login error (network or unexpected):", error);
       showAppToast(
         "Login failed. Please check your network connection and try again.",
-        require("../../assets/Group400.png")
+        require("../../assets/CityChits.png")
       );
     } finally {
       setLoading(false);
@@ -196,6 +249,7 @@ export default function Login() {
   };
 
   const handlePhoneNumberChange = (text) => {
+    // Only allow digits for phone number
     setPhoneNumber(text.replace(/[^0-9]/g, ""));
   };
 
@@ -220,17 +274,19 @@ export default function Login() {
           {!keyboardVisible && (
             <View style={styles.topSection}>
               <Image
-                source={require("../../assets/Group400.png")}
+                source={require("../../assets/CityChits.png")}
                 style={styles.logo}
                 resizeMode="contain"
               />
-              <Text style={styles.title}>MyChits</Text>
+              <Text style={styles.title}>Demo Rider</Text>
             </View>
           )}
 
           <View style={[styles.bottomSection, { paddingTop: 50 }]}>
             <View style={styles.loginTextContainer}>
-              <Text style={styles.loginText}>Login</Text>
+              {/* Using the new AnimatedLoginText component here */}
+              <AnimatedLoginText text="LOGIN" style={styles.loginText} />
+              
               <Text style={styles.description}>
                 Get access to your chits very easily
               </Text>
@@ -240,7 +296,7 @@ export default function Login() {
             <TextInput
               style={styles.input}
               placeholder="+91"
-              placeholderTextColor="#78909C"
+              placeholderTextColor="#000000ff"
               keyboardType="phone-pad"
               value={phoneNumber}
               onChangeText={handlePhoneNumberChange}
@@ -257,7 +313,7 @@ export default function Login() {
               <TextInput
                 style={styles.passwordInput}
                 placeholder="••••••••"
-                placeholderTextColor="#78909C"
+                placeholderTextColor="#000000ff"
                 secureTextEntry={!showPassword}
                 value={password}
                 onChangeText={handlePasswordChange}
@@ -277,7 +333,7 @@ export default function Login() {
                 <Ionicons
                   name={showPassword ? "eye" : "eye-off"}
                   size={24}
-                  color="#053B90"
+                  color="#6E30CF"
                 />
               </TouchableOpacity>
             </View>
@@ -330,6 +386,7 @@ export default function Login() {
   );
 }
 
+// --- Styles ---
 const inputWidthPercentage = "90%";
 const inputHeight = 50;
 const labelHorizontalMargin = 20;
@@ -338,7 +395,7 @@ const buttonRadius = 8;
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#053B90",
+    backgroundColor: "#6E30CF", // changed
   },
   keyboardAvoidingView: {
     flex: 1,
@@ -351,18 +408,19 @@ const styles = StyleSheet.create({
     flex: 0.6,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#053B90",
+    backgroundColor: "#6E30CF", // changed
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
     paddingVertical: 20,
     width: "100%",
   },
   logo: {
-    width: 100,
-    height: 100,
+    width: 300,
+    height: 150,
+    
   },
   title: {
-    color: "#FFFFFF",
+    color: "#f5f5f5ff",
     fontSize: 30,
     fontWeight: "700",
     textAlign: "center",
@@ -371,7 +429,7 @@ const styles = StyleSheet.create({
   bottomSection: {
     minHeight: screenHeight * 0.06,
     flexGrow: 1,
-    backgroundColor: "#C7E3EF",
+    backgroundColor: "#ad97ebff",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     paddingHorizontal: 20,
@@ -385,7 +443,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     width: inputWidthPercentage,
   },
-  loginText: {
+  loginText: { // This style is now used by the AnimatedLoginText
     color: "#000000",
     fontSize: 24,
     fontWeight: "bold",
@@ -412,10 +470,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 15,
     fontSize: 14,
-    color: "#1A237E",
+    color: "#030303ff",
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: "#B3E5FC",
+    borderColor: "#000000ff",
   },
   passwordInputContainer: {
     flexDirection: "row",
@@ -425,7 +483,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F0F8FF",
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#ADD8E6",
+    borderColor: "#000000ff",
     marginBottom: 12,
   },
   passwordInput: {
@@ -433,7 +491,7 @@ const styles = StyleSheet.create({
     height: inputHeight,
     paddingHorizontal: 15,
     fontSize: 14,
-    color: "#053B90",
+    color: "#000000ff", // changed
   },
   eyeIcon: {
     padding: 12,
@@ -449,7 +507,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   loginButton: {
-    backgroundColor: "#053B90",
+    backgroundColor: "#6E30CF", // changed
     borderRadius: 120,
     paddingVertical: 12,
     width: "70%",
@@ -467,11 +525,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   signUpText: {
-    color: "#78909C",
+    color: "#000000ff",
     fontSize: 14,
   },
   signUpButtonText: {
-    color: "#053B90",
+    color: "#6E30CF", // changed
     fontSize: 14,
     fontWeight: "bold",
   },
@@ -492,7 +550,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   toastText: {
-    color: "#053B90",
+    color: "black", // changed
     fontSize: 16,
     fontWeight: "600",
     marginLeft: 10,

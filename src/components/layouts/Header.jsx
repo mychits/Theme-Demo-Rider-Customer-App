@@ -23,7 +23,7 @@ const { width, height } = Dimensions.get("window");
 
 // Define colors for consistency and better aesthetics
 const Colors = {
-  primaryBlue: "#053B90", // Dark blue, main app color
+  primaryBlue: "#ac7be0ff", // Dark blue, main app color
   lightBackground: "#F0F5F9", // Very light grey-blue for screen background
   cardBackground: "#FFFFFF", // Pure white for card base
   darkText: "#2C3E50", // Dark grey for primary text

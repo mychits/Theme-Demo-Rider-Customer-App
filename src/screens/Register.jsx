@@ -18,11 +18,21 @@ import {
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+
+// Assuming these imports are correct for your project structure
 import url from "../data/url";
 import { ContextProvider } from "../context/UserProvider";
 
 const { height: screenHeight } = Dimensions.get("window");
 
+// --- Theme Colors ---
+const PRIMARY_COLOR = "#6E30CF"; // Violet/Purple
+const ACCENT_COLOR = "#050550ff"; // Lighter Violet
+const BACKGROUND_COLOR = "#b49ff0ff"; // Light background (Kept same for contrast)
+const TEXT_COLOR = "#000000";
+const HINT_COLOR = "#0f1010ff";
+
+// --- Toast Component ---
 const Toast = React.forwardRef(({ duration = 2000 }, ref) => {
   const [visible, setVisible] = useState(false);
   const [message, setMessage] = useState("");
@@ -55,6 +65,7 @@ const Toast = React.forwardRef(({ duration = 2000 }, ref) => {
   }));
 
   if (!visible) return null;
+  
 
   return (
     <Animated.View style={[styles.toastContainer, { opacity }]}>
@@ -68,10 +79,12 @@ const Toast = React.forwardRef(({ duration = 2000 }, ref) => {
   );
 });
 
+// --- Register Screen Component ---
 export default function Register() {
   const navigation = useNavigation();
   const toastRef = useRef();
-  const [appUser, setAppUser] = useContext(ContextProvider);
+  // Assuming ContextProvider provides [state, setState]
+  const [appUser, setAppUser] = useContext(ContextProvider); 
 
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -104,7 +117,8 @@ export default function Register() {
 
   const showAppToast = (message) => {
     if (toastRef.current) {
-      toastRef.current.show(message, require("../../assets/Group400.png"));
+      // Re-using the Group400.png image for the toast icon
+      toastRef.current.show(message, require("../../assets/CityChits.png")); 
     }
   };
 
@@ -133,6 +147,13 @@ export default function Register() {
       showAppToast("Phone number must be 10 digits.");
       return false;
     }
+    
+    // Add simple password length check for better UX
+    if (trimmedPassword.length < 6) {
+        showAppToast("Password must be at least 6 characters long.");
+        return false;
+    }
+
     return true;
   };
 
@@ -146,9 +167,8 @@ export default function Register() {
         phone_number: phoneNumber.replace(/\s/g, ""),
         full_name: fullName.trim(),
       };
-     
-      // Corrected line: Add /api/ to the endpoint
-      const apiEndpoint = `${url}/user/send-register-otp`; //
+      
+      const apiEndpoint = `${url}/user/send-register-otp`; 
       console.log("Attempting to send OTP to:", apiEndpoint); 
       console.log("Sending OTP payload:", payload);
 
@@ -163,6 +183,8 @@ export default function Register() {
         const data = await response.json();
         console.log("OTP send success response:", data);
         showAppToast(data.message || "OTP sent successfully!");
+        
+        // Navigate to OTP verification screen on success
         navigation.navigate("RegisterOtpVerify", {
           mobileNumber: phoneNumber.replace(/\s/g, ""),
           fullName: fullName.trim(),
@@ -177,7 +199,7 @@ export default function Register() {
         } else {
           const errorText = await response.text();
           console.error("OTP send error (non-JSON response):", response.status, errorText);
-          errorMessage = `Server Error (${response.status}): ${errorText.substring(0, 100)}... Please check your backend route.`; // Show truncated HTML
+          errorMessage = `Server Error (${response.status}). Please check your backend route or server logs.`;
         }
         showAppToast(errorMessage);
       }
@@ -191,26 +213,28 @@ export default function Register() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#053B90" />
+      <StatusBar barStyle="light-content" backgroundColor={PRIMARY_COLOR} />
       <KeyboardAvoidingView
         style={styles.keyboardAvoidingView}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={
-          Platform.OS === "ios" ? 0 : -screenHeight * 0.15
+          // Adjust for keyboard visibility if needed, or use a simpler offset
+          Platform.OS === "ios" ? 0 : -screenHeight * 0.15 
         }
       >
         <ScrollView
           contentContainerStyle={styles.scrollViewContent}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
           {!keyboardVisible && (
             <View style={styles.topSection}>
               <Image
-                source={require("../../assets/Group400.png")}
+                source={require("../../assets/CityChits.png")}
                 style={styles.logo}
                 resizeMode="contain"
               />
-              <Text style={styles.title}>MyChits</Text>
+              <Text style={styles.title}>Demo Rider</Text>
             </View>
           )}
 
@@ -218,24 +242,25 @@ export default function Register() {
             <Text style={styles.registerTitle}>Register</Text>
             <Text style={styles.registerSubtitle}>Create your account</Text>
 
-           
+            {/* Full Name Input */}
             <TextInput
               style={styles.input}
               placeholder="Full Name"
-              placeholderTextColor="#78909C"
+              placeholderTextColor={HINT_COLOR}
               value={fullName}
               onChangeText={setFullName}
               accessible
               accessibilityLabel="Full name input"
               autoCapitalize="words"
               autoCorrect={false}
+              editable={!loading}
             />
 
-           
+            {/* Phone Number Input */}
             <TextInput
               style={styles.input}
               placeholder="Phone Number"
-              placeholderTextColor="#78909C"
+              placeholderTextColor={HINT_COLOR}
               keyboardType="phone-pad"
               value={phoneNumber}
               onChangeText={(text) =>
@@ -246,14 +271,15 @@ export default function Register() {
               accessibilityLabel="Phone number input"
               autoCapitalize="none"
               autoCorrect={false}
+              editable={!loading}
             />
 
-           
+            {/* Password Input */}
             <View style={styles.passwordInputContainer}>
               <TextInput
                 style={styles.passwordInput}
                 placeholder="Create Password"
-                placeholderTextColor="#78909C"
+                placeholderTextColor={HINT_COLOR}
                 secureTextEntry={!showPassword}
                 value={password}
                 onChangeText={setPassword}
@@ -261,27 +287,29 @@ export default function Register() {
                 accessibilityLabel="Password input"
                 autoCapitalize="none"
                 autoCorrect={false}
+                editable={!loading}
               />
               <TouchableOpacity
                 onPress={() => setShowPassword(!showPassword)}
                 style={styles.eyeIcon}
                 accessible
                 accessibilityLabel="Toggle password visibility"
+                disabled={loading}
               >
                 <AntDesign
                   name={showPassword ? "eye" : "eyeo"}
                   size={20}
-                  color="#78909C"
+                  color={HINT_COLOR}
                 />
               </TouchableOpacity>
             </View>
 
-           
+            {/* Confirm Password Input */}
             <View style={styles.passwordInputContainer}>
               <TextInput
                 style={styles.passwordInput}
                 placeholder="Confirm Password"
-                placeholderTextColor="#78909C"
+                placeholderTextColor={HINT_COLOR}
                 secureTextEntry={!showConfirmPassword}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
@@ -289,23 +317,26 @@ export default function Register() {
                 accessibilityLabel="Confirm password input"
                 autoCapitalize="none"
                 autoCorrect={false}
+                editable={!loading}
               />
               <TouchableOpacity
                 onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                 style={styles.eyeIcon}
                 accessible
                 accessibilityLabel="Toggle confirm password visibility"
+                disabled={loading}
               >
                 <AntDesign
                   name={showConfirmPassword ? "eye" : "eyeo"}
                   size={20}
-                  color="#78909C"
+                  color={HINT_COLOR}
                 />
               </TouchableOpacity>
             </View>
 
+            {/* Send OTP Button */}
             <TouchableOpacity
-              style={styles.registerButton}
+              style={[styles.registerButton, loading && { opacity: 0.7 }]}
               onPress={handleSendOtp}
               accessible
               accessibilityLabel="Send OTP"
@@ -318,25 +349,21 @@ export default function Register() {
               )}
             </TouchableOpacity>
 
+            {/* Login Link */}
             <View style={styles.loginContainer}>
               <Text style={styles.loginText}>Already have an account? </Text>
               <TouchableOpacity
                 onPress={() => navigation.navigate("Login")}
                 accessible
                 accessibilityLabel="Navigate to Login"
+                disabled={loading}
               >
                 <Text style={styles.loginButtonText}>Log in</Text>
               </TouchableOpacity>
             </View>
           </View>
 
-          {/* Loading Overlay */}
-          {loading && (
-            <View style={styles.loadingOverlay}>
-              <ActivityIndicator size="large" color="#053B90" />
-              <Text style={styles.loadingText}>Sending OTP...</Text>
-            </View>
-          )}
+          {/* Optional Loading Overlay (Removed the duplicate here to keep it simple, the button handles loading state) */}
         </ScrollView>
       </KeyboardAvoidingView>
 
@@ -345,10 +372,11 @@ export default function Register() {
   );
 }
 
+// --- Stylesheet ---
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#053B90",
+    backgroundColor: PRIMARY_COLOR, // Violet
   },
   keyboardAvoidingView: {
     flex: 1,
@@ -361,15 +389,15 @@ const styles = StyleSheet.create({
     flex: 0.6,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#053B90",
+    backgroundColor: PRIMARY_COLOR, // Violet
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
     paddingVertical: 20,
     width: "100%",
   },
   logo: {
-    width: 110,
-    height: 110,
+    width: 300,
+    height: 150,
   },
   title: {
     color: "#FFFFFF",
@@ -380,7 +408,7 @@ const styles = StyleSheet.create({
   },
   bottomSection: {
     flex: 1,
-    backgroundColor: "#C7E3EF",
+    backgroundColor: BACKGROUND_COLOR, // Light background
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     paddingHorizontal: 20,
@@ -389,14 +417,14 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   registerTitle: {
-    color: "#000",
+    color: TEXT_COLOR,
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 5,
   },
   registerSubtitle: {
-    color: "#000",
+    color: TEXT_COLOR,
     fontSize: 14,
     textAlign: "center",
     marginBottom: 10,
@@ -408,20 +436,20 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 15,
     fontSize: 14,
-    color: "#053B90",
+    color: PRIMARY_COLOR, // Violet text color
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: "#B3E5FC",
+    borderColor: ACCENT_COLOR, // Lighter violet border
   },
   passwordInputContainer: {
     flexDirection: "row",
     alignItems: "center",
     width: "90%",
     height: 50,
-    backgroundColor: "#F0F8FF",
+    backgroundColor: "#F0F8FF", // Very light blue for subtle contrast
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#ADD8E6",
+    borderColor: ACCENT_COLOR,
     marginBottom: 12,
   },
   passwordInput: {
@@ -429,18 +457,19 @@ const styles = StyleSheet.create({
     height: 50,
     paddingHorizontal: 15,
     fontSize: 14,
-    color: "#053B90",
+    color: PRIMARY_COLOR, // Violet text color
   },
   eyeIcon: {
     padding: 12,
   },
   registerButton: {
-    backgroundColor: "#053B90",
+    backgroundColor: PRIMARY_COLOR, // Violet button
     borderRadius: 120,
     paddingVertical: 12,
     width: "70%",
     alignItems: "center",
     marginBottom: 18,
+    justifyContent: 'center', // Center indicator
   },
   registerButtonText: {
     color: "white",
@@ -452,30 +481,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   loginText: {
-    color: "#78909C",
+    color: HINT_COLOR,
     fontSize: 14,
   },
   loginButtonText: {
-    color: "#053B90",
+    color: PRIMARY_COLOR, // Violet login link
     fontSize: 14,
     fontWeight: "bold",
   },
-  loadingOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 1000,
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: "#053B90",
-  },
+  // Toast Styles (Adjusted text color to violet)
   toastContainer: {
     position: "absolute",
     top: 40,
@@ -493,7 +507,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   toastText: {
-    color: "#053B90",
+    color: "black", // Violet toast text
     fontSize: 14,
     fontWeight: "600",
     marginLeft: 10,

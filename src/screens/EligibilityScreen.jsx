@@ -350,17 +350,17 @@ const EligibilityScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#053B90",
+    backgroundColor: "#6E30CF",
   },
   scrollViewContent: {
     flexGrow: 1,
     paddingHorizontal: 1,
     paddingBottom: 30,
-    backgroundColor: "#053B90",
+    backgroundColor: "#6E30CF",
   },
   mainContentContainer: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#bfa5eaff",
     borderRadius: 15,
     padding: 15,
     marginTop: 15,
@@ -377,18 +377,18 @@ const styles = StyleSheet.create({
       },
     }),
     borderWidth: 5,
-    borderColor: "#053B90",
+    borderColor: "black",
   },
   mainTitle: {
     fontSize: 26,
     fontWeight: "bold",
-    color: "#053B90",
+    color: "#6E30CF",
     marginBottom: 15,
     textAlign: "center",
   },
   description: {
     fontSize: 16,
-    color: "#555555",
+    color: "black",
     marginBottom: 20,
     textAlign: "center",
     lineHeight: 24,
@@ -396,7 +396,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#053B90",
+    color: "#6E30CF",
     marginTop: 25,
     marginBottom: 10,
     borderBottomWidth: 1,
@@ -420,7 +420,7 @@ const styles = StyleSheet.create({
   },
   sectionDescription: {
     fontSize: 15,
-    color: "#666666",
+    color: "black",
     marginBottom: 15,
     lineHeight: 22,
   },
@@ -432,7 +432,7 @@ const styles = StyleSheet.create({
   subSectionTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#333333",
+    color: "black",
     marginBottom: 8,
   },
   listItem: {

@@ -96,7 +96,7 @@ const TabNavigate = ({ route }) => {
           left: 17,
           right: 17,
           elevation: 0,
-          backgroundColor: "#053B90",
+          backgroundColor: "#4A148C",
           borderRadius: 0,
           height: 45,
           borderTopWidth: 0,
