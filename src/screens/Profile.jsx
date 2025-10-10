@@ -12,11 +12,11 @@ import {
 import React, { useContext, useEffect, useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
-import url from "../data/url"; // Assuming this path is correct for your project
-import Header from "../components/layouts/Header"; // Assuming this path is correct for your project
-import { ContextProvider } from "../context/UserProvider"; // Assuming this path is correct for your project
+import url from "../data/url";
+import Header from "../components/layouts/Header";
+import { ContextProvider } from "../context/UserProvider";
 
-const Profile = ({ navigation, route }) => {
+const Profile = ({ navigation }) => {
   const [appUser, setAppUser] = useContext(ContextProvider);
   const userId = appUser.userId || {};
   const [userData, setUserData] = useState({
@@ -24,6 +24,7 @@ const Profile = ({ navigation, route }) => {
     phone_number: "",
     address: "",
   });
+
   const menuItems = [
     { title: "Basic Details", icon: "person", link: "MyAccount" },
     { title: "About Us", icon: "info", link: "About" },
@@ -32,42 +33,44 @@ const Profile = ({ navigation, route }) => {
     { title: "F&Q", icon: "question-answer", link: "Fq" },
     { title: "Reset Password", icon: "lock-reset", link: "ConformNewPassword" },
   ];
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get(
-          `${url}/user/get-user-by-id/${userId}`
-        );
-        setUserData(response.data); 
+        const response = await axios.get(`${url}/user/get-user-by-id/${userId}`);
+        setUserData(response.data);
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
     };
 
-    fetchUserData(); 
-  }, [userId]); 
+    fetchUserData();
+  }, [userId]);
 
   return (
     <SafeAreaView style={styles.fullScreenContainer}>
+      <StatusBar barStyle="light-content" backgroundColor="#6A0DAD" />
       <View style={styles.headerWrapper}>
         <Header userId={userId} navigation={navigation} />
       </View>
+
       <View style={styles.mainContentWrapper}>
         <View style={styles.contentCard}>
-          <View style={styles.dropdownContainer}>
-            <Text style={styles.titleText}>My Profile</Text>
-          </View>
+          <Text style={styles.titleText}>My Profile</Text>
+
           <View style={styles.profileImageContainer}>
-            <View style={styles.profileContainer}>
-              <Image
-                source={require("../../assets/profile (2).png")}
-                style={styles.profileImage}
-              />
-              <Text style={styles.userName}>{userData.full_name}</Text>
-              <Text style={styles.phoneNumber}>{userData.phone_number}</Text>
-            </View>
+            <Image
+              source={require("../../assets/profile (2).png")}
+              style={styles.profileImage}
+            />
+            <Text style={styles.userName}>{userData.full_name}</Text>
+            <Text style={styles.phoneNumber}>{userData.phone_number}</Text>
           </View>
-          <ScrollView style={styles.menuContainer} showsVerticalScrollIndicator={false}>
+
+          <ScrollView
+            style={styles.menuContainer}
+            showsVerticalScrollIndicator={false}
+          >
             {menuItems.map((item, index) => (
               <TouchableOpacity
                 key={index}
@@ -77,12 +80,13 @@ const Profile = ({ navigation, route }) => {
                 }
               >
                 <View style={styles.menuItemLeft}>
-                  <MaterialIcons name={item.icon} size={24} color="#585858" />
+                  <MaterialIcons name={item.icon} size={24} color="#6A0DAD" />
                   <Text style={styles.menuText}>{item.title}</Text>
                 </View>
-                <MaterialIcons name="chevron-right" size={24} color="#585858" />
+                <MaterialIcons name="chevron-right" size={24} color="#6A0DAD" />
               </TouchableOpacity>
             ))}
+
             <TouchableOpacity
               style={styles.logoutButton}
               onPress={() => navigation.navigate("Login")}
@@ -95,126 +99,90 @@ const Profile = ({ navigation, route }) => {
     </SafeAreaView>
   );
 };
+
 const styles = StyleSheet.create({
   fullScreenContainer: {
-    flex: 1, // Takes up the entire screen
-    backgroundColor: "#053B90", // Blue background for the entire screen
+    flex: 1,
+    backgroundColor: "#6A0DAD", // Violet background
   },
   headerWrapper: {
-    // Platform-specific padding for the status bar on Android
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-    backgroundColor: "#053B90", // Ensures header background is consistent
+    backgroundColor: "#6A0DAD",
   },
   mainContentWrapper: {
-    flex: 1, // Takes up the remaining vertical space below the header
-    backgroundColor: "#053B90", // Blue background for the outer container
-    alignItems: "center", // Center the contentCard horizontally
-    paddingVertical: 10, // Add vertical padding
+    flex: 1,
+    alignItems: "center",
+    backgroundColor: "#6A0DAD",
+    paddingVertical: 10,
   },
   contentCard: {
-    flex: 1, // Allows the contentCard to expand and fill available space
-    backgroundColor: "#fff",
-    width: "95%", // Occupies 95% of the parent's width
-    minWidth: 300, // Minimum width
-    maxWidth: 600, // Maximum width for larger screens
-    borderRadius: 10, // Rounded corners
-    padding: 15, // Inner padding
-    overflow: "hidden", // Clips content that goes outside the card's bounds
-    shadowColor: "#000", // Shadow for depth
-    shadowOffset: {
-      width: 2,
-      height: 4,
-    },
+    flex: 1,
+    backgroundColor: "#FFFFFF", // White card
+    width: "95%",
+    borderRadius: 14,
+    padding: 18,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5, // Android shadow
-  },
-  profileImageContainer: {
-    alignItems: "center", // Center items horizontally
-    justifyContent: "center", // Center items vertically
-    marginBottom: 10, // Margin below the container
-  },
-  dropdownContainer: {
-    marginHorizontal: 0,
-    marginTop: 8,
-    marginBottom: 8,
-    backgroundColor: "transparent",
+    shadowRadius: 5,
+    elevation: 5,
   },
   titleText: {
-    marginVertical: -10,
     fontWeight: "900",
-    fontSize: 21, // Increased font size
-    color: "#333", // Dark grey color
-    textAlign: "center", // Centered text
+    fontSize: 22,
+    color: "#6A0DAD",
+    textAlign: "center",
+    marginBottom: 10,
   },
-  profileContainer: {
+  profileImageContainer: {
     alignItems: "center",
-    marginTop: 7,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    backgroundColor: "#fff",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-    elevation: 2,
+    marginBottom: 15,
   },
   profileImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 60, // Makes it a circle
-    marginBottom: 15,
-    borderWidth: 3, // Border around the image
-    borderColor: "#053B90", // Blue border color
+    width: 75,
+    height: 75,
+    borderRadius: 75,
+    marginBottom: 10,
+    borderWidth: 3,
+    borderColor: "#6A0DAD",
   },
   userName: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#053B90", // Blue text color
-    marginBottom: 5,
+    color: "#000000",
+    marginBottom: 3,
   },
   phoneNumber: {
     fontSize: 15,
-    color: "#555", // Darker grey text color
-    marginBottom: 10,
+    color: "#333333",
   },
   menuContainer: {
-    // Removed flex: 1 from here to allow ScrollView to calculate content height properly
     width: "100%",
-    paddingHorizontal: 0,
-    // IMPORTANT: Increased paddingBottom to ensure the logout button is scrollable into view
-    paddingBottom: 60, // Adjusted this value to provide more scroll space
+    paddingBottom: 70,
   },
   menuItem: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-    paddingHorizontal: 10,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 8,
-    marginBottom: 4, // Decreased margin between items
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.18,
-    shadowRadius: 1.0,
-    elevation: 1,
+    backgroundColor: "#F9F6FF", // Light violet-white tone
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: "#E2D4F5",
+    shadowColor: "#6A0DAD",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 3,
   },
   menuItemLeft: {
     flexDirection: "row",
     alignItems: "center",
   },
   menuText: {
-    fontSize: 14,
+    fontSize: 15,
     color: "#000",
     marginLeft: 15,
     fontWeight: "500",
@@ -222,21 +190,18 @@ const styles = StyleSheet.create({
   logoutButton: {
     paddingVertical: 13,
     alignItems: "center",
-    marginTop: 10,
-    backgroundColor: "#053B90", // Blue color for logout button
-    borderRadius: 14,
-    marginHorizontal: 35,
+    backgroundColor: "#6A0DAD",
+    borderRadius: 12,
+    marginHorizontal: 40,
+    marginTop: 20,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 4.65,
+    shadowRadius: 6,
     elevation: 6,
   },
   logoutText: {
-    fontSize: 18,
+    fontSize: 17,
     color: "#fff",
     fontWeight: "bold",
   },

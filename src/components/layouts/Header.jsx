@@ -8,173 +8,131 @@ import {
   Dimensions,
   StatusBar,
   SafeAreaView,
-  Animated, // Import Animated
-  Easing, // Import Easing for better animation control
+  Animated,
+  Easing,
 } from "react-native";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 import axios from "axios";
 import { useRoute } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
-// Removed: import LottieView from "lottie-react-native"; // Removed LottieView import
-
-import url from "../../data/url"; // Your API base URL
+import url from "../../data/url";
 
 const { width, height } = Dimensions.get("window");
 
-// Define colors for consistency and better aesthetics
+// 🎨 Violet + Black Professional Theme
 const Colors = {
-  primaryBlue: "#ac7be0ff", // Dark blue, main app color
-  lightBackground: "#F0F5F9", // Very light grey-blue for screen background
-  cardBackground: "#FFFFFF", // Pure white for card base
-  darkText: "#2C3E50", // Dark grey for primary text
-  mediumText: "#7F8C8D", // Medium grey for secondary text
-  lightText: "#BDC3C7", // Light grey for subtle labels
-  shadowColor: "rgba(0,0,0,0.1)", // Light shadow for depth
-
-  // Header specific colors/gradients
-  headerGradientStart: "#053B90", // Dark blue
-  headerGradientEnd: "#053B90", // Slightly lighter, more vibrant blue
+  gradientStart: "#4B0082", // Deep indigo violet
+  gradientEnd: "#000000", // Black for depth
+  cardBackground: "rgba(255, 255, 255, 0.1)", // Glass effect
+  white: "#FFFFFF",
+  lightWhite: "rgba(255,255,255,0.85)",
+  overlay: "rgba(0,0,0,0.6)",
+  popupText: "#7A1CAC", // Accent violet for popup text
+  shadow: "rgba(0,0,0,0.3)",
 };
 
 const Header = ({ userId, navigation }) => {
   const [userData, setUserData] = useState({
     full_name: "",
     phone_number: "",
-    address: "",
   });
-
   const [showInfoPopup, setShowInfoPopup] = useState(false);
   const route = useRoute();
 
-  // Animated value for header slide-down
-  const headerAnim = useRef(new Animated.Value(-height * 0.2)).current; // Start off-screen above
+  const headerAnim = useRef(new Animated.Value(-height * 0.2)).current;
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         if (userId) {
-          const response = await axios.get(
-            `${url}/user/get-user-by-id/${userId}`
-          );
+          const response = await axios.get(`${url}/user/get-user-by-id/${userId}`);
           setUserData(response.data);
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
     };
-
     fetchUserData();
 
-    // Start the header animation when the component mounts
     Animated.timing(headerAnim, {
-      toValue: 0, // Slide to its original position (top: 0)
-      duration: 1000, // 1 second duration
-      easing: Easing.out(Easing.ease), // Smooth easing out effect
-      useNativeDriver: true, // Use native driver for performance
+      toValue: 0,
+      duration: 800,
+      easing: Easing.out(Easing.ease),
+      useNativeDriver: true,
     }).start();
-  }, [userId]); // Dependency array: re-run if userId changes
+  }, [userId]);
 
   const showBackButton = route.name !== "Home";
 
-  const toggleInfoPopup = () => {
-    setShowInfoPopup(!showInfoPopup);
-  };
-
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.headerGradientStart} />
-      <Animated.View // Use Animated.View for the animated header
-        style={[
-          styles.animatedHeaderWrapper,
-          { transform: [{ translateY: headerAnim }] }, // Apply the translate animation
-        ]}
+      <StatusBar barStyle="light-content" backgroundColor={Colors.gradientStart} />
+      <Animated.View
+        style={[styles.animatedHeaderWrapper, { transform: [{ translateY: headerAnim }] }]}
       >
-        <LinearGradient
-          colors={[Colors.headerGradientStart, Colors.headerGradientEnd]}
-          style={styles.headerGradient}
-        >
-          {/* Removed: LottieView component */}
-
+        <LinearGradient colors={[Colors.gradientStart, Colors.gradientEnd]} style={styles.headerGradient}>
           <View style={styles.headerContainer}>
-            {/* Left side: Back Button (if applicable) and Profile Info */}
-            <TouchableOpacity
-              style={styles.leftContainer}
-              onPress={() =>
-                navigation.navigate("BottomTab", {
-                  screen: "ProfileScreen",
-                  params: { userId: userId }, // Pass userId as parameters
-                })
-              }
-            >
-              {/* Conditional Back Button */}
+            {/* Left Section: Back + Profile Card */}
+            <View style={styles.leftContainer}>
               {showBackButton && (
-                <TouchableOpacity
-                  onPress={() => navigation.goBack()}
-                  style={styles.backButton}
-                >
-                  <Ionicons name="arrow-back" size={28} color="#fff" />
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                  <Ionicons name="arrow-back" size={26} color={Colors.white} />
                 </TouchableOpacity>
               )}
-              {/* Profile Image and Name/ID */}
-              <View
-                style={[
-                  styles.profileContainer,
-                  !showBackButton && { marginLeft: width * 0.02 },
-                ]}
+
+              <TouchableOpacity
+                style={styles.profileCard}
+                activeOpacity={0.9}
+                onPress={() =>
+                  navigation.navigate("BottomTab", {
+                    screen: "ProfileScreen",
+                    params: { userId },
+                  })
+                }
               >
                 <Image
-                  source={require("../../../assets/profile (2).png")} // Updated image path
+                  source={require("../../../assets/profile (2).png")}
                   style={styles.profileImage}
                   resizeMode="cover"
                 />
                 <View>
-                  <Text style={styles.profileName}>
-                    {userData.full_name || "..."}
-                  </Text>
-                  <Text style={styles.customerId}>
-                    {userData.phone_number || "..."}
-                  </Text>
+                  <Text style={styles.profileName}>{userData.full_name || "Loading..."}</Text>
+                  <Text style={styles.phoneNumber}>{userData.phone_number || "••••••••••"}</Text>
                 </View>
-              </View>
-            </TouchableOpacity>
+              </TouchableOpacity>
+            </View>
 
-            {/* Right side: Info Icon to trigger popup */}
+            {/* Right: Info Button */}
             <TouchableOpacity
-              onPress={toggleInfoPopup}
+              onPress={() => setShowInfoPopup(true)}
               style={styles.infoIconContainer}
             >
-              <AntDesign name="infocirlceo" size={22} color="#fff" />
+              <AntDesign name="infocirlceo" size={24} color={Colors.white} />
             </TouchableOpacity>
 
-            {/* Info Popup (conditionally rendered) */}
+            {/* Popup */}
             {showInfoPopup && (
               <TouchableOpacity
-                style={styles.infoPopupOverlay} // Covers the entire screen
-                onPress={toggleInfoPopup} // Dismiss popup when clicked anywhere on the overlay
-                activeOpacity={1} // Prevents visual feedback (opacity change) on overlay press
+                style={styles.infoPopupOverlay}
+                onPress={() => setShowInfoPopup(false)}
+                activeOpacity={1}
               >
                 <View style={styles.infoPopup}>
-                  {/* Close Button */}
                   <TouchableOpacity
-                    onPress={toggleInfoPopup}
+                    onPress={() => setShowInfoPopup(false)}
                     style={styles.closeButton}
                   >
-                    <AntDesign name="closecircle" size={24} color="#053B90" />
+                    <AntDesign name="closecircle" size={24} color={Colors.popupText} />
                   </TouchableOpacity>
 
-                  {/* Image for the popup */}
                   <Image
-                    source={require("../../../assets/Group400.png")} // **Verify this path**
+                    source={require("../../../assets/CityChits.png")}
                     style={styles.popupImage}
-                    resizeMode="contain" // Ensures the whole image is visible within its bounds
-                    onError={(e) =>
-                      console.log("Image loading error:", e.nativeEvent.error)
-                    }
+                    resizeMode="contain"
                   />
-                  {/* Text for the popup - MODIFIED HERE */}
                   <View style={styles.infoPopupTextContainer}>
-                    <Text style={styles.mychitsText}>Mychits</Text>
-                    <Text style={styles.customerAppText}>Customer app</Text>
+                    <Text style={styles.mychitsText}>Demo Rider</Text>
+                    <Text style={styles.customerAppText}>Customer App</Text>
                   </View>
                 </View>
               </TouchableOpacity>
@@ -188,105 +146,111 @@ const Header = ({ userId, navigation }) => {
 
 const styles = StyleSheet.create({
   safeArea: {
-    backgroundColor: Colors.headerGradientStart,
+    backgroundColor: Colors.gradientStart,
   },
   animatedHeaderWrapper: {
-    position: "relative",
     zIndex: 10,
   },
   headerGradient: {
-    paddingVertical: height * 0.01,
-    paddingHorizontal: width * 0.04,
-    position: "relative",
-    zIndex: 10,
-    // Removed: overflow: 'hidden' because Lottie is gone
+    paddingVertical: height * 0.012, // compact height
+    paddingHorizontal: width * 0.045,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+    shadowColor: Colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+    elevation: 8,
   },
-  // Removed: lottieAnimation style
   headerContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    position: "relative",
-    zIndex: 1,
   },
   leftContainer: {
     flexDirection: "row",
     alignItems: "center",
   },
   backButton: {
-    marginRight: width * 0.04,
+    marginRight: width * 0.03,
   },
-  profileContainer: {
+  profileCard: {
     flexDirection: "row",
     alignItems: "center",
-    marginLeft: width * 0.04,
+    backgroundColor: Colors.cardBackground,
+    paddingVertical: height * 0.007,
+    paddingHorizontal: width * 0.035,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
   },
   profileImage: {
-    width: width * 0.1,
-    height: width * 0.1,
+    width: width * 0.095,
+    height: width * 0.095,
     borderRadius: width * 0.05,
-    marginRight: width * 0.015,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.5)",
+    marginRight: width * 0.02,
+    borderWidth: 1.5,
+    borderColor: Colors.white,
   },
   profileName: {
-    color: "#fff",
-    fontSize: width * 0.045,
+    color: Colors.white,
+    fontSize: width * 0.043,
     fontWeight: "700",
+    letterSpacing: 0.3,
   },
-  customerId: {
-    color: "rgba(255,255,255,0.8)",
-    fontSize: width * 0.028,
+  phoneNumber: {
+    color: Colors.lightWhite,
+    fontSize: width * 0.03,
+    marginTop: height * 0.002,
   },
   infoIconContainer: {
     padding: width * 0.02,
   },
+
+  // --- Popup Styles ---
   infoPopupOverlay: {
     position: "absolute",
     top: 0,
     left: 0,
-    width: width,
-    height: height,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    width,
+    height,
+    backgroundColor: Colors.overlay,
     justifyContent: "center",
     alignItems: "center",
     zIndex: 100,
   },
   infoPopup: {
-    backgroundColor: "#fff",
-    borderRadius: 15,
-    paddingVertical: height * 0.02,
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    paddingVertical: height * 0.025,
     paddingHorizontal: width * 0.08,
     alignItems: "center",
-    shadowColor: "#000",
+    shadowColor: Colors.shadow,
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 15,
-    elevation: 15,
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 10,
     maxWidth: width * 0.8,
     position: "relative",
   },
   closeButton: {
     position: "absolute",
-    top: height * 0.01,
-    right: width * 0.02,
-    padding: width * 0.01,
+    top: height * 0.015,
+    right: width * 0.03,
     zIndex: 1,
   },
   popupImage: {
     width: width * 0.45,
     height: width * 0.25,
-    marginBottom: height * 0.015,
-    borderRadius: 10,
+    marginBottom: height * 0.02,
   },
   infoPopupTextContainer: {
     alignItems: "center",
-    marginTop: height * 0.005,
   },
   mychitsText: {
     fontSize: width * 0.06,
     fontWeight: "800",
-    color: "#053B90",
+    color: Colors.popupText,
     textAlign: "center",
   },
   customerAppText: {

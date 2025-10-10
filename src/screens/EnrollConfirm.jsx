@@ -9,6 +9,7 @@ import {
   SafeAreaView,
   Platform,
   StatusBar,
+  Dimensions,
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import Header from "../components/layouts/Header";
@@ -16,11 +17,71 @@ import { NetworkContext } from "../context/NetworkProvider";
 import Toast from "react-native-toast-message";
 import { ContextProvider } from "../context/UserProvider";
 
+const { width, height } = Dimensions.get("window");
+
+// Single confetti piece component
+const Confetti = ({ startX, color, delay }) => {
+  const translateY = useState(new Animated.Value(-50))[0];
+  const rotate = useState(new Animated.Value(0))[0];
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.delay(delay),
+        Animated.parallel([
+          Animated.timing(translateY, {
+            toValue: height + 50,
+            duration: 3000 + Math.random() * 2000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(rotate, {
+            toValue: 1,
+            duration: 3000 + Math.random() * 2000,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.timing(translateY, {
+          toValue: -50,
+          duration: 0,
+          useNativeDriver: true,
+        }),
+        Animated.timing(rotate, {
+          toValue: 0,
+          duration: 0,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  const rotation = rotate.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
+
+  return (
+    <Animated.View
+      style={{
+        width: 10,
+        height: 20,
+        backgroundColor: color,
+        position: "absolute",
+        top: 0,
+        left: startX,
+        borderRadius: 2,
+        transform: [{ translateY }, { rotate: rotation }],
+        opacity: 0.9,
+      }}
+    />
+  );
+};
+
 const EnrollConfirm = ({ navigation, route }) => {
   const { group_name, tickets } = route?.params || {};
-  const [appUser, setAppUser] = useContext(ContextProvider);
-  const userId = appUser.userId || {};
+  const [appUser] = useContext(ContextProvider);
+  const userId = appUser?.userId || null;
   const [scaleValue] = useState(new Animated.Value(0));
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const { isConnected, isInternetReachable } = useContext(NetworkContext);
 
@@ -30,7 +91,7 @@ const EnrollConfirm = ({ navigation, route }) => {
       friction: 3,
       tension: 200,
       useNativeDriver: true,
-    }).start();
+    }).start(() => setShowConfetti(true));
 
     if (!isConnected || !isInternetReachable) {
       Toast.show({
@@ -41,7 +102,7 @@ const EnrollConfirm = ({ navigation, route }) => {
         visibilityTime: 3000,
       });
     }
-  }, [scaleValue, isConnected, isInternetReachable]); // Updated dependencies
+  }, [scaleValue, isConnected, isInternetReachable]);
 
   const handleGoToMyGroups = () => {
     if (!userId) {
@@ -52,61 +113,83 @@ const EnrollConfirm = ({ navigation, route }) => {
         position: "bottom",
         visibilityTime: 3000,
       });
-      return; 
+      return;
     }
-
     navigation.navigate("BottomTab", {
       screen: "PaymentScreen",
-      params: { userId: userId }, // Pass the userId to the PaymentScreen
+      params: { userId },
     });
   };
 
   if (!userId) {
     return (
       <SafeAreaView style={styles.loadingScreen}>
-        <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color="#053B90" />
-         
-        </View>
+        <ActivityIndicator size="large" color="#8A2BE2" />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <Header userId={userId} navigation={navigation} />
+    <SafeAreaView style={styles.container}>
+      {/* Status bar color */}
+      <StatusBar translucent backgroundColor="#8A2BE2" barStyle="light-content" />
+
+      {/* Spacer to push header below status bar */}
+      <View style={styles.statusBarSpacer} />
+
+      {/* Header */}
+      <View style={styles.headerContainer}>
+        <Header userId={userId} navigation={navigation} />
+      </View>
+
+      {/* Main content */}
       <View style={styles.mainContentWrapper}>
         <View style={styles.contentCard}>
           <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
             <AntDesign name="checkcircle" size={100} color="green" />
           </Animated.View>
+
           <Text style={styles.congratulationsText}>
-            Congratulations! You successfully enrolled for {group_name} with{" "}
-            {tickets} tickets.
+            Congratulations! You successfully enrolled for{" "}
+            <Text style={styles.groupName}>{group_name}</Text> with {tickets} tickets.
           </Text>
-          <Text style={styles.activationText}>
-            Account will be activated soon.
-          </Text>
+
+          <Text style={styles.activationText}>Account will be activated soon.</Text>
+
           {!isConnected && (
-            <Text style={styles.offlineIndicator}>
-              You are currently offline.
-            </Text>
+            <Text style={styles.offlineIndicator}>You are currently offline.</Text>
           )}
+
           <TouchableOpacity style={styles.button} onPress={handleGoToMyGroups}>
             <Text style={styles.buttonText}>Go to My Groups</Text>
           </TouchableOpacity>
         </View>
+
+        {/* Confetti celebration */}
+        {showConfetti &&
+          Array.from({ length: 25 }).map((_, i) => {
+            const startX = Math.random() * width;
+            const colors = ["#FF3C38", "#FFDA38", "#38FF90", "#386BFF", "#DA38FF"];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const delay = Math.random() * 500;
+            return <Confetti key={i} startX={startX} color={color} delay={delay} />;
+          })}
       </View>
+
       <Toast />
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#053B90",
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+  container: { flex: 1, backgroundColor: "#8A2BE2" },
+  statusBarSpacer: {
+    height: Platform.OS === "android" ? StatusBar.currentHeight : 40,
+    backgroundColor: "#8A2BE2",
+  },
+  headerContainer: {
+    backgroundColor: "#8A2BE2",
+    paddingBottom: 5,
   },
   mainContentWrapper: {
     flex: 1,
@@ -115,17 +198,14 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   contentCard: {
-    flex: 1,
+    flex: 0,
     backgroundColor: "#fff",
     width: "95%",
     borderRadius: 10,
     padding: 15,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
@@ -137,7 +217,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     marginVertical: 10,
-    color: "#333",
+    color: "#000",
+  },
+  groupName: {
+    color: "#8A2BE2",
   },
   activationText: {
     fontSize: 16,
@@ -154,20 +237,17 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   button: {
-    backgroundColor: "#053B90",
+    backgroundColor: "#8A2BE2",
     padding: 15,
     borderRadius: 10,
     alignItems: "center",
     width: "100%",
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-    marginTop: 20, // Added margin top for spacing from text
+    marginTop: 20,
   },
   buttonText: {
     color: "#fff",
@@ -179,15 +259,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#F5F5F5",
-  },
-  loaderContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: "#053B90",
   },
 });
 
