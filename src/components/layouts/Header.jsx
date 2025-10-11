@@ -97,7 +97,7 @@ const Header = ({ userId, navigation }) => {
                 />
                 <View>
                   <Text style={styles.profileName}>{userData.full_name || "Loading..."}</Text>
-                  <Text style={styles.phoneNumber}>{userData.phone_number || "••••••••••"}</Text>
+                  <Text style={styles.phoneNumber}>{userData.phone_number || "**********"}</Text>
                 </View>
               </TouchableOpacity>
             </View>

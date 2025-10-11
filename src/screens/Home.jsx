@@ -1,25 +1,9 @@
 import React, { useState, useEffect, useContext, useCallback, useRef } from 'react';
 import {
-    View,
-    Image,
-    StyleSheet,
-    Dimensions,
-    Text,
-    TouchableOpacity,
-    Linking,
-    StatusBar,
-    SafeAreaView,
-    FlatList,
-    ActivityIndicator,
-    BackHandler,
-    ScrollView,
-    Platform,
-    Modal,
-    Alert,
-    Animated,
-    PanResponder,
+  View,Image,StyleSheet,Dimensions,Text, TouchableOpacity,Linking,StatusBar,SafeAreaView,
+  FlatList,ActivityIndicator,BackHandler, ScrollView, Platform, Modal, Alert,Animated, PanResponder,TextInput,
 } from 'react-native';
-import { Ionicons, MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import axios from 'axios';
 import url from '../data/url';
@@ -30,1537 +14,1080 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { ContextProvider } from '../context/UserProvider';
 import CityChits from '../../assets/CityChits.png';
 
-
-
 const screenWidth = Dimensions.get('window').width;
-
 const Home = ({ route, navigation }) => {
+  // Context & States
+  const [appUser] = useContext(ContextProvider);
+  const userId = appUser.userId || null;
+  const insets = useSafeAreaInsets();
+  const [greeting, setGreeting] = useState('');
+  const [userData, setUserData] = useState({ full_name: '', phone_number: '', address: '' });
+  const [isLoadingUserData, setIsLoadingUserData] = useState(true);
+  const [userDataError, setUserDataError] = useState(null);
+  const { isConnected, isInternetReachable } = useContext(NetworkContext);
+  const [isHelpModalVisible, setHelpModalVisible] = useState(false);
+  const [isSideMenuVisible, setSideMenuVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [relationshipManagers, setRelationshipManagers] = useState([]);
+  const bannerImages = [
+  { uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7RoGJlPs8_9bAJzP7EcBFgh2n5EOTHGstsw&s' },
+  { uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRjWelb8fKzz7Gn4uX9tlcaAlIFIFzJt4Joqw&s' },
+    { uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRn8CmQKTuihGMhCuwW8Gjizbx0wKk5FSmtQQ&s' },
+      { uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZK_0mWCjonGnSkVhaz0RNpnKB4dhvF4cRAo5a7XoW9xs6t9ufqTH32xBAGpjPTsF0dAw&usqp=CAU' },
 
-    const [appUser, setAppUser] = useContext(ContextProvider);
-    const userId = appUser.userId || {};
-    const [activeIndex, setActiveIndex] = useState(0);
-    const insets = useSafeAreaInsets();
-    const [greeting, setGreeting] = useState('');
-    const [userData, setUserData] = useState({
-        full_name: '', phone_number: '', address: '',
-    });
-    const [isLoadingUserData, setIsLoadingUserData] = useState(true);
-    const [userDataError, setUserDataError] = useState(null);
-    const { isConnected, isInternetReachable } = useContext(NetworkContext);
-    const [isHelpModalVisible, setHelpModalVisible] = useState(false);
-    const [isSideMenuVisible, setSideMenuVisible] = useState(false);
+];
+const [currentIndex, setCurrentIndex] = useState(0);
+const flatListRef = useRef(null);
 
-    // Animation and PanResponder setup
-    const slideAnim = useRef(new Animated.Value(-screenWidth)).current;
-    const panResponder = useRef(
-        PanResponder.create({
-            onStartShouldSetPanResponder: (evt, gestureState) => true,
-            onMoveShouldSetPanResponder: (evt, gestureState) => {
-                return isSideMenuVisible && gestureState.dx < -10;
-            },
-            onPanResponderMove: (evt, gestureState) => {
-                if (gestureState.dx < 0) {
-                    slideAnim.setValue(Math.max(gestureState.dx, -screenWidth));
-                }
-            },
-            onPanResponderRelease: (evt, gestureState) => {
-                if (gestureState.dx < -screenWidth / 2) {
-                    closeSideMenu();
-                } else {
-                    openSideMenu();
-                }
-            },
-        })
-    ).current;
+useEffect(() => {
+  const interval = setInterval(() => {
+    const nextIndex = (currentIndex + 1) % bannerImages.length;
+    setCurrentIndex(nextIndex);
+    flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
+  }, 3000); // change every 3 seconds
 
-    const openSideMenu = () => {
-        if (!isConnected || !isInternetReachable) {
-            Toast.show({
-                type: 'error',
-                text1: 'Offline',
-                text2: 'Please connect to the internet to access menu options.',
-                position: 'bottom',
-                visibilityTime: 4000,
-            });
-            return;
-        }
-        setSideMenuVisible(true);
-        Animated.timing(slideAnim, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-        }).start();
-    };
+  return () => clearInterval(interval);
+}, [currentIndex]);
 
-    const closeSideMenu = () => {
-        Animated.timing(slideAnim, {
-            toValue: -screenWidth,
-            duration: 300,
-            useNativeDriver: true,
-        }).start(() => setSideMenuVisible(false));
-    };
-
-    // Change state to an array to hold multiple relationship managers
-    const [relationshipManagers, setRelationshipManagers] = useState([]);
-
-    const handleWhatsAppPress = async () => {
-        const countryCode = '91';
-        const localPhoneNumber = '9483900777';
-        const fullPhoneNumber = `${countryCode}${localPhoneNumber}`;
-
-        const message = "Hello, I need assistance with MyChits App.";
-
-        const whatsappUrl = `https://wa.me/${fullPhoneNumber}?text=${encodeURIComponent(message)}`;
-
-        try {
-            const supported = await Linking.canOpenURL(whatsappUrl);
-
-            if (supported) {
-                await Linking.openURL(whatsappUrl);
-            } else {
-                Alert.alert(
-                    "WhatsApp Not Found",
-                    "WhatsApp is not installed on your device, or we could not open it. Please ensure WhatsApp is installed and try again.",
-                    [{ text: "OK" }]
-                );
-            }
-        } catch (error) {
-            console.error("Error opening WhatsApp:", error);
-            Alert.alert(
-                "Error",
-                "Could not open WhatsApp. Please check your internet connection and ensure WhatsApp is installed. If the issue persists, please contact support directly.",
-                [{ text: "OK" }]
-            );
-        }
-    };
-
-    const handleRateApp = async () => {
-        // Replace 'com.mychits.app' and 'com.mychits' with your actual app bundle IDs
-        const appId = Platform.OS === 'ios' ? 'com.mychits.app' : 'com.mychits';
-        const appStoreLink = Platform.OS === 'ios'
-            ? `itms-apps://itunes.apple.com/app/id${appId}`
-            : `market://details?id=${appId}`;
-
-        if (!isConnected || !isInternetReachable) {
-            Toast.show({
-                type: 'error',
-                text1: 'Offline',
-                text2: 'Please connect to the internet to rate the app.',
-                position: 'bottom',
-                visibilityTime: 4000,
-            });
-            return;
-        }
-
-        try {
-            const supported = await Linking.canOpenURL(appStoreLink);
-            if (supported) {
-                await Linking.openURL(appStoreLink);
-            } else {
-                Toast.show({
-                    type: 'error',
-                    text1: 'Cannot Open Store',
-                    text2: 'Could not open app store. Please check your settings.',
-                    position: 'bottom',
-                    visibilityTime: 4000,
-                });
-            }
-        } catch (error) {
-            console.error('An error occurred opening app store:', error);
-            Toast.show({
-                type: 'error',
-                text1: 'Error',
-                text2: 'An unexpected error occurred.',
-                position: 'bottom',
-                visibilityTime: 4000,
-            });
-        }
-    };
-
-    const menuItems = [
-        { title: "About Us", icon: "info", link: "About" },
-        { title: "Privacy Policy", icon: "privacy-tip", link: "Privacy" },
-        { title: "Help", icon: "help-outline", link: "Help" },
-        { title: "F&Q", icon: "question-answer", link: "Fq" },
-        { title: "WhatsApp", icon: "whatsapp", onPress: handleWhatsAppPress },
-    ];
-
-    const sideMenuItems = [
-        { title: "Chat with MyChit", icon: "chatbubbles-outline", onPress: handleWhatsAppPress },
-        { title: "Get Help", icon: "help-circle-outline", link: "Help" },
-        { title: "Earn Rewards", icon: "gift-outline", link: "FeatureComingSoon", featureTitle: "Rewards" },
-        // START OF MODIFICATION: Added My Profile to Side Menu
-        { title: "My Profile", icon: "person-outline", link: "ProfileScreen" },
-        // END OF MODIFICATION
-    ];
-
-    const handleNeedHelp = () => {
-        if (!isConnected || !isInternetReachable) {
-            Toast.show({
-                type: 'error',
-                text1: 'Offline',
-                text2: 'Please connect to the internet to access help options.',
-                position: 'bottom',
-                visibilityTime: 4000,
-            });
-            return;
-        }
-        setHelpModalVisible(true);
-    };
-
-    const handleOpenSideMenu = () => {
-        if (!isConnected || !isInternetReachable) {
-            Toast.show({
-                type: 'error',
-                text1: 'Offline',
-                text2: 'Please connect to the internet to access menu options.',
-                position: 'bottom',
-                visibilityTime: 4000,
-            });
-            return;
-        }
-        openSideMenu();
-    };
-
-    const handleCallUs = () => {
-        const phoneNumber = '9483900777';
-        Linking.canOpenURL(`tel:${phoneNumber}`)
-            .then((supported) => {
-                if (supported) {
-                    Linking.openURL(`tel:${phoneNumber}`).catch((error) => {
-                        console.error('Error opening phone dialer:', error);
-                        Toast.show({
-                            type: 'error',
-                            text1: 'Call Error',
-                            text2: 'Could not open phone dialer.',
-                            position: 'bottom',
-                            visibilityTime: 4000,
-                        });
-                    });
-                } else {
-                    Toast.show({
-                        type: 'info',
-                        text1: 'Not Supported',
-                        text2: 'Phone calls are not supported on this device.',
-                        position: 'bottom',
-                        visibilityTime: 4000,
-                    });
-                }
-            })
-            .catch((error) => {
-                console.error('Error checking phone dialer availability:', error);
-                Toast.show({
-                    type: 'error',
-                    text1: 'Error',
-                    text2: 'An error occurred while checking phone call availability.',
-                    position: 'bottom',
-                    visibilityTime: 4000,
-                });
-            });
-    };
-
-    // Updated function to handle calls to a specific RM phone number
-    const handleRelationshipManagerCall = (phoneNumber) => {
-        if (!phoneNumber) {
-            Toast.show({
-                type: 'error',
-                text1: 'Call Error',
-                text2: 'Relationship Manager phone number is not available.',
-                position: 'bottom',
-                visibilityTime: 4000,
-            });
-            return;
-        }
-        Linking.canOpenURL(`tel:${phoneNumber}`)
-            .then((supported) => {
-                if (supported) {
-                    Linking.openURL(`tel:${phoneNumber}`).catch((error) => {
-                        console.error('Error opening phone dialer:', error);
-                        Toast.show({
-                            type: 'error',
-                            text1: 'Call Error',
-                            text2: 'Could not open phone dialer.',
-                            position: 'bottom',
-                            visibilityTime: 4000,
-                        });
-                    });
-                } else {
-                    Toast.show({
-                        type: 'info',
-                        text1: 'Not Supported',
-                        text2: 'Phone calls are not supported on this device.',
-                        position: 'bottom',
-                        visibilityTime: 4000,
-                    });
-                }
-            })
-            .catch((error) => {
-                console.error('Error checking phone dialer availability:', error);
-                Toast.show({
-                    type: 'error',
-                    text1: 'Error',
-                    text2: 'An error occurred while checking phone call availability.',
-                    position: 'bottom',
-                    visibilityTime: 4000,
-                });
-            });
-    };
-
-    const handleWebsiteLink = async () => {
-        const websiteUrl = 'https://mychits.co.in/';
-        if (!isConnected || !isInternetReachable) {
-            Toast.show({
-                type: 'error',
-                text1: 'Offline',
-                text2: 'Please connect to the internet to open the website.',
-                position: 'bottom',
-                visibilityTime: 4000,
-            });
-            return;
-        }
-        try {
-            const supported = await Linking.canOpenURL(websiteUrl);
-            if (supported) {
-                await Linking.openURL(websiteUrl);
-            } else {
-                Toast.show({
-                    type: 'error',
-                    text1: 'Cannot Open URL',
-                    text2: `Don't know how to open this URL: ${websiteUrl}`,
-                    position: 'bottom',
-                    visibilityTime: 4000,
-                });
-            }
-        } catch (error) {
-            console.error('Error opening website:', error);
-            Toast.show({
-                type: 'error',
-                text1: 'Error Opening Website',
-                text2: 'An error occurred while trying to open the website.',
-                position: 'bottom',
-                visibilityTime: 4000,
-            });
-        }
-    };
-
-    const handleMenuItemPress = (item) => {
-        setHelpModalVisible(false);
-        setSideMenuVisible(false);
-        if (item.onPress) {
-            item.onPress();
-        } else if (typeof item.link === 'string' && item.link.length > 0) {
-            navigation.navigate(item.link, { user: route.params.user || {} });
+  // Animation for side menu
+  const slideAnim = useRef(new Animated.Value(-screenWidth)).current;
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (evt, gestureState) => isSideMenuVisible && gestureState.dx < -10,
+      onPanResponderMove: (evt, gestureState) => {
+        if (gestureState.dx < 0)
+          slideAnim.setValue(Math.max(gestureState.dx, -screenWidth));
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        if (gestureState.dx < -screenWidth / 2) {
+          closeSideMenu();
         } else {
-            console.warn("Invalid navigation item:", item);
-            Alert.alert("Navigation Error", `Could not navigate to ${item.title}. Link is invalid or missing.`);
+          openSideMenu();
         }
-    };
-
-    const handleLogout = () => {
-        closeSideMenu();
-        navigation.dispatch(StackActions.replace('Login'));
-    };
-
-    const handleCustomerSupportCall = (phoneNumber) => {
-        if (!phoneNumber) {
-            Toast.show({
-                type: 'error',
-                text1: 'Call Error',
-                text2: 'Phone number not provided for customer support.',
-                position: 'bottom',
-                visibilityTime: 4000,
-            });
-            return;
-        }
-
-        Linking.canOpenURL(`tel:${phoneNumber}`)
-            .then((supported) => {
-                if (supported) {
-                    Linking.openURL(`tel:${phoneNumber}`).catch((error) => {
-                        console.error('Error opening phone dialer:', error);
-                        Toast.show({
-                            type: 'error',
-                            text1: 'Call Error',
-                            text2: 'Could not open phone dialer for customer support.',
-                            position: 'bottom',
-                            visibilityTime: 4000,
-                        });
-                    });
-                } else {
-                    Toast.show({
-                        type: 'info',
-                        text1: 'Not Supported',
-                        text2: 'Phone calls are not supported on this device.',
-                        position: 'bottom',
-                        visibilityTime: 4000,
-                    });
-                }
-            })
-            .catch((error) => {
-                console.error('Error checking phone dialer availability:', error);
-                Toast.show({
-                    type: 'error',
-                    text1: 'Error',
-                    text2: 'An error occurred while checking phone call availability.',
-                    position: 'bottom',
-                    visibilityTime: 4000,
-                });
-            });
-    };
-
-    const fetchUserData = async () => {
-        if (!isConnected || !isInternetReachable) {
-            setIsLoadingUserData(false);
-            setUserDataError("No internet connection.");
-            setUserData({ full_name: '', phone_number: '', address: '' });
-            return;
-        }
-        setIsLoadingUserData(true);
-        setUserDataError(null);
-        try {
-            if (!userId) {
-                console.warn("userId is undefined. Cannot fetch user data.");
-                setUserDataError("User ID not found. Please log in again.");
-                setIsLoadingUserData(false);
-                return;
-            }
-            const response = await axios.get(`${url}/user/get-user-by-id/${userId}`);
-            setUserData(response.data);
-            setIsLoadingUserData(false);
-        } catch (error) {
-            console.error('Error fetching user data:', error);
-            setUserDataError("Failed to fetch user data. Please try again.");
-            Toast.show({
-                type: 'error',
-                text1: 'User Data Error',
-                text2: 'Could not fetch user information.',
-                position: 'bottom',
-                visibilityTime: 4000,
-            });
-            setIsLoadingUserData(false);
-        }
-    };
-
-    // Update fetch function to handle multiple relationship managers
-    const fetchRelationshipManagerDetails = async () => {
-        if (!isConnected || !isInternetReachable || !userId) {
-            return;
-        }
-
-        try {
-            const response = await axios.post(`${url}/enroll/get-user-tickets/${userId}`);
-            console.log('API Response for RM:', JSON.stringify(response.data, null, 2));
-
-            if (response.data && response.data.length > 0) {
-                const uniqueGroups = new Map();
-
-                response.data.forEach(ticket => {
-                    const rmDetails = ticket.group_id?.relationship_manager;
-                    const groupName = ticket.group_id?.group_name;
-                    const groupId = ticket.group_id?._id;
-
-                    if (rmDetails && rmDetails.phone_number && groupName && groupId) {
-                        uniqueGroups.set(groupId, {
-                            groupName: groupName,
-                            name: rmDetails.name,
-                            phoneNumber: rmDetails.phone_number
-                        });
-                    }
-                });
-
-                const groupManagers = Array.from(uniqueGroups.values());
-               
-                setRelationshipManagers(groupManagers);
-            } else {
-                console.warn("No user tickets found for this userId.");
-                setRelationshipManagers([]);
-            }
-        } catch (error) {
-            
-            Toast.show({
-                type: 'error',
-                text1: 'RM Data Error',
-                text2: 'Could not fetch Relationship Manager details.',
-                position: 'bottom',
-                visibilityTime: 4000,
-            });
-            setRelationshipManagers([]);
-        }
-    };
-
-    useEffect(() => {
-        fetchUserData();
-        fetchRelationshipManagerDetails();
-    }, [userId, isConnected, isInternetReachable]);
-
-    useEffect(() => {
-        const hour = new Date().getHours();
-        if (hour < 12) setGreeting('Good Morning');
-        else if (hour < 18) setGreeting('Good Afternoon');
-        else setGreeting('Good Evening');
-    }, []);
-
-    useFocusEffect(
-        useCallback(() => {
-            if (Platform.OS === 'android') {
-                const onBackPress = () => {
-                    if (isHelpModalVisible) {
-                        setHelpModalVisible(false);
-                        return true;
-                    }
-                    if (isSideMenuVisible) {
-                        closeSideMenu();
-                        return true;
-                    }
-                    BackHandler.exitApp();
-                    return true;
-                };
-
-                const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
-
-                return () => {
-                    subscription.remove();
-                };
-            }
-            return undefined;
-        }, [isHelpModalVisible, isSideMenuVisible])
-    );
-
-    const services = [
-        { navigateTo: 'Mygroups', icon: 'group', title: 'My Groups', bgColor: '#d6cce8ff', iconBg: '#783105ff', disabled: false },
-        { navigateTo: 'EnrollTab', screen: 'EnrollScreenMain', icon: 'group-add', title: 'New Groups', bgColor: '#d6cce8ff', iconBg: '#1407ceff', filter: 'New Groups', disabled: false },
-        { navigateTo: 'PaymentScreen', icon: 'payment', title: 'My Payments', bgColor: '#d6cce8ff', iconBg: '#ff7707ff', disabled: false },
-        { navigateTo: 'ReportScreen', icon: 'bar-chart', title: 'Reports', bgColor: '#d6cce8ff', iconBg: '#475a07ff', disabled: false },
-        // START OF MODIFICATION: Swapped My Profile with My Passbook for the main grid
-        { navigateTo: 'MyPassbook', icon: 'book', title: 'My Passbook', bgColor: '#d6cce8ff', iconBg: '#04595cff', disabled: false },
-        // END OF MODIFICATION
-        { navigateTo: 'AuctionList', icon: 'gavel', title: 'Auction', bgColor: '#d6cce8ff', iconBg: '#8e8c05ff', disabled: false, featureTitle: 'Auction' },
-        { navigateTo: 'IntroduceNewCustomers', icon: 'person-add', title: 'Introduce New Customers', bgColor: '#d6cce8ff', iconBg: '#a16400ff', disabled: false },
-        { navigateTo: 'MyLoan', screen: 'MyLoan', icon: 'account-balance-wallet', title: 'My Loan', bgColor: '#d6cce8ff', iconBg: '#e40000ff', filter: 'My Loan', disabled: false },
-        { navigateTo: 'PayYourDues', icon: 'currency-rupee', title: 'Pay Your Dues', bgColor: '#d6cce8ff', iconBg: '#9d00a5a3', disabled: false },
-    ];
-
-    const mychitsAdvantages = [
-        { icon: 'lock-clock', text1: '2 mins onboarding', text2: '& 24Hrs Payouts', iconColor: '#ff0000ff' },
-        {
-            icon: 'gavel',
-            text1: 'In app ',
-            text2: 'Auctions',
-            iconColor: '#581c06ff',
-            action: 'navigate',
-            targetScreen: 'AuctionList'
-        },
-        {
-            icon: 'event-note',
-            text1: ' Auctions',
-            text2: 'every month',
-            iconColor: '#ffb701ff',
-            action: 'navigate',
-            targetScreen: 'AuctionList'
-        },
-        {
-            icon: 'support-agent',
-            text1: '1 Click customer',
-            text2: 'support',
-            iconColor: '#00aaffff',
-            action: 'call',
-            phoneNumber: '+919483900777'
-        },
-        { icon: 'verified', text1: 'Fully Compliant as', text2: 'per Chit Act 1998', iconColor: '#0026ffff' },
-        { icon: 'groups', text1: 'Chit Plans for', text2: 'everyone', iconColor: '#00ff08ff' },
-    ];
-
-    const customerReviews = [
-        {
-            id: '1',
-            name: 'Prakash ',
-            rating: 5,
-            review: 'Great service! The app is easy to use, and I got my money on time. I recommend this fund.',
-
-            location: 'Bangalore'
-        },
-        {
-            id: '2',
-            name: 'Geetha Kumari',
-            rating: 4,
-            review: 'Very transparent and trustworthy. The team is always available to help and the process is seamless. A great way to save and invest.',
-
-            location: 'Chamarajanagr'
-        },
-        {
-            id: '3',
-            name: 'Ravi Kumar',
-            rating: 5,
-            review: 'A good app for managing my investments. The interface is easy to understand. One small suggestion would be to add more payment options.',
-
-            location: 'Bangalore'
-        },
-        {
-            id: '4',
-            name: 'Nisha Singh',
-            rating: 4,
-            review: 'The best chit fund experience I’ve had. Secure, simple, and transparent. The digital process saves a lot of time.',
-
-            location: 'Davanagere'
-        },
-        {
-            id: '5',
-            name: 'Raja Reddy',
-            rating: 5,
-            review: 'I was not sure at first, but the good service and clear papers made me trust this app. I am very happy I chose it.',
-
-            location: 'Mysore'
-        },
-        {
-            id: '6',
-            name: 'Sangeeta Rao',
-            rating: 4,
-            review: 'The app is good and the people who help customers answer fast. It is a good way to save money and get it when you need it.',
-
-            location: 'Mandya'
-        },
-        {
-            id: '7',
-            name: 'Vikram Patel',
-            rating: 5,
-            review: 'The process of joining and managing my chit fund is so simple. Highly recommend MyChits to everyone looking for a reliable chit fund.',
-
-            location: 'Bidar'
-        },
-        {
-            id: '8',
-            name: 'Anjali Desai',
-            rating: 5,
-            review: 'Excellent app! It’s simple, secure, and I can manage everything from my phone. The customer support is also very responsive and helpful.',
-
-            location: 'Bangalore'
-        },
-        {
-            id: '9',
-            name: 'Mukesh Choudhary',
-            rating: 4,
-            review: 'A reliable and easy-to-use platform. The process for joining a chit and making payments is very straightforward. Highly satisfied with my experience.',
-
-            location: 'Davanagere'
-        },
-        {
-            id: '10',
-            name: 'Priya Reddy',
-            rating: 5,
-            review: 'The best way to save money for my future goals. The entire process is transparent. I recommend this app to my friends and family.',
-
-            location: 'Bangalore'
-        },
-        {
-            id: '11',
-            name: 'Suresh Kumar',
-            rating: 5,
-            review: 'I love how easy it is to track my chit progress and auction status. Great job!',
-
-            location: 'Mandya'
-        },
-        {
-            id: '12',
-            name: 'Kavita Singh',
-            rating: 4,
-            review: 'A very good overall.',
-
-            location: 'Bangalore'
-        },
-        {
-            id: '13',
-            name: 'Rajesh Nair',
-            rating: 5,
-            review: 'Superb platform for my savings needs. The app is fast and reliable, and I never faced any issues. The team is also very supportive.',
-
-            location: 'Mysore'
-        },
-        {
-            id: '14',
-            name: 'Sneha Sharma',
-            rating: 4,
-            review: ' I appreciate the transparency and the constant support from the team.',
-
-            location: 'Bangalore'
-        },
-    ];
-
-    const ReviewsSection = () => {
-        const renderStarRating = (rating) => {
-            const stars = [];
-            for (let i = 1; i <= 5; i++) {
-                stars.push(
-                    <Ionicons
-                        key={i}
-                        name={i <= rating ? "star" : "star-outline"}
-                        size={24}
-                        color={i <= rating ? "#FFA500" : "#ccc"}
-                        style={styles.reviewStar}
-                    />
-                );
-            }
-            return <View style={styles.reviewRatingContainer}>{stars}</View>;
-        };
-
-        const renderReviewCard = ({ item }) => (
-            <View style={styles.reviewCard}>
-                <View style={styles.reviewHeader}>
-                    <Text style={styles.reviewName}>{item.name}</Text>
-                    <Text style={styles.reviewLocation}>{item.location}</Text>
-                    {renderStarRating(item.rating)}
-                </View>
-                <Text style={styles.reviewText}>{item.review}</Text>
-            </View>
-        );
-
-        return (
-            <View style={styles.reviewsContainer}>
-                <Text style={styles.reviewTitle}>What Our Customers Say</Text>
-                <FlatList
-                    data={customerReviews}
-                    renderItem={renderReviewCard}
-                    keyExtractor={item => item.id}
-                    horizontal={true}
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ paddingHorizontal: 5 }}
-                />
-            </View>
-        );
-    };
-
-    if (isLoadingUserData) {
-        return (
-            <SafeAreaView style={styles.loadingContainer}>
-                <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-                <ActivityIndicator size="large" color="#053B90" />
-            </SafeAreaView>
-        );
-    }
-
+      },
+    })
+  ).current;
+  const openSideMenu = () => {
     if (!isConnected || !isInternetReachable) {
-        return (
-            <SafeAreaView style={styles.offlineContainer}>
-                <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-                <View style={styles.offlineContent}>
-                    <MaterialIcons name="cloud-off" size={80} color="#999" />
-                    <Text style={styles.offlineTextTitle}>No Internet Connection</Text>
-                    <Text style={styles.offlineTextMessage}>
-                        Please check your network settings and try again.
-                    </Text>
-                    <TouchableOpacity
-                        style={styles.retryButton}
-                        onPress={fetchUserData}
-                    >
-                        <Text style={styles.retryButtonText}>Retry</Text>
-                    </TouchableOpacity>
-                </View>
-                <Toast />
-            </SafeAreaView>
-        );
+      Toast.show({
+        type: 'error',
+        text1: 'Offline',
+        text2: 'Please connect to the internet to access menu options.',
+        position: 'bottom',
+        visibilityTime: 4000,
+      });
+      return;
     }
-
-    return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="light-content" backgroundColor="#053B90" />
-            <View style={[styles.header, { paddingTop: insets.top }]}>
-                <TouchableOpacity onPress={handleOpenSideMenu} style={styles.hamburgerIconContainer}>
-                    <View style={styles.hamburgerLine} />
-                    <View style={styles.hamburgerLine} />
-                    <View style={styles.hamburgerLine} />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Chit Plans</Text>
-                <TouchableOpacity
-                    style={styles.helpButton}
-                    onPress={handleNeedHelp}
-                    activeOpacity={0.7}
-                    disabled={!isConnected || !isInternetReachable}
-                >
-                    <Ionicons name="information-circle-outline" size={16} color="#053B90" style={{ marginRight: 5 }} />
-                    <Text style={styles.helpText}>Need Help?</Text>
-                </TouchableOpacity>
-            </View>
-
-            <ScrollView style={styles.mainScrollView} contentContainerStyle={styles.contentContainer}>
-                <View style={styles.skyBlueSection}>
-                    {userDataError ? (
-                        <Text style={styles.errorTextSmall}>{userDataError}</Text>
-                    ) : (
-                        <>
-                            <View style={styles.welcomeContainer}>
-                                <View>
-                                    <Text style={styles.welcomeText}>
-                                        {greeting}!
-                                    </Text>
-                                    <Text style={styles.userNameText}>
-                                        {userData.full_name || 'User'}
-                                    </Text>
-                                </View>
-
-                            </View>
-                        </>
-                    )}
-                </View>
-                <View style={styles.servicesSection}>
-                    <Text style={styles.servicesTitle}>Services</Text>
-                    <FlatList
-                        data={services}
-                        renderItem={({ item, index }) => (
-                            <TouchableOpacity
-                                key={index}
-                                onPress={() => {
-                                    if (!item.disabled) {
-                                        if (item.screen) {
-                                            navigation.navigate(item.navigateTo, {
-                                                screen: item.screen,
-                                                params: {
-                                                    userId: userId,
-                                                    ...(item.filter && { groupFilter: item.filter })
-                                                }
-                                            });
-                                        } else {
-                                            navigation.navigate(item.navigateTo, {
-                                                userId: userId,
-                                                featureTitle: item.featureTitle || item.title
-                                            });
-                                        }
-                                    }
-                                }}
-                                style={[
-                                    styles.gridItemBox,
-                                    { backgroundColor: item.bgColor },
-                                    item.disabled && { opacity: 0.6 }
-                                ]}
-                                disabled={item.disabled}
-                            >
-                                <View style={[styles.iconCircle, { backgroundColor: item.iconBg }]}>
-                                    <MaterialIcons name={item.icon} size={26} color="#fff" />
-                                </View>
-                                <Text style={styles.serviceTitle}>{item.title}</Text>
-                            </TouchableOpacity>
-                        )}
-                        keyExtractor={(item, index) => index.toString()}
-                        numColumns={3}
-                        scrollEnabled={false}
-                        columnWrapperStyle={styles.row}
-                    />
-                    <View style={styles.blueContainer}>
-                        <TouchableOpacity
-                            style={styles.blueGridItem}
-                            onPress={() => navigation.navigate('RewardsScreen', { userId: userId, featureTitle: 'Rewards' })}
-                        >
-                            <View style={styles.iconCircleBlue}>
-                                <MaterialIcons name="emoji-events" size={30} color="#053B90" />
-                            </View>
-                            <Text style={styles.blueGridItemText}>Rewards</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.blueGridItem}
-                            onPress={() => navigation.navigate('OffersScreen', { userId: userId, featureTitle: 'Offers' })}
-                        >
-                            <View style={styles.iconCircleBlue}>
-                                <MaterialIcons name="local-offer" size={30} color="#053B90" />
-                            </View>
-                            <Text style={styles.blueGridItemText}>Offers</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.blueGridItem}
-                            onPress={() => navigation.navigate('EligibilityScreen', { userId: userId, featureTitle: 'Eligibility' })}
-                        >
-                            <View style={styles.iconCircleBlue}>
-                                <MaterialIcons name="check-circle" size={30} color="#053B90" />
-                            </View>
-                            <Text style={styles.blueGridItemText}>Eligibility</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.blueGridItem}
-                            onPress={() => navigation.navigate('MoreInformation', { userId: userId, featureTitle: 'More Features' })}
-                        >
-                            <View style={styles.iconCircleBlue}>
-                                <MaterialIcons name="more-horiz" size={30} color="#053B90" />
-                            </View>
-                            <Text style={styles.blueGridItemText}>More</Text>
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.bottomContainer}>
-                        {/* START OF MODIFICATION: Swapped My Passbook with My Profile for the bottom grid */}
-                        <TouchableOpacity
-                            style={styles.bottomGridItem}
-                            onPress={() => navigation.navigate('ProfileScreen', { userId: userId })}
-                        >
-                            <View style={styles.bottomIcon}>
-                                <MaterialIcons name="event-note" size={34} color="#053B90" />
-                            </View>
-                            <Text style={styles.bottomServiceTitle}> My </Text>
-                             <Text style={styles.bottomServiceTitle}>  Profile</Text>
-                        </TouchableOpacity>
-                        {/* END OF MODIFICATION */}
-                        <TouchableOpacity
-                            style={styles.bottomGridItem}
-                            onPress={() => navigation.navigate('MoreInformation', { userId: userId, featureTitle: 'More Information' })}
-                        >
-                            <View style={styles.bottomIcon}>
-                                <MaterialIcons name="more" size={34} color="#053B90" />
-                            </View>
-                            <Text style={styles.bottomServiceTitle}>More Information</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.bottomGridItem}
-                            onPress={() => navigation.navigate('Insurance', { userId: userId })}
-                        >
-                            <View style={styles.bottomIcon}>
-                                <MaterialIcons name="health-and-safety" size={34} color="#053B90" />
-                            </View>
-                            <Text style={styles.bottomServiceTitle}>My Insurance</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.bottomGridItem}
-                            onPress={() => navigation.navigate('Becomeanagent', { userId: userId })}
-                        >
-                            <View style={styles.bottomIcon}>
-                                <MaterialCommunityIcons name="account-tie" size={34} color="#053B90" />
-                            </View>
-                            <Text style={styles.bottomServiceTitle}>Become an Agent</Text>
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.benefitsSection}>
-                        <Text style={styles.benefitsTitle}>Why Choose MyChits?</Text>
-                        <View style={styles.benefitItem}>
-                            <View style={[styles.benefitIconCircle, { backgroundColor: '#FFEDEE' }]}>
-                                <MaterialIcons name="touch-app" size={28} color="#D32F2F" />
-                            </View>
-                            <View style={styles.benefitTextContent}>
-                                <Text style={styles.benefitHeading}>Easy Accessibility</Text>
-                                <Text style={styles.benefitDescription}>
-                                    Use our online presence and companion mobile app to keep track of your chits anytime, anywhere.
-                                </Text>
-                            </View>
-                        </View>
-                        <View style={styles.benefitItem}>
-                            <View style={[styles.benefitIconCircle, { backgroundColor: '#E1F5FE' }]}>
-                                <MaterialIcons name="currency-rupee" size={28} color="#1565C0" />
-                            </View>
-                            <View style={styles.benefitTextContent}>
-                                <Text style={styles.benefitHeading}>Large Choice of Chits</Text>
-                                <Text style={styles.benefitDescription}>
-                                    From ₹20,000 to ₹1 Crore, our subscriber-friendly plans are designed to suit your financial goals.
-                                </Text>
-                            </View>
-                        </View>
-                        <View style={styles.benefitItem}>
-                            <View style={[styles.benefitIconCircle, { backgroundColor: '#E8F5E9' }]}>
-                                <MaterialIcons name="verified-user" size={28} color="#388E3C" />
-                            </View>
-                            <View style={styles.benefitTextContent}>
-                                <Text style={styles.benefitHeading}>Most Trusted</Text>
-                                <Text style={styles.benefitDescription}>
-                                    MY CHITS has been trusted since 1998, operating as a safest registered chits company.
-                                </Text>
-                            </View>
-                        </View>
-                        <ReviewsSection />
-                        <View style={styles.advantagesBox}>
-                            <Text style={styles.advantagesHeadline}>Advantages of MyChits</Text>
-                            <View style={styles.advantagesGrid}>
-                                {mychitsAdvantages.map((item, index) => (
-                                    <TouchableOpacity
-                                        key={index}
-                                        style={styles.advantageItem}
-                                        onPress={() => {
-                                            if (item.action === 'call' && item.phoneNumber) {
-                                                handleCustomerSupportCall(item.phoneNumber);
-                                            } else if (item.action === 'navigate' && item.targetScreen) {
-                                                navigation.navigate(item.targetScreen);
-                                            }
-                                        }}
-                                    >
-                                        <View style={[styles.advantageIconContainer, { borderColor: 'black' }]}>
-                                            <MaterialIcons name={item.icon} size={30} color={item.iconColor} />
-                                        </View>
-                                        <Text style={styles.advantageText1}>{item.text1}</Text>
-                                        <Text style={styles.advantageText2}>{item.text2}</Text>
-                                    </TouchableOpacity>
-                                ))}
-                            </View>
-                        </View>
-                        <TouchableOpacity
-                            style={styles.viewLicenseLink}
-                            onPress={() => navigation.navigate('LicenseAndCertificate')}
-                        >
-                            <View style={styles.viewLicenseContent}>
-                                <MaterialIcons name="link" size={14} color="#053B90" />
-                                <Text style={styles.viewLicenseText}>View License and Certificate</Text>
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-                    <LinearGradient
-                        colors={['#F0F8FF', '#F8F8F8']}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 0, y: 1 }}
-                        style={styles.appInfoFooter}
-                    >
-                        <TouchableOpacity
-                            onPress={handleWebsiteLink}
-                            disabled={!isConnected || !isInternetReachable}
-                        >
-                            <Text style={styles.appInfoWebsiteLink}>
-                                Visit our Website: <Text style={{ fontWeight: 'bold' }}>mychits.co.in</Text>
-                            </Text>
-                        </TouchableOpacity>
-
-                        <View style={styles.madeWithLoveContainer}>
-                            <Text style={styles.appInfoMadeWithLove}>
-                                Made with <Text style={{ color: '#E53935' }}>❤️</Text> in India
-                            </Text>
-                            <MaterialIcons name="public" size={16} color="#4CAF50" style={styles.madeInIndiaIcon} />
-                        </View>
-                    </LinearGradient>
-                </View>
-            </ScrollView>
-
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={isHelpModalVisible}
-                onRequestClose={() => {
-                    setHelpModalVisible(!isHelpModalVisible);
-                }}
-            >
-                <TouchableOpacity
-                    style={styles.modalOverlay}
-                    activeOpacity={1}
-                    onPressOut={() => setHelpModalVisible(false)}
-                >
-                    <View style={styles.modalContent}>
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>How can we help?</Text>
-                            <TouchableOpacity onPress={() => setHelpModalVisible(false)}>
-                                <MaterialIcons name="close" size={24} color="#585858" />
-                            </TouchableOpacity>
-                        </View>
-                        <ScrollView showsVerticalScrollIndicator={false}>
-                            {menuItems.map((item, index) => (
-                                <TouchableOpacity
-                                    key={`help-item-${index}`}
-                                    style={styles.modalMenuItem}
-                                    onPress={() => handleMenuItemPress(item)}
-                                >
-                                    <View style={styles.modalMenuItemLeft}>
-                                        {item.icon === "whatsapp" ? (
-                                            <Ionicons name="logo-whatsapp" size={24} color="#053B90" />
-                                        ) : (
-                                            <MaterialIcons name={item.icon} size={24} color="#053B90" />
-                                        )}
-                                        <Text style={styles.modalMenuText}>{item.title}</Text>
-                                    </View>
-                                    <MaterialIcons name="chevron-right" size={24} color="#585858" />
-                                </TouchableOpacity>
-                            ))}
-                        </ScrollView>
-                        <View style={styles.modalCallSection}>
-                            <Text style={styles.modalCallText}>
-                                Still need help? Give us a call.
-                            </Text>
-                            <TouchableOpacity
-                                style={styles.modalCallButton}
-                                onPress={handleCallUs}
-                            >
-                                <MaterialIcons name="phone" size={20} color="#fff" style={styles.modalCallIcon} />
-                                <Text style={styles.modalCallButtonText}>Call Us Now</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </TouchableOpacity>
-            </Modal>
-
-            {isSideMenuVisible && (
-                <TouchableOpacity
-                    style={styles.modalOverlaySideMenu}
-                    activeOpacity={1}
-                    onPress={closeSideMenu}
-                >
-                    <Animated.View
-                        style={[
-                            styles.sideMenuContent,
-                            { transform: [{ translateX: slideAnim }] },
-                        ]}
-                        {...panResponder.panHandlers}
-                        onStartShouldSetResponder={() => true}
-                    >
-                        <TouchableOpacity onPress={closeSideMenu} style={styles.sideMenuCloseButton}>
-                            <MaterialIcons name="close" size={24} color="#585858" />
-                        </TouchableOpacity>
-
-                        {/* 🔽 Wrap content in a ScrollView */}
-                        <ScrollView
-                            showsVerticalScrollIndicator={false}
-                            contentContainerStyle={styles.sideMenuScrollContent}
-                        >
-                            {/* Header */}
-                            <View style={styles.sideMenuHeader}>
-                                <Image
-                                    source={CityChits}
-                                    style={styles.headerImage}
-                                    resizeMode="contain"
-                                />
-                                <View style={styles.headerTextContainer}>
-                                    <Text style={styles.sideMenuUserName}>{userData.full_name || 'User'}</Text>
-                                    <Text style={styles.sideMenuOnTrackText}>
-                                        You're on track, {userData.full_name.split(' ')[0] || 'User'}!
-                                    </Text>
-                                </View>
-
-                                {/* RM list */}
-                                {relationshipManagers.length > 0 && (
-                                    <View style={styles.rmListBox}>
-                                        {relationshipManagers.map((rm, index) => (
-                                            <View key={index} style={styles.relationshipManagerCard}>
-                                                <Text style={styles.rmGroupName}>{rm.groupName}</Text>
-                                                <View style={styles.managerDetailsRow}>
-                                                    <Text style={styles.rmManagerName}>Manager: {rm.name}</Text>
-                                                    <Text style={styles.rmPhoneNumberText}> {rm.phoneNumber}</Text>
-                                                    <TouchableOpacity
-                                                        onPress={() => handleRelationshipManagerCall(rm.phoneNumber)}
-                                                        style={styles.inlineCallButton}
-                                                    >
-                                                        <MaterialIcons name="phone" size={16} color="#053B90" />
-                                                    </TouchableOpacity>
-                                                </View>
-                                            </View>
-                                        ))}
-                                    </View>
-                                )}
-                            </View>
-
-                            {/* Menu items */}
-                            {sideMenuItems.map((item, index) => (
-                                <TouchableOpacity
-                                    key={`side-menu-item-${index}`}
-                                    style={styles.sideMenuItem}
-                                    onPress={() => {
-                                        closeSideMenu();
-                                        if (item.onPress) {
-                                            item.onPress();
-                                        } else if (item.link) {
-                                            if (item.featureTitle) {
-                                                navigation.navigate(item.link, {
-                                                    userId: userId,
-                                                    featureTitle: item.featureTitle,
-                                                });
-                                            } else {
-                                                navigation.navigate(item.link, {
-                                                    userId: userId
-                                                });
-                                            }
-                                        }
-                                    }}
-                                >
-                                    <Ionicons name={item.icon} size={24} color="#333" style={styles.sideMenuIcon} />
-                                    <Text style={styles.sideMenuText}>{item.title}</Text>
-                                </TouchableOpacity>
-                            ))}
-
-                            <View style={styles.sideMenuSeparator} />
-
-                            {/* Sign Out */}
-                            <TouchableOpacity style={styles.sideMenuItem} onPress={handleLogout}>
-                                <Ionicons name="log-out-outline" size={24} color="red" style={styles.sideMenuIcon} />
-                                <Text style={[styles.sideMenuText, { color: 'red' }]}>Sign Out</Text>
-                            </TouchableOpacity>
-
-                            {/* Footer */}
-                            <View style={styles.sideMenuFooter}>
-                                <TouchableOpacity onPress={handleRateApp} disabled={!isConnected || !isInternetReachable}>
-                                    <Text style={styles.sideMenuFooterText}>
-                                        Love us? Rate the app! <Ionicons name="star" size={16} color="#F7C641" />
-                                    </Text>
-                                </TouchableOpacity>
-                            </View>
-                        </ScrollView>
-                    </Animated.View>
-                </TouchableOpacity>
-            )}
-
-
-            <Toast />
-        </SafeAreaView>
+    setSideMenuVisible(true);
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+  const closeSideMenu = () => {
+    Animated.timing(slideAnim, {
+      toValue: -screenWidth,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => setSideMenuVisible(false));
+  };
+  
+  // WhatsApp support handler
+  const handleWhatsAppPress = async () => {
+    const countryCode = '91';
+    const localPhoneNumber = '9483900777';
+    const fullPhoneNumber = `${countryCode}${localPhoneNumber}`;
+    const message = "Hello, I need assistance with MyChits App.";
+    const whatsappUrl = `https://wa.me/${fullPhoneNumber}?text=${encodeURIComponent(message)}`;
+    try {
+      const supported = await Linking.canOpenURL(whatsappUrl);
+      if (supported) await Linking.openURL(whatsappUrl);
+      else Alert.alert("WhatsApp Not Found", "Please install WhatsApp and try again.", [{ text: "OK" }]);
+    } catch (error) {
+      console.error("Error opening WhatsApp:", error);
+      Alert.alert("Error", "Could not open WhatsApp. Please try again later.", [{ text: "OK" }]);
+    }
+  };
+  // Rate App handler
+  const handleRateApp = async () => {
+    const appId = Platform.OS === 'ios' ? 'com.mychits.app' : 'com.mychits';
+    const appStoreLink = Platform.OS === 'ios'
+      ? `itms-apps://itunes.apple.com/app/id${appId}`
+      : `market://details?id=${appId}`;
+    if (!isConnected || !isInternetReachable) {
+      Toast.show({
+        type: 'error',
+        text1: 'Offline',
+        text2: 'Please connect to the internet to rate the app.',
+        position: 'bottom',
+        visibilityTime: 4000,
+      });
+      return;
+    }
+    try {
+      const supported = await Linking.canOpenURL(appStoreLink);
+      if (supported) await Linking.openURL(appStoreLink);
+      else Toast.show({
+        type: 'error',
+        text1: 'Cannot Open Store',
+        text2: 'Please check your settings.',
+        position: 'bottom',
+        visibilityTime: 4000,
+      });
+    } catch (error) {
+      console.error("Error opening app store:", error);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'An unexpected error occurred.',
+        position: 'bottom',
+        visibilityTime: 4000,
+      });
+    }
+  };
+  // Menu Items for modal and side menu
+  const menuItems = [
+    { title: "About Us", icon: "info", link: "About" },
+    { title: "Privacy Policy", icon: "privacy-tip", link: "Privacy" },
+    { title: "Help", icon: "help-outline", link: "Help" },
+    { title: "F&Q", icon: "question-answer", link: "Fq" },
+    { title: "WhatsApp", icon: "logo-whatsapp", onPress: handleWhatsAppPress },
+  ];
+  const sideMenuItems = [
+    { title: "Chat with MyChit", icon: "chatbubbles-outline", onPress: handleWhatsAppPress },
+    { title: "Get Help", icon: "help-circle-outline", link: "Help" },
+    { title: "Earn Rewards", icon: "gift-outline", link: "FeatureComingSoon", featureTitle: "Rewards" },
+    { title: "My Profile", icon: "person-outline", link: "ProfileScreen" },
+  ];
+  const handleNeedHelp = () => {
+    if (!isConnected || !isInternetReachable) {
+      Toast.show({
+        type: 'error',
+        text1: 'Offline',
+        text2: 'Please connect to the internet to access help options.',
+        position: 'bottom',
+        visibilityTime: 4000,
+      });
+      return;
+    }
+    setHelpModalVisible(true);
+  };
+  const handleOpenSideMenu = () => {
+    if (!isConnected || !isInternetReachable) {
+      Toast.show({
+        type: 'error',
+        text1: 'Offline',
+        text2: 'Please connect to the internet to access menu options.',
+        position: 'bottom',
+        visibilityTime: 4000,
+      });
+      return;
+    }
+    openSideMenu();
+  };
+  const handleCallUs = () => {
+    const phoneNumber = '9483900777';
+    Linking.canOpenURL(`tel:${phoneNumber}`)
+      .then((supported) => {
+        if (supported) Linking.openURL(`tel:${phoneNumber}`).catch(error => {
+          console.error("Error opening dialer:", error);
+          Toast.show({
+            type: 'error',
+            text1: 'Call Error',
+            text2: 'Could not open phone dialer.',
+            position: 'bottom',
+            visibilityTime: 4000,
+          });
+        });
+        else Toast.show({
+          type: 'info',
+          text1: 'Not Supported',
+          text2: 'Phone calls are not supported on this device.',
+          position: 'bottom',
+          visibilityTime: 4000,
+        });
+      })
+      .catch(error => {
+        console.error("Error checking dialer:", error);
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: 'An error occurred while checking phone call availability.',
+          position: 'bottom',
+          visibilityTime: 4000,
+        });
+      });
+  };
+  const handleRelationshipManagerCall = (phoneNumber) => {
+    if (!phoneNumber) {
+      Toast.show({
+        type: 'error',
+        text1: 'Call Error',
+        text2: 'Relationship Manager phone number is not available.',
+        position: 'bottom',
+        visibilityTime: 4000,
+      });
+      return;
+    }
+    Linking.canOpenURL(`tel:${phoneNumber}`)
+      .then((supported) => {
+        if (supported) Linking.openURL(`tel:${phoneNumber}`).catch(error => {
+          console.error("Error opening dialer:", error);
+          Toast.show({
+            type: 'error',
+            text1: 'Call Error',
+            text2: 'Could not open phone dialer.',
+            position: 'bottom',
+            visibilityTime: 4000,
+          });
+        });
+        else Toast.show({
+          type: 'info',
+          text1: 'Not Supported',
+          text2: 'Phone calls are not supported on this device.',
+          position: 'bottom',
+          visibilityTime: 4000,
+        });
+      })
+      .catch(error => {
+        console.error("Dialer check error:", error);
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: 'An error occurred while checking call availability.',
+          position: 'bottom',
+          visibilityTime: 4000,
+        });
+      });
+  };
+  const handleWebsiteLink = async () => {
+    const websiteUrl = 'https://mychits.co.in/';
+    if (!isConnected || !isInternetReachable) {
+      Toast.show({
+        type: 'error',
+        text1: 'Offline',
+        text2: 'Please connect to the internet to open the website.',
+        position: 'bottom',
+        visibilityTime: 4000,
+      });
+      return;
+    }
+    try {
+      const supported = await Linking.canOpenURL(websiteUrl);
+      if (supported) await Linking.openURL(websiteUrl);
+      else Toast.show({
+        type: 'error',
+        text1: 'Cannot Open URL',
+        text2: `Can't open this URL: ${websiteUrl}`,
+        position: 'bottom',
+        visibilityTime: 4000,
+      });
+    } catch (error) {
+      console.error("Website link error:", error);
+      Toast.show({
+        type: 'error',
+        text1: 'Error Opening Website',
+        text2: 'An error occurred while trying to open the website.',
+        position: 'bottom',
+        visibilityTime: 4000,
+      });
+    }
+  };
+  const handleMenuItemPress = (item) => {
+    setHelpModalVisible(false);
+    setSideMenuVisible(false);
+    if (item.onPress) {
+      item.onPress();
+    } else if (item.link && typeof item.link === 'string') {
+      navigation.navigate(item.link, { user: route.params.user || {} });
+    } else {
+      Alert.alert("Navigation Error", `Could not navigate to ${item.title}.`);
+    }
+  };
+  const handleLogout = () => {
+    closeSideMenu();
+    navigation.dispatch(StackActions.replace('Login'));
+  };
+  const handleCustomerSupportCall = (phoneNumber) => {
+    if (!phoneNumber) {
+      Toast.show({
+        type: 'error',
+        text1: 'Call Error',
+        text2: 'Phone number not provided.',
+        position: 'bottom',
+        visibilityTime: 4000,
+      });
+      return;
+    }
+    Linking.canOpenURL(`tel:${phoneNumber}`)
+      .then((supported) => {
+        if (supported) {
+          Linking.openURL(`tel:${phoneNumber}`).catch(error => {
+            console.error("Dialer error:", error);
+            Toast.show({
+              type: 'error',
+              text1: 'Call Error',
+              text2: 'Could not open phone dialer.',
+              position: 'bottom',
+              visibilityTime: 4000,
+            });
+          });
+        } else {
+          Toast.show({
+            type: 'info',
+            text1: 'Not Supported',
+            text2: 'Phone calls are not supported on this device.',
+            position: 'bottom',
+            visibilityTime: 4000,
+          });
+        }
+      })
+      .catch(error => {
+        console.error("Dialer check error:", error);
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: 'Error while checking call availability.',
+          position: 'bottom',
+          visibilityTime: 4000,
+        });
+      });
+  };
+  const fetchUserData = async () => {
+    if (!isConnected || !isInternetReachable) {
+      setIsLoadingUserData(false);
+      setUserDataError("No internet connection.");
+      setUserData({ full_name: '', phone_number: '', address: '' });
+      return;
+    }
+    setIsLoadingUserData(true);
+    setUserDataError(null);
+    try {
+      if (!userId) {
+        setUserDataError("User ID not found. Please log in again.");
+        setIsLoadingUserData(false);
+        return;
+      }
+      const response = await axios.get(`${url}/user/get-user-by-id/${userId}`);
+      setUserData(response.data);
+      setIsLoadingUserData(false);
+    } catch (error) {
+      console.error("User data fetch error:", error);
+      setUserDataError("Failed to fetch user data. Please try again.");
+      Toast.show({
+        type: 'error',
+        text1: 'User Data Error',
+        text2: 'Could not fetch user information.',
+        position: 'bottom',
+        visibilityTime: 4000,
+      });
+      setIsLoadingUserData(false);
+    }
+  };
+  const fetchRelationshipManagerDetails = async () => {
+    if (!isConnected || !isInternetReachable || !userId) return;
+    try {
+      const response = await axios.post(`${url}/enroll/get-user-tickets/${userId}`);
+      if (response.data && response.data.length > 0) {
+        const uniqueGroups = new Map();
+        response.data.forEach(ticket => {
+          const rmDetails = ticket.group_id?.relationship_manager;
+          const groupName = ticket.group_id?.group_name;
+          const groupId = ticket.group_id?._id;
+          if (rmDetails && rmDetails.phone_number && groupName && groupId) {
+            uniqueGroups.set(groupId, {
+              groupName,
+              name: rmDetails.name,
+              phoneNumber: rmDetails.phone_number,
+            });
+          }
+        });
+        setRelationshipManagers(Array.from(uniqueGroups.values()));
+      } else {
+        setRelationshipManagers([]);
+      }
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'RM Data Error',
+        text2: 'Could not fetch Relationship Manager details.',
+        position: 'bottom',
+        visibilityTime: 4000,
+      });
+      setRelationshipManagers([]);
+    }
+  };
+  // Set greeting on load
+  useEffect(() => {
+    fetchUserData();
+    fetchRelationshipManagerDetails();
+  }, [userId, isConnected, isInternetReachable]);
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting('Good Morning');
+    else if (hour < 18) setGreeting('Good Afternoon');
+    else setGreeting('Good Evening');
+  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      if (Platform.OS === 'android') {
+        const onBackPress = () => {
+          if (isHelpModalVisible) {
+            setHelpModalVisible(false);
+            return true;
+          }
+          if (isSideMenuVisible) {
+            closeSideMenu();
+            return true;
+          }
+          BackHandler.exitApp();
+          return true;
+        };
+        const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+        return () => subscription.remove();
+      }
+      return undefined;
+    }, [isHelpModalVisible, isSideMenuVisible])
+  );
+  // Services grid data with improved border and color styling
+  const services = [
+    { navigateTo: 'Mygroups', icon: 'group', title: 'My Groups', bgColor: '#F9F9F9', iconBg: '#053B90', disabled: false },
+    { navigateTo: 'EnrollTab', screen: 'EnrollScreenMain', icon: 'user-plus', title: 'New Groups', bgColor: '#F9F9F9', iconBg: '#007AFF', filter: 'New Groups', disabled: false },
+    { navigateTo: 'PaymentScreen', icon: 'credit-card', title: 'My Payments', bgColor: '#F9F9F9', iconBg: '#FF7707', disabled: false },
+    { navigateTo: 'ReportScreen', icon: 'bar-chart', title: 'Reports', bgColor: '#F9F9F9', iconBg: '#475a07', disabled: false },
+    { navigateTo: 'MyPassbook', icon: 'book', title: 'My Passbook', bgColor: '#F9F9F9', iconBg: '#04595c', disabled: false },
+    { navigateTo: 'AuctionList', icon: 'gavel', title: 'Auction', bgColor: '#F9F9F9', iconBg: '#8e8c05', disabled: false, featureTitle: 'Auction' },
+    { navigateTo: 'IntroduceNewCustomers', icon: 'user-plus', title: 'Refer friend', bgColor: '#F9F9F9', iconBg: '#a16400', disabled: false },
+    { navigateTo: 'MyLoan', screen: 'MyLoan', icon: 'wallet', title: 'My Loan', bgColor: '#F9F9F9', iconBg: '#e40000', filter: 'My Loan', disabled: false },
+    { navigateTo: 'PayYourDues', icon: 'rupee', title: 'Pay Your Dues', bgColor: '#F9F9F9', iconBg: '#9d00a5', disabled: false },
+  ];
+  // Advantages or offers section
+  const mychitsAdvantages = [
+    { icon: 'lock', text1: '2 mins onboarding', text2: '& 24Hrs Payouts', iconColor: '#ff0000' },
+    { icon: 'gavel', text1: 'In App Auctions', text2: 'for best deals', iconColor: '#581c06', action: 'navigate', targetScreen: 'AuctionList' },
+    { icon: 'calendar', text1: 'Monthly Auctions', text2: 'exciting deals', iconColor: '#ffb701', action: 'navigate', targetScreen: 'AuctionList' },
+    { icon: 'headset', text1: '1 Click', text2: 'support', iconColor: '#00aaff', action: 'call', phoneNumber: '+919483900777' },
+    { icon: 'check', text1: 'Fully Compliant', text2: 'with regulations', iconColor: '#0026ff' },
+    { icon: 'users', text1: 'Chit Plans', text2: 'for everyone', iconColor: '#00ff08' },
+  ];
+  // Customer reviews section
+  const customerReviews = [
+    { id: '1', name: 'Prakash', rating: 5, review: 'Great service! The app is very user-friendly and I got my money on time.', location: 'Bangalore' },
+    { id: '2', name: 'Geetha Kumari', rating: 4, review: 'Transparent, trustworthy, and super supportive team!', location: 'Chamarajanagr' },
+    { id: '3', name: 'Ravi Kumar', rating: 5, review: 'Simple interface and reliable payments.', location: 'Bangalore' },
+  ];
+  const ReviewsSection = () => {
+    const renderStarRating = (rating) => {
+      const stars = [];
+      for (let i = 1; i <= 5; i++) {
+        stars.push(
+          <Ionicons
+            key={i}
+            name={i <= rating ? 'star' : 'star-outline'}
+            size={20}
+            color={i <= rating ? '#FFA500' : '#ccc'}
+            style={styles.reviewStar}
+          />
+        );
+      }
+      return <View style={styles.reviewRatingContainer}>{stars}</View>;
+    };
+    const renderReviewCard = ({ item }) => (
+      <View style={styles.reviewCard}>
+        <Text style={styles.reviewName}>{item.name}</Text>
+        <Text style={styles.reviewLocation}>{item.location}</Text>
+        {renderStarRating(item.rating)}
+        <Text style={styles.reviewText}>{item.review}</Text>
+      </View>
     );
+    return (
+      <View style={styles.reviewsContainer}>
+        <Text style={styles.reviewTitle}>What Our Customers Say</Text>
+        <FlatList
+          data={customerReviews}
+          renderItem={renderReviewCard}
+          keyExtractor={(item) => item.id}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.reviewListContent}
+        />
+      </View>
+    );
+  };
+  if (isLoadingUserData) {
+    return (
+      <SafeAreaView style={styles.loadingContainer}>
+        <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+        <ActivityIndicator size="large" color="#053B90" />
+      </SafeAreaView>
+    );
+  }
+  if (!isConnected || !isInternetReachable) {
+    return (
+      <SafeAreaView style={styles.offlineContainer}>
+        <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+        <View style={styles.offlineContent}>
+          <MaterialIcons name="cloud-off" size={80} color="#999" />
+          <Text style={styles.offlineTextTitle}>No Internet Connection</Text>
+          <Text style={styles.offlineTextMessage}>Please check your network settings and try again.</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={fetchUserData}>
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+        <Toast />
+      </SafeAreaView>
+    );
+  }
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#2f164fff" />
+      {/* Header */}
+      <View style={[styles.header, { paddingTop: insets.top }]}>
+        <TouchableOpacity onPress={handleOpenSideMenu} style={styles.hamburgerIconContainer}>
+          <View style={styles.hamburgerLine} />
+          <View style={styles.hamburgerLine} />
+          <View style={styles.hamburgerLine} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Demo Rider Plans</Text>
+        <TouchableOpacity style={styles.helpButton} onPress={handleNeedHelp}>
+          <Ionicons name="information-circle-outline" size={18} color="#620590ff" style={{ marginRight: 5 }} />
+          <Text style={styles.helpText}>Need Help?</Text>
+        </TouchableOpacity>
+      </View>
+      {/* Search Bar */}
+      <View style={styles.searchBarContainer}>
+        <Ionicons name="search" size={20} color="#666" style={{ marginHorizontal: 8 }} />
+        <TextInput
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder="Search services or news..."
+          placeholderTextColor="#888"
+          style={styles.searchInput}
+        />
+      </View>
+      <ScrollView style={styles.mainScrollView} contentContainerStyle={styles.contentContainer}>
+        {/* Greeting Section */}
+        <View style={styles.greetingSection}>
+          {userDataError ? (
+            <Text style={styles.errorTextSmall}>{userDataError}</Text>
+          ) : (
+            <View style={styles.welcomeContainer}>
+              <Text style={styles.greetingText}>{greeting}!</Text>
+              <Text style={styles.userNameText}>{userData.full_name || 'User'}</Text>
+            </View>
+          )}
+        </View>
+        <View style={{ marginVertical: 20 }}>
+  <FlatList
+    ref={flatListRef}
+    data={bannerImages}
+    keyExtractor={(item, index) => index.toString()}
+    horizontal
+    pagingEnabled
+    showsHorizontalScrollIndicator={false}
+    renderItem={({ item }) => (
+      <Image
+        source={{ uri: item.uri }}
+        style={{
+          width: Dimensions.get('window').width * 0.9,
+          height: 150,
+          borderRadius: 15,
+          marginHorizontal: Dimensions.get('window').width * 0.05 / 2,
+        }}
+        resizeMode="cover"
+      />
+    )}
+  />
+</View>
+<View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 8 }}>
+  {bannerImages.map((_, index) => (
+    <View
+      key={index}
+      style={{
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: currentIndex === index ? '#FFD700' : '#ccc',
+        marginHorizontal: 4,
+      }}
+    />
+  ))}
+</View>
+
+        {/* Services Grid */}
+        <View style={styles.servicesSection}>
+          <Text style={styles.servicesTitle}>Services</Text>
+          <FlatList
+            data={services}
+            renderItem={({ item, index }) => (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  styles.gridItemBox,
+                  { backgroundColor: item.bgColor },
+                  item.disabled && { opacity: 0.6 },
+                ]}
+                onPress={() => {
+                  if (!item.disabled) {
+                    if (item.screen) {
+                      navigation.navigate(item.navigateTo, {
+                        screen: item.screen,
+                        params: {
+                          userId,
+                          ...(item.filter && { groupFilter: item.filter }),
+                        },
+                      });
+                    } else {
+                      navigation.navigate(item.navigateTo, {
+                        userId,
+                        featureTitle: item.featureTitle || item.title,
+                      });
+                    }
+                  }
+                }}
+                disabled={item.disabled}
+              >
+                <View style={[styles.iconCircle, { backgroundColor: item.iconBg }]}>
+                  {item.icon === 'credit-card' ? (
+                    <FontAwesome name="credit-card" size={26} color="#fff" />
+                  ) : item.icon === 'rupee' ? (
+                    <MaterialCommunityIcons name="currency-inr" size={26} color="#fff" />
+                  ) : item.icon === 'wallet' ? (
+                    <FontAwesome name="money" size={26} color="#fff" />
+                  ) : item.icon === 'user-plus' ? (
+                    <FontAwesome name="user-plus" size={26} color="#fff" />
+                  ) : (
+                    <MaterialIcons name={item.icon} size={26} color="#fff" />
+                  )}
+                </View>
+                <Text style={styles.serviceTitle}>{item.title}</Text>
+              </TouchableOpacity>
+            )}
+            keyExtractor={(item, index) => index.toString()}
+            numColumns={3}
+            scrollEnabled={false}
+            columnWrapperStyle={styles.row}
+          />
+          {/* Extra blue grid for rewards and offers */}
+          <View style={styles.blueContainer}>
+            <TouchableOpacity
+              style={styles.blueGridItem}
+              onPress={() => navigation.navigate('RewardsScreen', { userId, featureTitle: 'Rewards' })}
+            >
+              <View style={styles.iconCircleBlue}>
+                <MaterialIcons name="emoji-events" size={30} color="#053B90" />
+              </View>
+              <Text style={styles.blueGridItemText}>Rewards</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.blueGridItem}
+              onPress={() => navigation.navigate('OffersScreen', { userId, featureTitle: 'Offers' })}
+            >
+              <View style={styles.iconCircleBlue}>
+                <MaterialIcons name="local-offer" size={30} color="#053B90" />
+              </View>
+              <Text style={styles.blueGridItemText}>Offers</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.blueGridItem}
+              onPress={() => navigation.navigate('EligibilityScreen', { userId, featureTitle: 'Eligibility' })}
+            >
+              <View style={styles.iconCircleBlue}>
+                <MaterialIcons name="check-circle" size={30} color="#053B90" />
+              </View>
+              <Text style={styles.blueGridItemText}>Eligibility</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.blueGridItem}
+              onPress={() => navigation.navigate('MoreInformation', { userId, featureTitle: 'More Features' })}
+            >
+              <View style={styles.iconCircleBlue}>
+                <MaterialIcons name="more-horiz" size={30} color="#053B90" />
+              </View>
+              <Text style={styles.blueGridItemText}>More</Text>
+            </TouchableOpacity>
+          </View>
+          {/* Bottom Navigation */}
+          <View style={styles.bottomContainer}>
+            <TouchableOpacity style={styles.bottomGridItem} onPress={() => navigation.navigate('ProfileScreen', { userId })}>
+              <View style={styles.bottomIcon}>
+                <MaterialIcons name="person" size={34} color="#053B90" />
+              </View>
+              <Text style={styles.bottomServiceTitle}>My Profile</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.bottomGridItem} onPress={() => navigation.navigate('MoreInformation', { userId, featureTitle: 'More Information' })}>
+              <View style={styles.bottomIcon}>
+                <MaterialIcons name="more" size={34} color="#053B90" />
+              </View>
+              <Text style={styles.bottomServiceTitle}>More Info</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.bottomGridItem} onPress={() => navigation.navigate('Insurance', { userId })}>
+              <View style={styles.bottomIcon}>
+                <MaterialIcons name="health-and-safety" size={34} color="#053B90" />
+              </View>
+              <Text style={styles.bottomServiceTitle}>Insurance</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.bottomGridItem} onPress={() => navigation.navigate('Becomeanagent', { userId })}>
+              <View style={styles.bottomIcon}>
+                <MaterialCommunityIcons name="account-tie" size={34} color="#053B90" />
+              </View>
+              <Text style={styles.bottomServiceTitle}>Agent</Text>
+            </TouchableOpacity>
+          </View>
+          {/* Advantages/Offers Section */}
+          {/* <View style={styles.benefitsSection}>
+            <Text style={styles.benefitsTitle}>Why Choose MyChits?</Text>
+            {mychitsAdvantages.map((item, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.advantageItem}
+                onPress={() => {
+                  if (item.action === 'call' && item.phoneNumber) {
+                    handleCustomerSupportCall(item.phoneNumber);
+                  } else if (item.action === 'navigate' && item.targetScreen) {
+                    navigation.navigate(item.targetScreen);
+                  }
+                }}
+              >
+                <View style={styles.advantageIconContainer}>
+                  <MaterialIcons name={item.icon} size={28} color={item.iconColor} />
+                </View>
+                <Text style={styles.advantageText1}>{item.text1}</Text>
+                <Text style={styles.advantageText2}>{item.text2}</Text>
+              </TouchableOpacity>
+            ))}
+          </View> */}
+          <View style={styles.benefitsSection}>
+  <Text style={styles.benefitsTitle}>Why Choose MyChits?</Text>
+  <View style={styles.advantagesContainer}>
+    {mychitsAdvantages.map((item, index) => (
+      <TouchableOpacity
+        key={index}
+        style={styles.advantageItem}
+        onPress={() => {
+          if (item.action === 'call' && item.phoneNumber) {
+            handleCustomerSupportCall(item.phoneNumber);
+          } else if (item.action === 'navigate' && item.targetScreen) {
+            navigation.navigate(item.targetScreen);
+          }
+        }}
+        activeOpacity={0.8}
+      >
+        <View style={[styles.advantageIconContainer, { borderColor: item.iconColor }]}>
+          <MaterialIcons name={item.icon} size={28} color={item.iconColor} />
+        </View>
+        <Text style={styles.advantageText1}>{item.text1}</Text>
+        <Text style={styles.advantageText2}>{item.text2}</Text>
+      </TouchableOpacity>
+    ))}
+  </View>
+</View>
+
+          <TouchableOpacity style={styles.viewLicenseLink} onPress={() => navigation.navigate('LicenseAndCertificate')}>
+            <View style={styles.viewLicenseContent}>
+              <MaterialIcons name="link" size={16} color="#053B90" />
+              <Text style={styles.viewLicenseText}>View License & Certificate</Text>
+            </View>
+          </TouchableOpacity>
+          <LinearGradient
+            colors={['#F0F8FF', '#F8F8F8']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.appInfoFooter}
+          >
+            <TouchableOpacity onPress={handleWebsiteLink}>
+              <Text style={styles.appInfoWebsiteLink}>
+                Visit our Website: <Text style={{ fontWeight: 'bold' }}>mychits.co.in</Text>
+              </Text>
+            </TouchableOpacity>
+            <View style={styles.madeWithLoveContainer}>
+              <Text style={styles.appInfoMadeWithLove}>
+                Made with <Text style={{ color: '#E53935' }}>❤️</Text> in India
+              </Text>
+              <MaterialIcons name="public" size={16} color="#4CAF50" style={styles.madeInIndiaIcon} />
+            </View>
+          </LinearGradient>
+        </View>
+        <ReviewsSection />
+      </ScrollView>
+      {/* Help Modal */}
+      <Modal
+        animationType="slide"
+        transparent
+        visible={isHelpModalVisible}
+        onRequestClose={() => setHelpModalVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPressOut={() => setHelpModalVisible(false)}
+        >
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>How can we help?</Text>
+              <TouchableOpacity onPress={() => setHelpModalVisible(false)}>
+                <MaterialIcons name="close" size={24} color="#585858" />
+              </TouchableOpacity>
+            </View>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {menuItems.map((item, index) => (
+                <TouchableOpacity
+                  key={`help-item-${index}`}
+                  style={styles.modalMenuItem}
+                  onPress={() => handleMenuItemPress(item)}
+                >
+                  <View style={styles.modalMenuItemLeft}>
+                    {item.icon === "logo-whatsapp" ? (
+                      <Ionicons name={item.icon} size={24} color="#053B90" />
+                    ) : (
+                      <MaterialIcons name={item.icon} size={24} color="#053B90" />
+                    )}
+                    <Text style={styles.modalMenuText}>{item.title}</Text>
+                  </View>
+                  <MaterialIcons name="chevron-right" size={24} color="#585858" />
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <View style={styles.modalCallSection}>
+              <Text style={styles.modalCallText}>Still need help? Give us a call.</Text>
+              <TouchableOpacity style={styles.modalCallButton} onPress={handleCallUs}>
+                <MaterialIcons name="phone" size={20} color="#fff" style={styles.modalCallIcon} />
+                <Text style={styles.modalCallButtonText}>Call Us Now</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+      {/* Side Menu */}
+      {isSideMenuVisible && (
+        <TouchableOpacity style={styles.modalOverlaySideMenu} activeOpacity={1} onPress={closeSideMenu}>
+          <Animated.View style={[styles.sideMenuContent, { transform: [{ translateX: slideAnim }] }]} {...panResponder.panHandlers}>
+            <TouchableOpacity onPress={closeSideMenu} style={styles.sideMenuCloseButton}>
+              <MaterialIcons name="close" size={24} color="#585858" />
+            </TouchableOpacity>
+            <ScrollView contentContainerStyle={styles.sideMenuScrollContent}>
+              <View style={styles.sideMenuHeader}>
+                <Image source={CityChits} style={styles.headerImage} resizeMode="contain" />
+                <View style={styles.headerTextContainer}>
+                  <Text style={styles.sideMenuUserName}>{userData.full_name || 'User'}</Text>
+                  <Text style={styles.sideMenuOnTrackText}>
+                    You're on track, {userData.full_name.split(' ')[0] || 'User'}!
+                  </Text>
+                </View>
+                {relationshipManagers.length > 0 && (
+                  <View style={styles.rmListBox}>
+                    {relationshipManagers.map((rm, index) => (
+                      <View key={index} style={styles.relationshipManagerCard}>
+                        <Text style={styles.rmGroupName}>{rm.groupName}</Text>
+                        <View style={styles.managerDetailsRow}>
+                          <Text style={styles.rmManagerName}>Manager: {rm.name}</Text>
+                          <Text style={styles.rmPhoneNumberText}>{rm.phoneNumber}</Text>
+                          <TouchableOpacity onPress={() => handleRelationshipManagerCall(rm.phoneNumber)} style={styles.inlineCallButton}>
+                            <MaterialIcons name="phone" size={16} color="#053B90" />
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </View>
+              {sideMenuItems.map((item, index) => (
+                <TouchableOpacity
+                  key={`side-menu-item-${index}`}
+                  style={styles.sideMenuItem}
+                  onPress={() => {
+                    closeSideMenu();
+                    if (item.onPress) item.onPress();
+                    else if (item.link) {
+                      navigation.navigate(item.link, { userId, featureTitle: item.featureTitle });
+                    }
+                  }}
+                >
+                  <Ionicons name={item.icon} size={24} color="#333" style={styles.sideMenuIcon} />
+                  <Text style={styles.sideMenuText}>{item.title}</Text>
+                </TouchableOpacity>
+              ))}
+              <View style={styles.sideMenuSeparator} />
+              <TouchableOpacity style={styles.sideMenuItem} onPress={handleLogout}>
+                <Ionicons name="log-out-outline" size={24} color="red" style={styles.sideMenuIcon} />
+                <Text style={[styles.sideMenuText, { color: 'red' }]}>Sign Out</Text>
+              </TouchableOpacity>
+              <View style={styles.sideMenuFooter}>
+                <TouchableOpacity onPress={handleRateApp}>
+                  <Text style={styles.sideMenuFooterText}>
+                    Love us? Rate the app! <Ionicons name="star" size={16} color="#F7C641" />
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </Animated.View>
+        </TouchableOpacity>
+      )}
+      <Toast />
+    </SafeAreaView>
+  );
 };
-
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#6E30CF' },
-    header: { flexDirection: 'row', alignItems: 'center', paddingBottom: 10, paddingHorizontal: 15, justifyContent: 'space-between', backgroundColor: '#6E30CF' },
-    headerTitle: { color: '#FFD700', fontSize: 20, fontWeight: 'bold', marginLeft: 10, marginTop: 10 },
-    hamburgerIconContainer: { flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginTop: 10, marginLeft: 7 },
-    hamburgerLine: { width: 23, height: 2, backgroundColor: 'white', borderRadius: 2, marginVertical: 3 },
-    helpButton: { flexDirection: 'row', alignItems: 'center', paddingVertical: 5, paddingHorizontal: 9, backgroundColor: 'white', borderRadius: 15, marginTop: 10 },
-    helpText: { color: 'black', fontSize: 12 },
-    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFFFFF' },
-    mainScrollView: { flex: 1 },
-    contentContainer: { overflow: 'hidden', paddingBottom: 85 },
-    skyBlueSection: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#dbccf1ff', borderRadius: 15, marginTop: 5, width: '92%', height: 100, alignSelf: 'center', padding: 15 },
-    welcomeContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flex: 1, },
-
-    servicesSection: { borderColor: '#2bef1aff', borderWidth: 5, marginTop: 25, backgroundColor: '#fafafaff', borderRadius: 15, paddingTop: 30, width: '97%', alignSelf: 'center', alignItems: 'center', paddingBottom: 13, borderColor: '#053B90' },
-    servicesTitle: { position: 'absolute', top: -20, alignSelf: 'center', backgroundColor: '#b2b0f3ff', width: 230, height: 40, borderRadius: 11, textAlign: 'center', textAlignVertical: 'center', color: 'black', fontWeight: '900', fontSize: 20, lineHeight: 22, textTransform: 'capitalize', borderWidth: 1, borderColor: '#053B90' },
-    gridItemBox: { width: '27%', alignItems: 'center', marginBottom: 8, paddingVertical: 8, paddingHorizontal: 5, borderRadius: 12, marginHorizontal: 5.8, marginLeft: 14, borderWidth: 3, borderColor: '#8159e8ff' },
-    iconCircle: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center', marginBottom: -2 },
-    serviceTitle: { fontSize: 12
-        , textAlign: 'center', fontWeight: '800', color: '#black', marginTop: 1 },
-    blueContainer: { backgroundColor: '#d6cce8ff', borderRadius: 10, marginTop: 5, paddingVertical: 8, paddingHorizontal: 3, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around', alignItems: 'center', width: '93%' },
-    blueGridItem: { width: '20%', alignItems: 'center', marginBottom: 1, borderRadius: 8, paddingVertical: 5, marginHorizontal: 2 },
-    iconCircleBlue: { width: 50, height: 50, borderRadius: 25, backgroundColor: '#d5d0dbff', justifyContent: 'center', alignItems: 'center', marginBottom: -2 },
-    blueGridItemText: { marginTop: 2, fontSize: 10, color: '#fff', textAlign: 'center', fontWeight: '600' },
-    bottomContainer: { marginTop: -1, paddingVertical: 12, paddingHorizontal: 10, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around', alignItems: 'center', width: '102%', alignSelf: 'center' },
-    bottomGridItem: { width: '22%', alignItems: 'center', marginBottom: 10, paddingHorizontal: 8, justifyContent: 'center', borderWidth: 1, borderRadius: 12, borderColor: '#8159e8ff' },
-    bottomIcon: { justifyContent: 'center', alignItems: 'center', marginBottom: 0 },
-    bottomServiceTitle: { marginTop: -2, fontSize: 10, color: '#000', textAlign: 'center', fontWeight: '600' },
-    sideMenuScrollContent: {
-        paddingBottom: 30, // avoid cut-off at bottom
-    },
-    welcomeText: { fontSize: 20, fontWeight: 'bold', color: 'black', marginBottom: 0, textAlign: 'left', marginLeft: 15 },
-    userNameText: { fontSize: 19, fontWeight: '600', color: 'blaxk', textAlign: 'left', marginTop: 4, marginLeft: 15 },
-    errorTextSmall: { fontSize: 12, color: 'red', textAlign: 'center' },
-    offlineContainer: { flex: 1, backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center' },
-    offlineContent: { justifyContent: 'center', alignItems: 'center', padding: 20 },
-    offlineTextTitle: { fontSize: 22, fontWeight: 'bold', color: '#333', marginTop: 15, textAlign: 'center' },
-    offlineTextMessage: { fontSize: 16, color: '#666', marginTop: 10, textAlign: 'center', lineHeight: 22 },
-    retryButton: { marginTop: 30, backgroundColor: '#053B90', paddingVertical: 12, paddingHorizontal: 30, borderRadius: 8 },
-    retryButtonText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
-    modalOverlay: { flex: 1, justifyContent: 'flex-end', alignItems: 'center', backgroundColor: 'rgba(12,12,12,0.6)' },
-    modalContent: { width: '97%', backgroundColor: '#FFFFFF', borderTopLeftRadius: 30, borderTopRightRadius: 30, paddingHorizontal: 25, paddingBottom: 0, shadowColor: 'transparent', elevation: 0 },
-    modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 15, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
-    modalTitle: { fontSize: 22, fontWeight: '800', color: 'black' },
-    modalMenuItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 13, borderBottomWidth: 1, borderBottomColor: '#f5f5f5', backgroundColor: 'transparent' },
-    modalMenuItemLeft: { flexDirection: 'row', alignItems: 'center' },
-    modalMenuText: { fontSize: 17, color: '#424242', marginLeft: 20, fontWeight: '500' },
-    modalCallSection: { marginTop: 30, alignItems: 'center', paddingTop: 20, borderTopColor: '#f0f0f0', marginBottom: 30 },
-    modalCallText: { fontSize: 17, color: '#616161', marginBottom: 18, textAlign: 'center' },
-    modalCallButton: { flexDirection: 'row', backgroundColor: '#4CAF50', paddingVertical: 14, paddingHorizontal: 26, borderRadius: 30, alignItems: 'center', justifyContent: 'center' },
-    modalCallIcon: { marginRight: 12 },
-    modalCallButtonText: { color: '#FFFFFF', fontSize: 18, fontWeight: '700', letterSpacing: 0.5 },
-    modalOverlaySideMenu: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(12,12,12,0.6)',
-        zIndex: 10,
-    },
-    sideMenuContent: {
-        width: '80%',
-        height: '100%',
-        backgroundColor: '#FFFFFF',
-        borderTopRightRadius: 30,
-        borderBottomRightRadius: 30,
-        paddingBottom: 0,
-        shadowColor: '#000',
-        elevation: 5,
-        borderWidth: 1,
-        borderColor: '#EFEFEF',
-    },
-    sideMenuCloseButton: {
-        position: 'absolute',
-        right: 20,
-        top: 50,
-        zIndex: 1,
-        backgroundColor: '#c9d2daff',   // white background
-        borderRadius: 20,          // makes it circular
-        padding: 8,                // space around the icon
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.5,
-        elevation: 5,              // shadow for Android
-    },
-    sideMenuHeader: {
-        width: '100%',
-        backgroundColor: '#6E30CF',
-        borderTopRightRadius: 30,
-        paddingHorizontal: 25,
-        justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 5,
-        overflow: 'hidden',
-        paddingTop: 30,
-        paddingBottom: 20
-    },
-    headerImage: {
-        width: 300,
-        height: 80,
-        alignSelf: 'center',
-        marginTop: 40, // increase value to move further down
-    },
-    sideMenuUserName: {
-        fontSize: 25,
-        fontWeight: 'bold',
-        color: 'white',
-        marginTop: 10,
-        textAlign: 'center', // centers text
-    },
-    sideMenuOnTrackText: {
-        fontSize: 17,
-        color: 'white',
-        
-        marginTop: 5,
-        textAlign: 'center', // centers text
-    },
-    rmListBox: {
-        backgroundColor: '#FFECB3',
-        borderRadius: 15,
-        borderWidth: 1,
-        borderColor: '#FFD54F',
-        marginTop: 15,
-        marginBottom: 5,
-        marginHorizontal: 15,
-        padding: 5,
-        width: '100%',
-        alignSelf: 'center',
-    },
-    rmListScrollView: {
-        maxHeight: 300,
-        paddingHorizontal: 5,
-    },
-    relationshipManagerCard: {
-        flexDirection: 'column',
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        borderRadius: 15,
-        marginBottom: 4,
-        
-        alignSelf: 'center',
-        width: '100%',
-    },
-    rmGroupName: {
-        fontSize: 15,
-        fontWeight: 'bold',
-        color: '#333',
-        marginBottom: -2,
-    },
-    managerDetailsRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-    },
-    rmManagerName: {
-        fontSize: 14,
-        color: '#555',
-        fontWeight: 800,
-        marginRight: 5,
-    },
-    rmPhoneNumberText: {
-        fontSize: 13,
-        color: '#555',
-        marginRight: 8,
-    },
-    inlineCallButton: {
-        backgroundColor: '#B3E5FC',
-        padding: 5,
-        borderRadius: 15,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    callButton: {
-        backgroundColor: '#B3E5FC',
-        padding: 8,
-        borderRadius: 20,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    menuItemsScrollView: {
-        flex: 1,
-        paddingHorizontal: 20,
-        paddingTop: 10,
-    },
-    sideMenuItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 10,
-    },
-    sideMenuIcon: {
-        marginRight: 20,
-        marginLeft: 20,
-    },
-    sideMenuText: {
-        fontSize: 16,
-        color: '#333',
-        fontWeight: '500',
-    },
-    sideMenuSeparator: {
-        height: 1,
-        backgroundColor: '#eee',
-        marginVertical: 10,
-    },
-    sideMenuFooter: {
-        paddingVertical: 12,
-        alignItems: 'center',
-        borderTopWidth: 1,
-        borderTopColor: '#eee',
-        backgroundColor: '#f9f9f9',
-    },
-    sideMenuFooterText: {
-        fontSize: 14,
-        color: '#666',
-        fontWeight: '600',
-    },
-    sideMenuVersionText: {
-        fontSize: 12,
-        color: '#999',
-        marginTop: 5,
-    },
-    benefitsSection: {
-        marginTop: 15,
-        paddingTop: 50,
-        paddingBottom: 40,
-        paddingHorizontal: 25,
-        width: '99%',
-        alignSelf: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.15,
-        shadowRadius: 20,
-        elevation: 18,
-        position: 'relative',
-        overflow: 'visible'
-    },
-    benefitsTitle: { position: 'absolute', top: -20, left: '60%', transform: [{ translateX: -150 }], backgroundColor: '#520590ff', width: 300, height: 55, borderRadius: 30, textAlign: 'center', textAlignVertical: 'center', color: 'white', fontWeight: '900', fontSize: 16, lineHeight: 22, textTransform: 'uppercase', letterSpacing: 1.5, shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 12, zIndex: 10, borderWidth: 2, borderColor: '#1e1c1fff' },
-    benefitItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 20, padding: 12, backgroundColor: '#bf77e0ff', borderRadius: 18, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 6, borderWidth: 1, borderColor: '#8e03ffff' },
-    benefitIconCircle: { width: 45, height: 45, borderRadius: 32.5, justifyContent: 'center', alignItems: 'center', marginRight: 18, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, shadowRadius: 4, elevation: 3 },
-    benefitTextContent: { flex: 1 },
-    benefitHeading: { fontSize: 16, fontWeight: 'bold', color: '#212121', marginBottom: 6 },
-    benefitDescription: { fontSize: 10, color: '#ffffffff', lineHeight: 20 },
-    viewLicenseLink: { alignSelf: 'flex-start', marginTop: 15, paddingVertical: 5, marginLeft: 20, },
-    viewLicenseContent: { flexDirection: 'row', alignItems: 'center', marginLeft: 13 },
-    viewLicenseText: { color: '#053B90', fontSize: 16, fontWeight: '600', textDecorationLine: 'underline', marginLeft: 5 },
-    appInfoFooter: {
-        alignItems: 'center',
-        marginTop: -15,
-        marginBottom: 30,
-        paddingVertical: 25,
-        paddingHorizontal: 25,
-        width: '85%',
-        alignSelf: 'center',
-        borderRadius: 22,
-        borderWidth: 2,
-        borderColor: 'black',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.15,
-        shadowRadius: 20,
-        elevation: 18,
-        overflow: 'hidden',
-    },
-    appInfoWebsiteLink: { fontSize: 17, color: '#004', textDecorationLine: 'underline', marginBottom: 8, textAlign: 'center', fontWeight: '500', letterSpacing: 0.5, textShadowColor: 'rgba(0,0,0,0.05)', textShadowOffset: { width: 0.5, height: 0.5 }, textShadowRadius: 1 },
-    madeWithLoveContainer: { flexDirection: 'row', alignItems: 'center', marginTop: 10, justifyContent: 'center' },
-    appInfoMadeWithLove: { fontSize: 15, color: '#4A4A4A', fontStyle: 'normal', fontWeight: 'normal', letterSpacing: 0.3 },
-    madeInIndiaIcon: { marginLeft: 8 },
-    advantagesHeadline: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: 'black',
-        marginBottom: 15,
-        textAlign: 'center',
-        marginTop: 20,
-    },
-    advantagesGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-around',
-        marginBottom: 5,
-    },
-    advantageItem: {
-        width: '30%',
-        alignItems: 'center',
-        marginBottom: 15,
-        paddingVertical: 10,
-        paddingHorizontal: 5,
-        backgroundColor: '#be71f2ff',
-        borderRadius: 20,
-        elevation: 3,
-        borderWidth:2,
-        borderColor:'black',
-    },
-    advantageIconContainer: {
-        width: 40,
-        height: 40,
-        borderRadius: 30,
-        borderWidth: 2,
-        
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 5,
-    },
-    advantageText1: {
-        fontSize: 10,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        color: 'black',
-    },
-    advantageText2: {
-        fontSize: 9,
-        textAlign: 'center',
-        color: 'white',
-    },
-    reviewsContainer: {
-        marginTop: 20,
-        paddingVertical: 15,
-        width: '97%',
-        alignSelf: 'center',
-    },
-    reviewTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: 'black',
-        marginBottom: 15,
-        textAlign: 'center',
-    },
-    reviewCard: {
-        backgroundColor: '#ba74dfff',
-        borderRadius: 15,
-        padding: 15,
-        marginHorizontal: 10,
-        width: 250,
-        borderWidth: 1,
-        borderColor: 'black',
-    },
-    reviewHeader: {
-        flexDirection: 'column',
-        alignItems: 'center',
-        marginBottom: 10,
-    },
-    reviewName: {
-        fontSize: 17,
-        fontWeight: 'bold',
-        color: '#000000ff',
-        textAlign: 'center',
-    },
-    reviewLocation: {
-        fontSize: 13,
-        color: '#ffffffff',
-        marginBottom: 5,
-        textAlign: 'center',
-    },
-    reviewRatingContainer: {
-        flexDirection: 'row',
-    },
-    reviewStar: {
-        marginHorizontal: 1,
-    },
-    reviewText: {
-        fontSize: 13,
-        lineHeight: 20,
-        color: '#000000ff',
-        fontWeight: 600,
-        fontStyle: 'italic'
-    },
-    // Fix for FlatList item wrapping
-    row: {
-        justifyContent: 'space-around',
-        paddingHorizontal: 5,
-    },
+  container: { flex: 1, backgroundColor: '#6A0DAD' },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingBottom: 10,
+    paddingHorizontal: 15,
+    justifyContent: 'space-between',
+    backgroundColor: '#6A0DAD',
+  },
+  headerTitle: { color: '#FFD700', fontSize: 22, fontWeight: 'bold', marginLeft: 10, marginTop: 10 },
+  hamburgerIconContainer: { marginTop: 10, marginLeft: 7 },
+  hamburgerLine: { width: 25, height: 3, backgroundColor: '#fff', borderRadius: 2, marginVertical: 3 },
+  helpButton: { flexDirection: 'row', alignItems: 'center', paddingVertical: 5, paddingHorizontal: 10, backgroundColor: '#fff', borderRadius: 15, marginTop: 10 },
+  helpText: { color: '#053B90', fontSize: 13, fontWeight: '500' },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFFFFF' },
+  mainScrollView: { flex: 1 },
+  contentContainer: { paddingBottom: 50 },
+  searchBarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ECECEC',
+    marginHorizontal: 20,
+    borderRadius: 25,
+    paddingHorizontal: 10,
+    marginTop: 10,
+  },
+  searchInput: { flex: 1, fontSize: 16, color: '#333', paddingVertical: 8 },
+  greetingSection: {
+    backgroundColor: '#F2F4F7',
+    marginHorizontal: 20,
+    marginTop: 15,
+    borderRadius: 10,
+    padding: 15,
+    borderWidth: 1,
+    borderColor: '#053B90',
+  },
+  welcomeContainer: { alignItems: 'center' },
+  greetingText: { fontSize: 22, color: '#053B90', fontWeight: 'bold' },
+  userNameText: { fontSize: 20, color: '#053B90', marginTop: 4 },
+  errorTextSmall: { fontSize: 13, color: 'red', textAlign: 'center' },
+  servicesSection: {
+    marginTop: 25,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingVertical: 30,
+    paddingHorizontal: 10,
+    width: '95%',
+    alignSelf: 'center',
+    borderWidth: 1,
+    borderColor: 'black',
+    elevation: 3,
+  },
+  servicesTitle: {
+    position: 'absolute',
+    top: -18,
+    alignSelf: 'center',
+    backgroundColor: '#FFD700',
+    width: 240,
+    height: 36,
+    borderRadius: 18,
+    textAlign: 'center',
+    textAlignVertical: 'center',
+    color: '#053B90',
+    fontSize: 20,
+    fontWeight: 'bold',
+    borderWidth: 1,
+    borderColor: 'black',
+  },
+  row: { justifyContent: 'space-around', marginVertical: 10 },
+  gridItemBox: {
+    width: '28%',
+    alignItems: 'center',
+    marginBottom: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 5,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'black',
+  },
+  iconCircle: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center', marginBottom: 4 },
+  serviceTitle: { fontSize: 11, textAlign: 'center', fontWeight: '600', color: '#053B90', marginTop: 2 },
+  blueContainer: {
+    backgroundColor: '#E8F0FE',
+    borderRadius: 10,
+    marginTop: 20,
+    paddingVertical: 10,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+    marginHorizontal: 10,
+  },
+  blueGridItem: { width: '22%', alignItems: 'center', marginVertical: 8 },
+  iconCircleBlue: { width: 50, height: 50, borderRadius: 25, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#053B90' },
+  blueGridItemText: { marginTop: 4, fontSize: 11, color: '#053B90', textAlign: 'center', fontWeight: '600' },
+  bottomContainer: { marginTop: 25, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', width: '100%' },
+  bottomGridItem: { width: '22%', alignItems: 'center', paddingVertical: 8, borderWidth: 1, borderRadius: 10, borderColor: '#053B90' },
+  bottomIcon: { marginBottom: 2 },
+  bottomServiceTitle: { fontSize: 11, color: '#053B90', textAlign: 'center', fontWeight: '600' },
+  benefitsSection: { marginTop: 30, paddingHorizontal: 15, paddingBottom: 30, backgroundColor: '#F2F4F7', borderRadius: 10, borderWidth: 1, borderColor: '#053B90',     marginVertical: 20,    paddingHorizontal: 15,
+ },
+  benefitsTitle: { fontSize: 20, fontWeight: 'bold', color: '#053B90', textAlign: 'center', marginBottom: 20 },
+  advantageItem: { alignItems: 'center', marginVertical: 10 },
+   advantagesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+  },
+  advantageIconContainer: { width: 45, height: 45, borderRadius: 22.5, justifyContent: 'center', alignItems: 'center', marginBottom: 4, borderWidth: 1, borderColor: '#053B90' },
+  advantageText1: { fontSize: 12, fontWeight: 'bold', color: 'black', textAlign: 'center' },
+  advantageText2: { fontSize: 10, textAlign: 'center', color: '#053B90' },
+  viewLicenseLink: { alignSelf: 'center', marginTop: 10 },
+  viewLicenseContent: { flexDirection: 'row', alignItems: 'center' },
+  viewLicenseText: { color: '#053B90', fontSize: 15, fontWeight: '600', textDecorationLine: 'underline', marginLeft: 5 },
+  appInfoFooter: { alignItems: 'center', marginTop: 20, marginBottom: 20, paddingVertical: 15, paddingHorizontal: 25, borderRadius: 15, borderWidth: 1, borderColor: '#053B90', width: '90%', alignSelf: 'center' },
+  appInfoWebsiteLink: { fontSize: 16, color: '#053B90', textDecorationLine: 'underline', textAlign: 'center', fontWeight: '500' },
+  madeWithLoveContainer: { flexDirection: 'row', alignItems: 'center', marginTop: 10 },
+  appInfoMadeWithLove: { fontSize: 15, color: '#053B90' },
+  madeInIndiaIcon: { marginLeft: 8 },
+  reviewsContainer: { marginTop: 25, paddingVertical: 10, width: '95%', alignSelf: 'center' },
+  reviewTitle: { fontSize: 20, fontWeight: 'bold', color: '#fff', marginBottom: 10, textAlign: 'center' },
+  reviewCard: { backgroundColor: '#fff', borderRadius: 8, padding: 10, marginHorizontal: 8, width: 250, borderWidth: 1, borderColor: '#053B90' },
+  reviewName: { fontSize: 16, fontWeight: 'bold', color: '#053B90', textAlign: 'center' },
+  reviewLocation: { fontSize: 13, color: '#666', textAlign: 'center', marginBottom: 5 },
+  reviewRatingContainer: { flexDirection: 'row', justifyContent: 'center', marginVertical: 4 },
+  reviewStar: { marginHorizontal: 1 },
+  reviewText: { fontSize: 13, lineHeight: 20, color: '#333', fontStyle: 'italic', textAlign: 'center' },
+  modalOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.6)' },
+  modalContent: { width: '100%', backgroundColor: '#FFFFFF', borderTopLeftRadius: 25, borderTopRightRadius: 25, paddingHorizontal: 25, paddingBottom: 20 },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 15, borderBottomWidth: 1, borderBottomColor: '#ddd' },
+  modalTitle: { fontSize: 22, fontWeight: '800', color: '#053B90' },
+  modalMenuItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#EEE' },
+  modalMenuItemLeft: { flexDirection: 'row', alignItems: 'center' },
+  modalMenuText: { fontSize: 17, color: '#333', marginLeft: 16, fontWeight: '500' },
+  modalCallSection: { marginTop: 25, alignItems: 'center', paddingVertical: 15 },
+  modalCallText: { fontSize: 17, color: '#666', marginBottom: 15, textAlign: 'center' },
+  modalCallButton: { flexDirection: 'row', backgroundColor: '#007AFF', paddingVertical: 12, paddingHorizontal: 25, borderRadius: 30, alignItems: 'center' },
+  modalCallIcon: { marginRight: 12 },
+  modalCallButtonText: { color: '#fff', fontSize: 18, fontWeight: '700' },
+  modalOverlaySideMenu: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 10 },
+  sideMenuContent: { width: '80%', height: '100%', backgroundColor: '#FFFFFF', borderTopRightRadius: 30, borderBottomRightRadius: 30, paddingBottom: 20, borderWidth: 1, borderColor: '#EEE' },
+  sideMenuCloseButton: { position: 'absolute', right: 20, top: 50, zIndex: 1, backgroundColor: '#ccc', borderRadius: 20, padding: 8 },
+  sideMenuScrollContent: { paddingBottom: 30 },
+  sideMenuHeader: { width: '100%', backgroundColor: '#053B90', borderTopRightRadius: 30, paddingHorizontal: 25, justifyContent: 'center', paddingVertical: 20 },
+  headerImage: { width: 200, height: 60, alignSelf: 'center', marginVertical: 15 },
+  sideMenuUserName: { fontSize: 24, fontWeight: 'bold', color: '#FFD700', textAlign: 'center', marginBottom: 5 },
+  sideMenuOnTrackText: { fontSize: 16, color: '#fff', textAlign: 'center' },
+  rmListBox: { backgroundColor: '#FFECB3', borderRadius: 10, borderWidth: 1, borderColor: '#FFD54F', marginTop: 15, padding: 8 },
+  relationshipManagerCard: { paddingVertical: 8, paddingHorizontal: 10, borderRadius: 8, marginBottom: 8, backgroundColor: '#fff' },
+  rmGroupName: { fontSize: 15, fontWeight: 'bold', color: '#333', marginBottom: 4 },
+  managerDetailsRow: { flexDirection: 'row', alignItems: 'center' },
+  rmManagerName: { fontSize: 14, color: '#555', fontWeight: '600', marginRight: 5 },
+  rmPhoneNumberText: { fontSize: 13, color: '#555' },
+  inlineCallButton: { backgroundColor: '#B3E5FC', padding: 5, borderRadius: 15, marginLeft: 8 },
+  sideMenuItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, marginLeft: 20 },
+  sideMenuIcon: { marginRight: 20 },
+  sideMenuText: { fontSize: 16, color: '#333' },
+  sideMenuSeparator: { height: 1, backgroundColor: '#EEE', marginVertical: 10 },
+  sideMenuFooter: { paddingVertical: 12, alignItems: 'center', borderTopWidth: 1, borderTopColor: '#EEE', backgroundColor: '#F9F9F9' },
+  sideMenuFooterText: { fontSize: 14, color: '#666', fontWeight: '600' },
 });
-
 export default Home;

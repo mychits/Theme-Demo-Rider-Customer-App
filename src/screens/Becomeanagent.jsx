@@ -1,100 +1,82 @@
-// Becomeanagent.jsx - (No significant changes needed here for the 404 error fix, as your POST request URL formation is correct for the intended backend setup)
-
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useContext } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   StatusBar,
   ScrollView,
   TextInput,
   TouchableOpacity,
-  Platform,
   ActivityIndicator,
   KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
-import Header from "../components/layouts/Header";
-import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
 import { ContextProvider } from "../context/UserProvider";
-import axios from 'axios';
-import url from "../data/url"; // Make sure this path is correct to your backend URL
+import axios from "axios";
+import url from "../data/url";
 
 const Colors = {
-  primaryBlue: "#053B90",
-  lightBackground: "#F0F5F9",
-  cardBackground: "#FFFFFF",
-  darkText: "#2C3E50",
-  mediumText: "#7F8C8D",
-  lightText: "#BDC3C7",
-  accentGreen: "#2ECC71",
-  accentBlue: "#3499DB",
-  buttonPrimary: "#00BCD4",
-  buttonText: "#FFFFFF",
-  shadowColor: "rgba(0,0,0,0.1)",
-  gradientStart: "#FFFFFF",
-  gradientEnd: "#E3F2FD",
-  actionBoxBackground: "#F8F8F8",
-  borderColor: "#E0E0E0",
-  amountHighlight: "#E74C3C",
-  darkInvestment: "#0A2647",
-  darkProfit: "#196F3D",
+  violet: "#4B0082",
+  violetLight: "#f0ebfa",
+  white: "#fff",
+  grayText: "#666",
+  inputBg: "#f0ebfa",
+  border: "#DAD2FF",
+  buttonDark: "#4B0082",
+  buttonLight: "#B7A6FF",
 };
 
-const Becomeanagent = ({ navigation, route }) => {
-  const insets = useSafeAreaInsets();
-
+const BecomeAnAgent = ({ navigation }) => {
   const [appUser] = useContext(ContextProvider);
-  const currentUserId = appUser.userId || null;
+  const currentUserId = appUser?.userId || null;
 
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [address, setAddress] = useState("");
-  const [idProofType, setIdProofType] = useState("");
-  const [idProofNumber, setIdProofNumber] = useState("");
-  const [bankAccountNumber, setBankAccountNumber] = useState("");
-  const [ifscCode, setIfscCode] = useState("");
-  const [experience, setExperience] = useState("");
+  const [form, setForm] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    address: "",
+    idType: "",
+    idNumber: "",
+    bankNumber: "",
+    ifsc: "",
+    experience: "",
+  });
 
   const [isLoading, setIsLoading] = useState(false);
 
+  const handleChange = (name, value) => {
+    setForm({ ...form, [name]: value });
+  };
+
   const validateForm = () => {
-    if (
-      !fullName ||
-      !email ||
-      !phoneNumber ||
-      !address ||
-      !idProofType ||
-      !idProofNumber ||
-      !bankAccountNumber ||
-      !ifscCode ||
-      !experience
-    ) {
-      Toast.show({
-        type: "error",
-        text1: "Missing Information",
-        text2: "Please fill in all required fields.",
-        position: "bottom",
-      });
-      return false;
+    for (let key in form) {
+      if (!form[key]) {
+        Toast.show({
+          type: "error",
+          text1: "Missing Information",
+          text2: "Please fill in all required fields.",
+          position: "bottom",
+        });
+        return false;
+      }
     }
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
+    if (!/^\S+@\S+\.\S+$/.test(form.email)) {
       Toast.show({
         type: "error",
         text1: "Invalid Email",
-        text2: "Please enter a valid email address.",
+        text2: "Enter a valid email address.",
         position: "bottom",
       });
       return false;
     }
-    if (!/^\d{10}$/.test(phoneNumber)) {
+    if (!/^\d{10}$/.test(form.phone)) {
       Toast.show({
         type: "error",
         text1: "Invalid Phone Number",
-        text2: "Please enter a 10-digit phone number.",
+        text2: "Enter a 10-digit phone number.",
         position: "bottom",
       });
       return false;
@@ -102,10 +84,8 @@ const Becomeanagent = ({ navigation, route }) => {
     return true;
   };
 
-  const handleSubmitApplication = async () => {
-    if (!validateForm()) {
-      return;
-    }
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
 
     if (!currentUserId) {
       Toast.show({
@@ -119,68 +99,55 @@ const Becomeanagent = ({ navigation, route }) => {
 
     setIsLoading(true);
     try {
-      const formData = {
+      const payload = {
         userId: currentUserId,
-        fullName,
-        email,
-        phoneNumber,
-        address,
-        idProofType,
-        idProofNumber,
-        bankAccountNumber,
-        ifscCode,
-        experience,
+        fullName: form.fullName,
+        email: form.email,
+        phoneNumber: form.phone,
+        address: form.address,
+        idProofType: form.idType,
+        idProofNumber: form.idNumber,
+        bankAccountNumber: form.bankNumber,
+        ifscCode: form.ifsc,
+        experience: form.experience,
         status: "pending",
         appliedAt: new Date().toISOString(),
       };
 
-      const fullUrl = `${url}/become-agent/agents/become`;
-      console.log("Attempting to post to URL:", fullUrl);
+      const response = await axios.post(`${url}/become-agent/agents/become`, payload);
 
-      const response = await axios.post(fullUrl, formData);
-
-      if (response.status === 201 || response.status === 200) {
+      if (response.status === 200 || response.status === 201) {
         Toast.show({
           type: "success",
           text1: "Application Submitted!",
-          text2: "We will review your application shortly.",
+          text2: "We'll review your application soon.",
           position: "bottom",
-          visibilityTime: 4000,
         });
-        setFullName("");
-        setEmail("");
-        setPhoneNumber("");
-        setAddress("");
-        setIdProofType("");
-        setIdProofNumber("");
-        setBankAccountNumber("");
-        setIfscCode("");
-        setExperience("");
-
+        setForm({
+          fullName: "",
+          email: "",
+          phone: "",
+          address: "",
+          idType: "",
+          idNumber: "",
+          bankNumber: "",
+          ifsc: "",
+          experience: "",
+        });
       } else {
         Toast.show({
           type: "info",
           text1: "Submission Issue",
-          text2: response.data.message || "Something went wrong with the submission.",
+          text2: response.data?.message || "Something went wrong.",
           position: "bottom",
-          visibilityTime: 4000,
         });
       }
     } catch (error) {
-      console.error("Error submitting agent application: ", error);
-      let errorMessage = "Failed to submit application. Please try again later.";
-      if (error.response && error.response.data && error.response.data.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-
       Toast.show({
         type: "error",
         text1: "Submission Failed",
-        text2: errorMessage,
+        text2: error.response?.data?.message || error.message || "Failed to submit application.",
         position: "bottom",
-        visibilityTime: 4000,
       });
     } finally {
       setIsLoading(false);
@@ -188,265 +155,151 @@ const Becomeanagent = ({ navigation, route }) => {
   };
 
   return (
-    <SafeAreaView
-      style={[
-        styles.safeArea,
-        {
-          paddingTop:
-            Platform.OS === "android" ? StatusBar.currentHeight : insets.top,
-        },
-      ]}
-    >
-      <StatusBar barStyle="dark-content" backgroundColor="#053B90" />
-      <Header
-        userId={currentUserId}
-        navigation={navigation}
-        title="Become an Agent"
-      />
+    <SafeAreaView style={styles.safe}>
+      <StatusBar backgroundColor={Colors.violet} barStyle="light-content" />
+
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Agent Application Form</Text>
+        <Text style={styles.headerSub}>Fill in your details below to apply.</Text>
+      </View>
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <ScrollView contentContainerStyle={styles.scrollViewContent}>
-          <LinearGradient
-            colors={["#FFFFFF", "#E0F2F7"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={styles.formContainer}
-          >
-            <Text style={styles.formTitle}>Agent Application Form</Text>
-            <Text style={styles.formSubtitle}>
-              Please fill in your details to apply.
-            </Text>
-
-            <Text style={styles.inputLabel}>Full Name</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your full name"
-              value={fullName}
-              onChangeText={setFullName}
-              autoCapitalize="words"
-              placeholderTextColor="#999"
-            />
-
-            <Text style={styles.inputLabel}>Email Address</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your email"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              placeholderTextColor="#999"
-            />
-
-            <Text style={styles.inputLabel}>Phone Number</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your phone number"
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
-              keyboardType="phone-pad"
-              maxLength={10}
-              placeholderTextColor="#999"
-            />
-
-            <Text style={styles.inputLabel}>Full Address</Text>
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              placeholder="Enter your full address"
-              value={address}
-              onChangeText={setAddress}
-              multiline
-              numberOfLines={3}
-              placeholderTextColor="#999"
-            />
-
-            <Text style={styles.inputLabel}>
-              ID Proof Type (e.g., Aadhaar, PAN)
-            </Text>
-            <TextInput
-              style={styles.input}
-              placeholder="e.g., Aadhaar Card"
-              value={idProofType}
-              onChangeText={setIdProofType}
-              placeholderTextColor="#999"
-            />
-
-            <Text style={styles.inputLabel}>ID Proof Number</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter ID proof number"
-              value={idProofNumber}
-              onChangeText={setIdProofNumber}
-              placeholderTextColor="#999"
-            />
-
-            <Text style={styles.inputLabel}>Bank Account Number</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter bank account number"
-              value={bankAccountNumber}
-              onChangeText={setBankAccountNumber}
-              keyboardType="numeric"
-              placeholderTextColor="#999"
-            />
-
-            <Text style={styles.inputLabel}>IFSC Code</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter IFSC code"
-              value={ifscCode}
-              onChangeText={setIfscCode}
-              autoCapitalize="characters"
-              placeholderTextColor="#999"
-            />
-
-            <Text style={styles.inputLabel}>
-              Relevant Experience (Optional)
-            </Text>
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              placeholder="e.g., 2 years in sales, managed a chits group"
-              value={experience}
-              onChangeText={setExperience}
-              multiline
-              numberOfLines={3}
-              placeholderTextColor="#999"
-            />
+        <ScrollView
+          style={styles.formContainer}
+          contentContainerStyle={{ paddingBottom: 80 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.card}>
+            {[
+              { label: "Full Name", key: "fullName" },
+              { label: "Email Address", key: "email", keyboardType: "email-address" },
+              { label: "Phone Number", key: "phone", keyboardType: "numeric" },
+              { label: "Full Address", key: "address", multiline: true },
+              { label: "ID Proof Type", key: "idType" },
+              { label: "ID Proof Number", key: "idNumber" },
+              { label: "Bank Account Number", key: "bankNumber", keyboardType: "numeric" },
+              { label: "IFSC Code", key: "ifsc" },
+              { label: "Relevant Experience", key: "experience", multiline: true },
+            ].map((input, i) => (
+              <View key={i}>
+                <Text style={styles.label}>{input.label}</Text>
+                <TextInput
+                  style={[styles.input, input.multiline && styles.textArea]}
+                  placeholder={`Enter ${input.label.toLowerCase()}`}
+                  placeholderTextColor="#888"
+                  value={form[input.key]}
+                  onChangeText={(text) => handleChange(input.key, text)}
+                  keyboardType={input.keyboardType || "default"}
+                  multiline={input.multiline || false}
+                />
+              </View>
+            ))}
 
             <TouchableOpacity
-              style={[
-                styles.submitButton,
-                isLoading && styles.submitButtonDisabled,
-              ]}
-              onPress={handleSubmitApplication}
+              style={[styles.submitBtn, isLoading && styles.buttonDisabled]}
+              onPress={handleSubmit}
               disabled={isLoading}
             >
               {isLoading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.submitButtonText}>Submit Application</Text>
+                <Text style={styles.submitText}>Submit Application</Text>
               )}
             </TouchableOpacity>
-          </LinearGradient>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
       <Toast />
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  loadingScreen: {
+  safe: {
     flex: 1,
-    justifyContent: "center",
+    backgroundColor: Colors.white,
+  },
+  header: {
+    backgroundColor: Colors.violet,
+    paddingVertical: 25,
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
     alignItems: "center",
-    backgroundColor: "#F5F5F5",
+    position: "relative",
   },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: "#053B90",
+  backBtn: {
+    position: "absolute",
+    left: 20,
+    top: 30,
+    zIndex: 10,
   },
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#053B90",
+  headerTitle: {
+    color: "#fff",
+    fontSize: 22,
+    fontWeight: "700",
+    textAlign: "center",
   },
-  scrollViewContent: {
-    flexGrow: 1,
-    alignItems: "center",
-    paddingHorizontal: 15,
-    paddingBottom: 20,
-    backgroundColor: "#053B90",
+  headerSub: {
+    color: "#ddd",
+    fontSize: 14,
+    marginTop: 4,
+    textAlign: "center",
   },
   formContainer: {
-    width: "100%",
-    borderRadius: 15,
-    padding: 25,
+    paddingHorizontal: 20,
     marginTop: 10,
+  },
+  card: {
+    backgroundColor: Colors.white,
+    borderRadius: 15,
+    padding: 20,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 6,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 15,
-    overflow: "hidden",
-    borderWidth: 0,
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
   },
-  formTitle: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: "#053B90",
-    textAlign: "center",
-    marginBottom: 10,
-    textShadowColor: "rgba(0,0,0,0.1)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  formSubtitle: {
+  label: {
+    color: "#000",
     fontSize: 15,
-    color: "#555",
-    textAlign: "center",
-    marginBottom: 25,
-  },
-  inputLabel: {
-    fontSize: 14,
-    color: "#333",
-    marginBottom: 5,
+    marginBottom: 6,
     fontWeight: "600",
   },
   input: {
-    width: "100%",
-    padding: 14,
-    backgroundColor: "#F0F8FF",
-    borderRadius: 12,
-    borderColor: "#A9D6E5",
-    borderWidth: 1,
-    marginBottom: 18,
-    fontSize: 16,
-    color: "#333",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    backgroundColor: Colors.inputBg,
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 15,
+    fontSize: 15,
+    color: "#000",
   },
   textArea: {
-    height: 120,
+    height: 80,
     textAlignVertical: "top",
-    paddingTop: 14,
   },
-  submitButton: {
-    backgroundColor: "#053B90",
-    paddingVertical: 16,
+  submitBtn: {
+    backgroundColor: Colors.buttonDark,
+    paddingVertical: 14,
     borderRadius: 12,
     alignItems: "center",
-    justifyContent: "center",
-    marginTop: 30,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 5,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 10,
+    marginTop: 10,
   },
-  submitButtonDisabled: {
-    backgroundColor: "#A9BEDA",
-    shadowOpacity: 0.1,
-    elevation: 3,
+  buttonDisabled: {
+    backgroundColor: Colors.buttonLight,
   },
-  submitButtonText: {
-    color: "#FFFFFF",
-    fontSize: 19,
-    fontWeight: "bold",
-    letterSpacing: 0.5,
+  submitText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "700",
   },
 });
 
-export default Becomeanagent;
+export default BecomeAnAgent;

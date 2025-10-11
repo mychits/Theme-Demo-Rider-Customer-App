@@ -312,7 +312,7 @@ export default function Login() {
             <View style={styles.passwordInputContainer}>
               <TextInput
                 style={styles.passwordInput}
-                placeholder="••••••••"
+                placeholder="******"
                 placeholderTextColor="#000000ff"
                 secureTextEntry={!showPassword}
                 value={password}

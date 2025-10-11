@@ -1,20 +1,28 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, Platform } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, StatusBar, Platform } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
-
-import Header from "../components/layouts/Header";
 import { ContextProvider } from "../context/UserProvider";
-
 
 import ReferFriend from '../../assets/ReferFriend.png';
 import FirstTime from '../../assets/FirstTime.png';
 import PrimeMember from '../../assets/PrimeMember.png';
 
+const Colors = {
+  violet: '#7B61FF',
+  violetDark: '#4B3BA8',
+  violetLight: '#E9E3FF',
+  white: '#fff',
+  grayText: '#666',
+  button: '#4B3BA8',
+  buttonLight: '#B7A6FF',
+  headerText: '#fff',
+  cardText: '#333',
+};
+
 const OffersScreen = ({ navigation }) => {
-    const insets = useSafeAreaInsets();
     const [appUser] = useContext(ContextProvider);
-    const userId = appUser.userId || {};
+    const userId = appUser?.userId || {};
 
     const offers = [
         { id: '1', title: 'Refer a friend, get ₹500', description: 'Your friend joins a chit, you get instant rewards.', image: ReferFriend },
@@ -23,95 +31,87 @@ const OffersScreen = ({ navigation }) => {
     ];
 
     return (
-        <SafeAreaView
-            style={[
-                styles.safeArea,
-                {
-                    paddingTop:
-                        Platform.OS === "android" ? StatusBar.currentHeight : insets.top,
-                },
-            ]}
-        >
-            <StatusBar barStyle="light-content" backgroundColor="#053B90" />
-            <Header userId={userId} navigation={navigation} />
-            <View style={styles.mainContentArea}>
-                <ScrollView contentContainerStyle={styles.container}>
-                    <View style={styles.headerContainer}>
-                        <Text style={styles.headerTitle}>Special Offers</Text>
-                    </View>
-                    {offers.map(offer => (
-                        <View key={offer.id} style={styles.card}>
-                            <Image source={offer.image} style={styles.cardImage} />
-                            <View style={styles.cardContent}>
-                                <Text style={styles.cardTitle}>{offer.title}</Text>
-                                <Text style={styles.cardDescription}>{offer.description}</Text>
-                                <TouchableOpacity style={styles.button}>
-                                    <Text style={styles.buttonText}>View Details</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                    ))}
-                </ScrollView>
+        <View style={styles.container}>
+            <StatusBar barStyle="light-content" backgroundColor={Colors.violetDark} />
+
+            {/* Absolute Header */}
+            <View style={styles.header}>
+                <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+                    <Ionicons name="arrow-back" size={24} color={Colors.headerText} />
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>Special Offers</Text>
             </View>
-        </SafeAreaView>
+
+            <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+                {offers.map(offer => (
+                    <View key={offer.id} style={styles.card}>
+                        <Image source={offer.image} style={styles.cardImage} />
+                        <View style={styles.cardContent}>
+                            <Text style={styles.cardTitle}>{offer.title}</Text>
+                            <Text style={styles.cardDescription}>{offer.description}</Text>
+                            <TouchableOpacity style={styles.button}>
+                                <Text style={styles.buttonText}>View Details</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                ))}
+            </ScrollView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: "#053B90",
-    },
-    mainContentArea: {
-        flex: 1,
-        backgroundColor: "#fff",
-        marginHorizontal: 10,
-        marginBottom: 50,
-        borderRadius: 12,
-        overflow: "hidden",
-        ...Platform.select({
-            ios: {
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 6 },
-                shadowOpacity: 0.1,
-                shadowRadius: 10,
-            },
-            android: {
-                elevation: 8,
-            },
-        }),
-    },
     container: {
-        flexGrow: 1,
-        padding: 15,
-        backgroundColor: '#fff',
+        flex: 1,
+        backgroundColor: Colors.violetLight,
+        paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
     },
-    headerContainer: {
+    header: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 80,
+        backgroundColor: Colors.violetDark,
+        paddingHorizontal: 20,
+        flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 20,
+        zIndex: 10,
+        borderBottomLeftRadius: 20,
+        borderBottomRightRadius: 20,
+    },
+    backBtn: {
+        position: 'absolute',
+        left: 20,
+        zIndex: 20,
     },
     headerTitle: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#333',
+        flex: 1,
+        color: Colors.headerText,
+        fontSize: 22,
+        fontWeight: '700',
+        textAlign: 'center',
+    },
+    scrollContent: {
+        paddingTop: 100, // To avoid content hidden behind absolute header
+        paddingHorizontal: 15,
+        paddingBottom: 50,
     },
     card: {
-        backgroundColor: '#fff',
+        backgroundColor: Colors.white,
         borderRadius: 15,
         marginBottom: 15,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.1,
-        shadowRadius: 4,
+        shadowRadius: 6,
         elevation: 5,
         overflow: 'hidden',
     },
     cardImage: {
-        width: '90%',
-        height: 200, // This height is adjusted for better visibility
-        borderTopLeftRadius: 15,
-        borderTopRightRadius: 15,
-        resizeMode: 'cover', // This is important to ensure the image fills the space
+        width: '100%',
+        height: 200,
+        resizeMode: 'cover',
     },
     cardContent: {
         padding: 15,
@@ -119,23 +119,23 @@ const styles = StyleSheet.create({
     cardTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#333',
+        color: Colors.cardText,
         marginBottom: 5,
     },
     cardDescription: {
         fontSize: 14,
-        color: '#666',
+        color: Colors.grayText,
         marginBottom: 10,
     },
     button: {
-        backgroundColor: '#6b7280',
+        backgroundColor: Colors.button,
         borderRadius: 25,
         paddingVertical: 10,
         paddingHorizontal: 20,
         alignSelf: 'flex-start',
     },
     buttonText: {
-        color: '#fff',
+        color: Colors.white,
         fontWeight: 'bold',
     },
 });
