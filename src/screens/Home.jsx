@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect, useContext, useCallback, useRef } from 'react';
 import {
-  View,Image,StyleSheet,Dimensions,Text, TouchableOpacity,Linking,StatusBar,SafeAreaView,
-  FlatList,ActivityIndicator,BackHandler, ScrollView, Platform, Modal, Alert,Animated, PanResponder,TextInput,
+  View, Image, StyleSheet, Dimensions, Text, TouchableOpacity, Linking, StatusBar, SafeAreaView,
+  FlatList, ActivityIndicator, BackHandler, ScrollView, Platform, Modal, Alert, Animated, PanResponder, TextInput,
 } from 'react-native';
 import { Ionicons, MaterialIcons, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,7 +14,6 @@ import { useFocusEffect, StackActions } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ContextProvider } from '../context/UserProvider';
 import CityChits from '../../assets/CityChits.png';
-
 const screenWidth = Dimensions.get('window').width;
 const Home = ({ route, navigation }) => {
   // Context & States
@@ -29,26 +29,27 @@ const Home = ({ route, navigation }) => {
   const [isSideMenuVisible, setSideMenuVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [relationshipManagers, setRelationshipManagers] = useState([]);
+  // Banner Images for Carousel
   const bannerImages = [
-  { uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7RoGJlPs8_9bAJzP7EcBFgh2n5EOTHGstsw&s' },
-  { uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRjWelb8fKzz7Gn4uX9tlcaAlIFIFzJt4Joqw&s' },
-    { uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRn8CmQKTuihGMhCuwW8Gjizbx0wKk5FSmtQQ&s' },
-      { uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZK_0mWCjonGnSkVhaz0RNpnKB4dhvF4cRAo5a7XoW9xs6t9ufqTH32xBAGpjPTsF0dAw&usqp=CAU' },
-
-];
-const [currentIndex, setCurrentIndex] = useState(0);
-const flatListRef = useRef(null);
-
-useEffect(() => {
-  const interval = setInterval(() => {
-    const nextIndex = (currentIndex + 1) % bannerImages.length;
-    setCurrentIndex(nextIndex);
-    flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
-  }, 3000); // change every 3 seconds
-
-  return () => clearInterval(interval);
-}, [currentIndex]);
-
+    { uri: 'https://kopuramchits.com/wp-content/uploads/2024/09/how-chit-fund-works-banner.jpg' },
+    { uri: 'https://kopuramchits.com/wp-content/uploads/2024/10/how-to-choose-right-chit-investment.jpg' },
+    { uri: 'https://kopuramchits.com/wp-content/plugins/phastpress/phast.php/c2VydmljZT1pbWFnZXMmc3JjPWh0dHBzJTNBJTJGJTJGa29wdXJhbWNoaXRzLmNvbSUyRndwLWNvbnRlbnQlMkZ1cGxvYWRzJTJGMjAyNSUyRjAxJTJGQ0hJVC1GVU5EUy1JTi1PTkxJTkUtQUdFLTEwMjR4NDI3LmpwZyZjYWNoZU1hcmtlcj0xNzM2NDkxMTYzLTM3MDUwJnRva2VuPWVmOTQ2MTEzZWZjNDVmMzI.q.jpg' },
+    { uri: 'https://kopuramchits.com/wp-content/plugins/phastpress/phast.php/c2VydmljZT1pbWFnZXMmc3JjPWh0dHBzJTNBJTJGJTJGa29wdXJhbWNoaXRzLmNvbSUyRndwLWNvbnRlbnQlMkZ1cGxvYWRzJTJGMjAyNCUyRjA5JTJGQ2hpdC1GdW5kcy0xLTEtMTAyNHg0MjcuanBnJmNhY2hlTWFya2VyPTE3MjcyNDMxMDUtMzA1NTUmdG9rZW49OTU3NjJmZGE5OTFjZDkxYQ.q.jpg' },
+    { uri: 'https://kopuramchits.com/wp-content/plugins/phastpress/phast.php/c2VydmljZT1pbWFnZXMmc3JjPWh0dHBzJTNBJTJGJTJGa29wdXJhbWNoaXRzLmNvbSUyRndwLWNvbnRlbnQlMkZ1cGxvYWRzJTJGMjAyNCUyRjEyJTJGcG9zdC1vZmZpY2Utc2NoZW1lLXZzLWNoaXQtc2NoZW1lLTEwMjR4NDI3LmpwZyZjYWNoZU1hcmtlcj0xNzM1MTk4NzQ0LTM0NjMwJnRva2VuPTQ3NDgzMzI5N2Y0ZmI4ZjY.q.jpg' },
+    { uri: 'https://kopuramchits.com/wp-content/plugins/phastpress/phast.php/c2VydmljZT1pbWFnZXMmc3JjPWh0dHBzJTNBJTJGJTJGa29wdXJhbWNoaXRzLmNvbSUyRndwLWNvbnRlbnQlMkZ1cGxvYWRzJTJGMjAyNCUyRjA5JTJGY2hpdC1mdW5kcy1lYXNpbHktYWNjZXNzaWJsZS0xMDI0eDQyOC5wbmcmY2FjaGVNYXJrZXI9MTcyNzI0OTYxNC0xMjI0MzUmdG9rZW49YzkxNTEwNWQ5NjM0ZjA4Nw.q.png' },
+    { uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTO-SofGELdmKTLyi_6COElR5SnvqHJULt7pKZOFG0vTXgXdziMU6hYzM4clp7ITEtCWHg&usqp=CAU' },
+    { uri: 'https://kopuramchits.com/wp-content/plugins/phastpress/phast.php/c2Vydm/ljZT1pbWFnZXMmc3JjPWh0dHBzJTNBJTJGJTJGa29wdXJhbWNoaXRzLmNvbSUyRndwLWNvbnRlbnQlMkZ1cGxvYWRzJTJGMjAyNCUyRjEyJTJGc2F2aW5ncy12cy1jaGl0LXJldHVybnMtd2hhdC13b3Jrcy1iZXN0LTEwMjR4NDI3LmpwZyZjYWNoZU1hcmtlcj0xNzM1MTAzMDU4LTMyOTY0JnRva2VuPTMyZDU4MzZiOTUwZjU5MTY.q.jpg' },
+  ];
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const flatListRef = useRef(null);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const nextIndex = (currentIndex + 1) % bannerImages.length;
+      setCurrentIndex(nextIndex);
+      flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
+    }, 3000); // change every 3 seconds
+    return () => clearInterval(interval);
+  }, [currentIndex]);
   // Animation for side menu
   const slideAnim = useRef(new Animated.Value(-screenWidth)).current;
   const panResponder = useRef(
@@ -93,7 +94,6 @@ useEffect(() => {
       useNativeDriver: true,
     }).start(() => setSideMenuVisible(false));
   };
-  
   // WhatsApp support handler
   const handleWhatsAppPress = async () => {
     const countryCode = '91';
@@ -451,7 +451,7 @@ useEffect(() => {
       return undefined;
     }, [isHelpModalVisible, isSideMenuVisible])
   );
-  // Services grid data with improved border and color styling
+  // Services grid data with improved styling
   const services = [
     { navigateTo: 'Mygroups', icon: 'group', title: 'My Groups', bgColor: '#F9F9F9', iconBg: '#053B90', disabled: false },
     { navigateTo: 'EnrollTab', screen: 'EnrollScreenMain', icon: 'user-plus', title: 'New Groups', bgColor: '#F9F9F9', iconBg: '#007AFF', filter: 'New Groups', disabled: false },
@@ -463,6 +463,12 @@ useEffect(() => {
     { navigateTo: 'MyLoan', screen: 'MyLoan', icon: 'wallet', title: 'My Loan', bgColor: '#F9F9F9', iconBg: '#e40000', filter: 'My Loan', disabled: false },
     { navigateTo: 'PayYourDues', icon: 'rupee', title: 'Pay Your Dues', bgColor: '#F9F9F9', iconBg: '#9d00a5', disabled: false },
   ];
+  // Create filteredServices based on searchQuery (filtering by title)
+  const filteredServices = searchQuery.trim() !== ''
+    ? services.filter(service =>
+        service.title.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : services;
   // Advantages or offers section
   const mychitsAdvantages = [
     { icon: 'lock', text1: '2 mins onboarding', text2: '& 24Hrs Payouts', iconColor: '#ff0000' },
@@ -550,7 +556,7 @@ useEffect(() => {
           <View style={styles.hamburgerLine} />
           <View style={styles.hamburgerLine} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Demo Rider Plans</Text>
+        <Text style={styles.headerTitle}>Demo Rider </Text>
         <TouchableOpacity style={styles.helpButton} onPress={handleNeedHelp}>
           <Ionicons name="information-circle-outline" size={18} color="#620590ff" style={{ marginRight: 5 }} />
           <Text style={styles.helpText}>Need Help?</Text>
@@ -562,7 +568,7 @@ useEffect(() => {
         <TextInput
           value={searchQuery}
           onChangeText={setSearchQuery}
-          placeholder="Search services or news..."
+          placeholder="Quick Search..."
           placeholderTextColor="#888"
           style={styles.searchInput}
         />
@@ -580,47 +586,46 @@ useEffect(() => {
           )}
         </View>
         <View style={{ marginVertical: 20 }}>
-  <FlatList
-    ref={flatListRef}
-    data={bannerImages}
-    keyExtractor={(item, index) => index.toString()}
-    horizontal
-    pagingEnabled
-    showsHorizontalScrollIndicator={false}
-    renderItem={({ item }) => (
-      <Image
-        source={{ uri: item.uri }}
-        style={{
-          width: Dimensions.get('window').width * 0.9,
-          height: 150,
-          borderRadius: 15,
-          marginHorizontal: Dimensions.get('window').width * 0.05 / 2,
-        }}
-        resizeMode="cover"
-      />
-    )}
-  />
-</View>
-<View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 8 }}>
-  {bannerImages.map((_, index) => (
-    <View
-      key={index}
-      style={{
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: currentIndex === index ? '#FFD700' : '#ccc',
-        marginHorizontal: 4,
-      }}
-    />
-  ))}
-</View>
-
+          <FlatList
+            ref={flatListRef}
+            data={bannerImages}
+            keyExtractor={(item, index) => index.toString()}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <Image
+                source={{ uri: item.uri }}
+                style={{
+                  width: Dimensions.get('window').width * 0.9,
+                  height: 150,
+                  borderRadius: 15,
+                  marginHorizontal: Dimensions.get('window').width * 0.05 / 2,
+                }}
+                resizeMode="cover"
+              />
+            )}
+          />
+        </View>
+        <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 8 }}>
+          {bannerImages.map((_, index) => (
+            <View
+              key={index}
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: currentIndex === index ? '#FFD700' : '#ccc',
+                marginHorizontal: 4,
+              }}
+            />
+          ))}
+        </View>
         {/* Services Grid */}
         <View style={styles.servicesSection}>
           <Text style={styles.servicesTitle}>Services</Text>
           <FlatList
-            data={services}
+            data={filteredServices}
             renderItem={({ item, index }) => (
               <TouchableOpacity
                 key={index}
@@ -737,54 +742,31 @@ useEffect(() => {
             </TouchableOpacity>
           </View>
           {/* Advantages/Offers Section */}
-          {/* <View style={styles.benefitsSection}>
-            <Text style={styles.benefitsTitle}>Why Choose MyChits?</Text>
-            {mychitsAdvantages.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.advantageItem}
-                onPress={() => {
-                  if (item.action === 'call' && item.phoneNumber) {
-                    handleCustomerSupportCall(item.phoneNumber);
-                  } else if (item.action === 'navigate' && item.targetScreen) {
-                    navigation.navigate(item.targetScreen);
-                  }
-                }}
-              >
-                <View style={styles.advantageIconContainer}>
-                  <MaterialIcons name={item.icon} size={28} color={item.iconColor} />
-                </View>
-                <Text style={styles.advantageText1}>{item.text1}</Text>
-                <Text style={styles.advantageText2}>{item.text2}</Text>
-              </TouchableOpacity>
-            ))}
-          </View> */}
           <View style={styles.benefitsSection}>
-  <Text style={styles.benefitsTitle}>Why Choose MyChits?</Text>
-  <View style={styles.advantagesContainer}>
-    {mychitsAdvantages.map((item, index) => (
-      <TouchableOpacity
-        key={index}
-        style={styles.advantageItem}
-        onPress={() => {
-          if (item.action === 'call' && item.phoneNumber) {
-            handleCustomerSupportCall(item.phoneNumber);
-          } else if (item.action === 'navigate' && item.targetScreen) {
-            navigation.navigate(item.targetScreen);
-          }
-        }}
-        activeOpacity={0.8}
-      >
-        <View style={[styles.advantageIconContainer, { borderColor: item.iconColor }]}>
-          <MaterialIcons name={item.icon} size={28} color={item.iconColor} />
-        </View>
-        <Text style={styles.advantageText1}>{item.text1}</Text>
-        <Text style={styles.advantageText2}>{item.text2}</Text>
-      </TouchableOpacity>
-    ))}
-  </View>
-</View>
-
+            <Text style={styles.benefitsTitle}>Why Choose MyChits?</Text>
+            <View style={styles.advantagesContainer}>
+              {mychitsAdvantages.map((item, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.advantageItem}
+                  onPress={() => {
+                    if (item.action === 'call' && item.phoneNumber) {
+                      handleCustomerSupportCall(item.phoneNumber);
+                    } else if (item.action === 'navigate' && item.targetScreen) {
+                      navigation.navigate(item.targetScreen);
+                    }
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <View style={[styles.advantageIconContainer, { borderColor: item.iconColor }]}>
+                    <MaterialIcons name={item.icon} size={28} color={item.iconColor} />
+                  </View>
+                  <Text style={styles.advantageText1}>{item.text1}</Text>
+                  <Text style={styles.advantageText2}>{item.text2}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
           <TouchableOpacity style={styles.viewLicenseLink} onPress={() => navigation.navigate('LicenseAndCertificate')}>
             <View style={styles.viewLicenseContent}>
               <MaterialIcons name="link" size={16} color="#053B90" />
@@ -802,14 +784,36 @@ useEffect(() => {
                 Visit our Website: <Text style={{ fontWeight: 'bold' }}>mychits.co.in</Text>
               </Text>
             </TouchableOpacity>
+            {/* Social Icons Section */}
+            
             <View style={styles.madeWithLoveContainer}>
               <Text style={styles.appInfoMadeWithLove}>
                 Made with <Text style={{ color: '#E53935' }}>❤️</Text> in India
               </Text>
               <MaterialIcons name="public" size={16} color="#4CAF50" style={styles.madeInIndiaIcon} />
             </View>
+            
           </LinearGradient>
+          <View style={styles.socialIconsContainer}>
+          <TouchableOpacity onPress={() => Linking.openURL('https://wa.me/919483900777 ')}>
+          <Ionicons name="logo-whatsapp" size={24} color="#25D366" />
+          </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => Linking.openURL('https://www.instagram.com/my_chits/')}>
+                <Ionicons name="logo-instagram" size={24} color="#C13584" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => Linking.openURL('https://www.facebook.com/Mychitfund/')}>
+                <Ionicons name="logo-facebook" size={24} color="#3b5998" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => Linking.openURL('https://www.youtube.com/@MyChit-z6d')}>
+                <Ionicons name="logo-youtube" size={24} color="#FF0000" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => Linking.openURL('https://www.linkedin.com/in/mychits-vijaya-vinayak-chit-funds-pvt-ltd-55b7a2384/')}>
+                <Ionicons name="logo-linkedin" size={24} color="#0077B5" />
+              </TouchableOpacity>
+            </View>
         </View>
+        
         <ReviewsSection />
       </ScrollView>
       {/* Help Modal */}
@@ -1028,11 +1032,10 @@ const styles = StyleSheet.create({
   bottomGridItem: { width: '22%', alignItems: 'center', paddingVertical: 8, borderWidth: 1, borderRadius: 10, borderColor: '#053B90' },
   bottomIcon: { marginBottom: 2 },
   bottomServiceTitle: { fontSize: 11, color: '#053B90', textAlign: 'center', fontWeight: '600' },
-  benefitsSection: { marginTop: 30, paddingHorizontal: 15, paddingBottom: 30, backgroundColor: '#F2F4F7', borderRadius: 10, borderWidth: 1, borderColor: '#053B90',     marginVertical: 20,    paddingHorizontal: 15,
- },
+  benefitsSection: { marginTop: 30, paddingHorizontal: 15, paddingBottom: 30, backgroundColor: '#F2F4F7', borderRadius: 10, borderWidth: 1, borderColor: '#053B90', marginVertical: 20 },
   benefitsTitle: { fontSize: 20, fontWeight: 'bold', color: '#053B90', textAlign: 'center', marginBottom: 20 },
   advantageItem: { alignItems: 'center', marginVertical: 10 },
-   advantagesContainer: {
+  advantagesContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-around',
@@ -1089,5 +1092,11 @@ const styles = StyleSheet.create({
   sideMenuSeparator: { height: 1, backgroundColor: '#EEE', marginVertical: 10 },
   sideMenuFooter: { paddingVertical: 12, alignItems: 'center', borderTopWidth: 1, borderTopColor: '#EEE', backgroundColor: '#F9F9F9' },
   sideMenuFooterText: { fontSize: 14, color: '#666', fontWeight: '600' },
+  socialIconsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    marginVertical: 10,
+  },
 });
 export default Home;
