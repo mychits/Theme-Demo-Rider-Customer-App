@@ -1,3 +1,4 @@
+
 import React, { useContext } from "react";
 import {
   View,
@@ -7,28 +8,24 @@ import {
   ScrollView,
   SafeAreaView,
   StatusBar,
-  Platform, // Import Platform for OS-specific styles
-  Linking, // Import Linking for handling URLs
+  Platform,
+  Linking,
 } from "react-native";
-import Header from "../components/layouts/Header"; // Import your Header component
+import Header from "../components/layouts/Header";
 import { ContextProvider } from "../context/UserProvider";
-
 const { width, height } = Dimensions.get("window");
-
 const Privacy = ({ route, navigation }) => {
   const { userName, userNumber } = route.params || {};
-  const [appUser, setAppUser] = useContext(ContextProvider);
+  const [appUser] = useContext(ContextProvider);
   const userId = appUser.userId || {};
-
   const handleLinkPress = (url) => {
     Linking.openURL(url).catch((err) =>
       console.error("Couldn't load page", err)
     );
   };
-
   return (
-    <SafeAreaView style={styles.blueBackgroundContainer}>
-      <StatusBar barStyle="light-content" backgroundColor="#0A4B9F" />{" "}
+    <SafeAreaView style={styles.violetBackgroundContainer}>
+      <StatusBar barStyle="light-content" backgroundColor="#6A0DAD" />
       <Header
         title="Privacy Policy"
         userId={userId}
@@ -37,11 +34,10 @@ const Privacy = ({ route, navigation }) => {
         navigation={navigation}
       />
       <ScrollView
-        style={styles.scrollViewStyle} // Controls the background of the scrollable area below the header
-        contentContainerStyle={styles.whiteContentContainer} // This is the main neumorphic card
+        style={styles.scrollViewStyle}
+        contentContainerStyle={styles.whiteContentContainer}
       >
         <View style={styles.innerContentPadding}>
-          {" "}
           <Text style={styles.header}>Privacy Policy</Text>
           <View>
             <Text style={styles.paragraph}>
@@ -74,7 +70,7 @@ const Privacy = ({ route, navigation }) => {
             <Text style={styles.paragraph}>
               VIJAYA VINAYAK CHITFUNDS PRIVATE LIMITED and their affiliates are
               committed to protecting and respecting User privacy and providing
-              with the information, options and choices necessary for you to
+              you with the information, options and choices necessary for you to
               control how we use your information. This Privacy Policy describes
               how the Website collects and uses personal information to provide
               services operated by or on behalf of the Website/App. This Privacy
@@ -133,50 +129,46 @@ const Privacy = ({ route, navigation }) => {
           </Text>
           <Text style={styles.paragraph}>
             In the course of registering for and availing the various services
-            We provide from time to time through the Website/App.We directly
+            we provide from time to time through the Website/App, we directly
             collect information containing User - name, address, contact number,
             email address and the chit fund(s) that are being subscribed to by
             the User.
           </Text>
           <Text style={styles.paragraph}>
-            You acknowledge that You are disclosing User Information
+            You acknowledge that you are disclosing User Information
             voluntarily. Prior to the completion of any registration process on
-            the Website/App or prior to availing of any services offered on Our
-            website. If You wish not to disclose any Personal Information You
-            may refrain from doing so; however if You don’t provide information
+            the Website/App or prior to availing any services offered on our
+            website, if you wish not to disclose any Personal Information you
+            may refrain from doing so; however, if you don’t provide information
             that is requested, it is possible that the registration process
-            would be incomplete and/or You may not be able to avail of Our
-            Services.
+            would be incomplete and/or you may not be able to avail our Services.
           </Text>
           <Text style={styles.subSectionTitle}>
             Information being collected automatically by the Website/App:
           </Text>
           <Text style={styles.paragraph}>
-            Internet protocol (IP) address, browser type, mobile device
-            identifier, Internet service provider, operating system, pages that
-            have been visited before and after using the Website, the date and
-            time of visit, information about the links clicked and pages viewed
-            within the Website/App, and other standard server log information
-            may be collected automatically by visiting the Website/App. The
-            Website uses cookies and similar technologies to automatically
-            collect this information. By using the Website, you consent to the
-            Website's use of cookies and similar technologies.
+            Internet protocol (IP) address, browser type, mobile device identifier,
+            Internet service provider, operating system, pages that have been visited
+            before and after using the Website, the date and time of visit, information
+            about the links clicked and pages viewed within the Website/App, and other
+            standard server log information may be collected automatically by
+            visiting the Website/App. The Website uses cookies and similar technologies
+            to automatically collect this information. By using the Website, you
+            consent to the Website's use of cookies and similar technologies.
           </Text>
           <Text style={styles.subSectionTitle}>Device information:</Text>
           <Text style={styles.paragraph}>
             The devices used (mobile phones, computers, tablets, etc.) to access
-            Website services such as the hardware models, operation system
+            Website services such as the hardware models, operating system
             information, software information and version, file names, language
-            preferences, IP address cookie information, advertising identifiers,
+            preferences, IP address, cookie information, advertising identifiers,
             browser version, device settings, and mobile network information.
-            The Website may recognise Users devices to provide the User with
-            personalised experiences and advertising across the services
-            available.
+            The Website may recognize the User's devices to provide personalized
+            experiences and advertising across the services available.
           </Text>
           <Text style={styles.subSectionTitle}>Camera & storage:</Text>
           <Text style={styles.paragraph}>
-            To upload image or photo and proofs related to KYC and document
-            upload.
+            To upload image or photo and proofs related to KYC and document upload.
           </Text>
           <Text style={styles.subSectionTitle}>Location:</Text>
           <Text style={styles.paragraph}>
@@ -191,18 +183,16 @@ const Privacy = ({ route, navigation }) => {
             information, mobile network information, and information about your
             device's interaction with our service to uniquely identify the
             devices, to ensure that unauthorized devices are not able to act on
-            your behalf and to prevent frauds.
+            your behalf and to prevent fraud.
           </Text>
           <Text style={styles.subSectionTitle}>Information Sharing:</Text>
           <Text style={styles.paragraph}>
             MyChits will not sell or rent your Information to anyone, for any
-            reason, at any time. However, we will be sharing your Information
-            with our financial partners, affiliates and business partners, and
-            the User hereby consents to the same. We will take reasonable steps
-            to ensure that these third-party service providers are obligated to
-            protect your information and are also subject to
-            confidentiality/non-disclosure obligations and they comply with the
-            applicable provisions of the data protection laws.
+            reason, at any time. However, we will share your Information with our
+            financial partners, affiliates and business partners, and the User hereby
+            consents to the same. We will take reasonable steps to ensure that these third-party
+            service providers are obligated to protect your information and are also subject to confidentiality/non-disclosure
+            obligations and comply with the applicable data protection laws.
           </Text>
           <Text style={styles.subSectionTitle}>
             Information received from other sources:
@@ -211,16 +201,13 @@ const Privacy = ({ route, navigation }) => {
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                If there is use of any of the other websites or apps we operate,
-                or other services provided by us.
+                If there is use of any of the other websites or apps we operate, or other services provided by us.
               </Text>
             </View>
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                From third parties through whom the User is able to access or
-                register for the services (e.g. where you are able to log in
-                with a Google account).
+                From third parties through whom the User is able to access or register for the services (e.g. logging in with a Google account).
               </Text>
             </View>
             <View style={styles.bulletPointContainer}>
@@ -231,138 +218,97 @@ const Privacy = ({ route, navigation }) => {
             </View>
           </View>
           <Text style={styles.paragraph}>
-            In case Website/App receives or collects any such data as
-            abovementioned, the User will be informed when such data is being
-            collected and if such data is intended to be shared internally
-            and/or combined with data automatically collected on this
-            Website/App. The purpose of such usage shall also be intimated to
-            the User.
+            In case the Website/App receives or collects any such data as
+            mentioned, the User will be informed when such data is being collected and if such data is intended to be shared internally
+            and/or combined with data automatically collected on the Website/App. The purpose of such usage shall also be intimated to the User.
           </Text>
           <Text style={styles.paragraph}>
-            The Website/App works closely with third parties (including but not
-            limited to, business partners, sub-contractors in technical, payment
-            services, advertising networks, analytics providers, and search
-            information providers). User will be notified when and if the
-            Website/App receives information about the User from such third
-            parties and the purposes for which Website/App intends to use that
-            information.
+            The Website/App works closely with third parties (including but not limited to business partners, sub-contractors, payment services,
+            advertising networks, analytics providers, and search information providers). The User will be notified when and if the Website/App receives
+            information about the User from such third parties and the purposes for which it intends to use that information.
           </Text>
           <Text style={styles.paragraph}>
-            The User may be given the option to access or register for any and
-            all services through the use of a user name and password (or any
-            other identifier) for certain services provided by third parties
-            (each, an <Text style={styles.boldText}>"Integrated Service"</Text>
-            ), such as through the use of your Google account, accounts with
-            payment systems or wallet providers, or otherwise have the option to
-            authorize an integrated service to provide personal data to the
-            Website/App. By authorizing the Website/App to connect with an
-            Integrated Service, User authorizes Us to access and store User’s
-            personal data that the Integrated Service makes available to the
-            Website/App, and to use and disclose it in accordance with this
-            policy. Please review the terms and conditions of service, terms of
-            use and privacy policies of each integrated service carefully before
-            using their services and integrating with our services. Please check
-            your privacy settings on each integrated device to understand what
-            personal data has been integrated with our services.
+            The User may be given the option to access or register for any and all services through the use of a user name and password (or any other identifier)
+            for services provided by third parties (each, an <Text style={styles.boldText}>"Integrated Service"</Text>), such as via your Google account,
+            accounts with payment systems or wallet providers, or otherwise authorizing an integrated service to provide personal data to the Website/App.
+            By authorizing the Website/App to connect with an Integrated Service, the User authorizes us to access and store their personal data that the
+            Integrated Service makes available to the Website/App, and to use and disclose it in accordance with this policy. Please review the terms and conditions
+            of each integrated service carefully before using their services and integrating with our services. Check your privacy settings on each integrated
+            device to understand what personal data is shared.
           </Text>
           <Text style={styles.paragraph}>
-            Depending on the nature of dealings with User and/or the services
-            provided, the Website/App may collect other types of personal data
-            from third parties, including:
+            Depending on the nature of dealings with the User and/or the services provided, the Website/App may collect other types of personal data from third parties, including:
           </Text>
           <View>
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                personal data relating to any complaints you make or are made
-                about you, including recording of any calls in that regard;
+                Personal data relating to any complaints you make or that are made about you, including call recordings.
               </Text>
             </View>
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                personal data collected and held via financial or payment
-                systems about the payment mechanism or method that you might use
-                (including credit card, debit card, upi details, etc.) and the
-                payments you may make for our services or any services procured
-                or subscribed to using Website and/or App services;
+                Personal data collected and held via financial or payment systems regarding payment mechanism details
+                (such as credit card, debit card, or UPI details) and payments for any services procured via the Website/App.
               </Text>
             </View>
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                personal data collected by third-party marketing, survey and
-                advertising service providers;
+                Personal data collected by third-party marketing, survey, and advertising service providers.
               </Text>
             </View>
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                personal data provided to any partners through which User
-                creates or accesses their account for the services, such as
-                employee information provided to companies engaging in our
-                corporate or other services, payment providers, or services
-                integrated with our services, or other websites (such as search
-                engines) with which our services have been integrated;
+                Personal data provided to any partners through which the User creates or accesses their account for the services,
+                such as employee information provided to companies engaging in our corporate or other services, payment providers,
+                or other integrated websites (such as search engines).
               </Text>
             </View>
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                personal data which is accessible from User use of online sites
-                or applications in which the Website/App has an interest (such
-                as messages for the purposes of issuing and receiving one-time
-                passwords and other device verification) and device-related or
-                device-generated personal data. The latter might include User
-                device details, device IDs, your location, network connections,
-                network access and communication and session data. Location data
-                may also be collected or derived from IP addresses, mobile
-                numbers and network information.
+                Device-related or device-generated personal data including device details, device IDs, location, network connections,
+                network access, and session data. Location data may also be derived from IP addresses, mobile numbers, and network information.
               </Text>
             </View>
           </View>
           <Text style={styles.sectionTitle}>Usage of Information</Text>
           <Text style={styles.paragraph}>
-            Information collected by this Website will help enhance the design
-            and implementation of Services on the Website/App. The Services may
-            also use information provided by the User to operate and improve the
-            functionality of the Service. Apart from this, information
-            collected/provided will be used to take steps in order to enter into
-            any contract or carry out service obligations arising from any
-            contract entered into between User and Us, such as:
+            Information collected by the Website will help enhance the design and implementation of our services on the Website/App.
+            The Services may also use information provided by the User to operate and improve functionality. In addition, such information
+            will be used for fulfilling contracts or service obligations between the User and us, including:
           </Text>
           <View>
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                Administering User account within the site;
+                Administering the User account within the site;
               </Text>
             </View>
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                Verification of any financial transactions being carried out in
-                relation to payments made through the site and/or the App.
+                Verification of any financial transactions conducted via the site and/or App.
               </Text>
             </View>
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                Providing information about available goods and services which
-                interests Users for modifying:
+                Providing information about available goods and services to tailor content:
                 <View style={styles.nestedBulletContainer}>
                   <View style={styles.bulletPointContainer}>
                     <Text style={styles.nestedBulletIcon}>-</Text>
                     <Text style={styles.bulletText}>
-                      Manner of presentation of the Contents from the Site in
-                      the most effective way.
+                      To present the content in the most effective manner.
                     </Text>
                   </View>
                   <View style={styles.bulletPointContainer}>
                     <Text style={styles.nestedBulletIcon}>-</Text>
                     <Text style={styles.bulletText}>
-                      Provide information, products and services that are
-                      requested from us.
+                      To provide products and services requested by the User.
                     </Text>
                   </View>
                 </View>
@@ -370,19 +316,16 @@ const Privacy = ({ route, navigation }) => {
             </View>
           </View>
           <Text style={styles.subSectionTitle}>
-            Information collected by User from use of Services:
+            Information collected by the User from use of Services:
           </Text>
           <Text style={styles.paragraph}>
-            We will use information for their legitimate interests, when
-            considered to not be overriding User rights:
+            We will use information for our legitimate interests, provided these do not override the User’s rights:
           </Text>
           <View>
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                To administer the Services and for internal operations,
-                including troubleshooting, data analysis, testing, research,
-                statistical and survey purposes.
+                To administer the Services and for internal operations including troubleshooting, data analysis, and research.
               </Text>
             </View>
             <View style={styles.bulletPointContainer}>
@@ -394,23 +337,19 @@ const Privacy = ({ route, navigation }) => {
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                For measuring or understanding the effectiveness of advertising
-                we serve to you and others, and to deliver relevant advertising
-                to you.
+                To measure and understand the effectiveness of advertising and provide relevant ads.
               </Text>
             </View>
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                To improve the Services to ensure that content is presented in
-                the most effective manner for you and for your computer.
+                To improve the Services, ensuring content is effectively presented.
               </Text>
             </View>
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                To allow you to participate in interactive features of our
-                service, when you choose to do so.
+                To allow you to participate in interactive features if you choose.
               </Text>
             </View>
           </View>
@@ -418,225 +357,146 @@ const Privacy = ({ route, navigation }) => {
             User Information received from other sources:
           </Text>
           <Text style={styles.paragraph}>
-            Website will combine such information with information given by the
-            User and information collected about User for their legitimate
-            interests (where considered that these are not overridden by User
-            rights). Such information along with the combined information shall
-            be used for the purposes as mentioned above.
+            The Website will combine such information with that provided by the User, and use it for the purposes mentioned above.
           </Text>
           <Text style={styles.sectionTitle}>
             Promotional Updates and Communications
           </Text>
           <Text style={styles.paragraph}>
-            Website/App will share promotional updates and communications with
-            User consent or, where applicable, in legitimate interest.
+            The Website/App will share promotional updates with your consent or, where applicable, in our legitimate interest.
           </Text>
           <Text style={styles.paragraph}>
-            Where permitted in legitimate interest, Website/App will use User
-            personal information for marketing analysis and to provide the User
-            with promotional update communications by email, telephone, text
-            messages, in-application messages and/or push messages about new
-            products and/or services. Website may also share user personal
-            information with third-party social media and other partner
-            platforms in order to provide you with promotional update
-            communications.
+            When permitted in our legitimate interest, we may use your personal information for marketing analysis and to send promotional updates by email,
+            phone, text, in-app, or push notifications. The Website may also share your personal information with third-party social media and partner
+            platforms for such updates.
           </Text>
           <Text style={styles.paragraph}>
-            The User can object to further marketing at any time through their
-            profile settings or by selecting the "unsubscribe" link at the end
-            of all our marketing and promotional update communications.
+            You can object to further marketing at any time via your profile settings or by selecting the "unsubscribe" link in our communications.
           </Text>
           <Text style={styles.paragraph}>
-            By using the Website/App and registering yourself, You authorize Us,
-            Our affiliates & Our associate partners to contact You via email or
-            phone call or SMS and offer You their services for the product You
-            have opted for, imparting product knowledge or offer promotional
-            offers, as well as for web aggregation. You authorize Us to contact
-            You for a period of 90 days from Your registration with Us,
-            irrespective of having registered under DND or DNC or NCPR services.
+            By using and registering on the Website/App, you authorize us and our partners to contact you for product updates, promotional offers,
+            and web aggregation, including via email, phone, or SMS for a period of 90 days from registration.
           </Text>
           <Text style={styles.paragraph}>
-            Additionally, by registering, You authorize Us to send SMS/email
-            alerts to You for Your login details and any other service
-            requirements or advertising messages/emails from Us. Further when we
-            call you for providing details, you authorize us to record the
-            conversation for Quality and Training purposes.
+            Additionally, by registering, you authorize us to send SMS/email alerts for your login details, service requirements, or advertising messages.
+            If we call you for further details, you authorize us to record the conversation for quality and training purposes.
           </Text>
           <Text style={styles.sectionTitle}>Sharing of Information</Text>
           <Text style={styles.paragraph}>
-            We may share your information with certain third parties as set
-            forth below:
+            We may share your information with certain third parties as outlined below:
           </Text>
           <Text style={styles.subSectionTitle}>
             Authorized third-party vendors and service providers.
           </Text>
           <Text style={styles.paragraph}>
-            The information shared on this website may be shared with
-            third-party vendors and service providers who support this
-            Website/App, such as by providing technical infrastructure services,
-            business analytics, and data processing who process User personal
-            data on behalf of the website and in accordance with the applicable
-            Data Protection Laws. This includes in supporting the services
-            offered through the site and/or the App for: data hosting services,
-            providing fulfilment services, distributing and communication being
-            sent, supporting or updating marketing lists, facilitating feedback
-            on services and providing IT support services from time to time.
+            Your information may be shared with service providers who support the Website/App, such as technical infrastructure, analytics, and data processing,
+            in accordance with applicable Data Protection Laws.
           </Text>
           <Text style={styles.paragraph}>
-            The information may also be shared with the entities that make up
-            the Service Providers (
-            <Text style={styles.boldText}>"Partners"</Text>).
-          </Text>
-          <Text style={styles.paragraph}>
-            The information may be shared with any member of the group, which
-            mean and include subsidiaries, ultimate holding company and its
-            subsidiaries, who support the processing of personal data under this
-            policy.
+            Information may also be shared with partners ("Partners") or with any member of our group – including subsidiaries – who support personal data processing.
           </Text>
           <Text style={styles.subSectionTitle}>
-            Disclosure of information to respond to subpoenas, court orders,
-            legal process, law enforcement requests, legal claims or government
-            inquiries, detect fraud, and to protect and defend the rights,
-            interests, safety, and security of the website, its affiliates,
-            owner, users, or the public at large.
+            Disclosure to respond to legal obligations:
           </Text>
           <Text style={styles.paragraph}>
-            Apart from this, if bound under any additional duty to disclose or
-            share User personal data in order to comply with legal obligations
-            or in compulsion of law.
+            We may disclose your information to comply with subpoenas, court orders, legal process, or law enforcement requests, and to protect the rights,
+            interests, safety, and security of the Website, affiliates, users, or the public.
           </Text>
           <Text style={styles.subSectionTitle}>
-            Sharing of information in connection with a substantial corporate
-            transaction, such as the sale of a website, a merger, consolidation,
-            asset sale, or in the unlikely event of bankruptcy that may have
-            already been entered into or will enter into future agreements.
+            Sharing in connection with corporate transactions:
+          </Text>
+          <Text style={styles.paragraph}>
+            Information may be shared in relation to a significant corporate transaction, such as a sale, merger, consolidation, or bankruptcy.
           </Text>
           <Text style={styles.subSectionTitle}>
-            Sharing of information for any other purposes disclosed to you at
-            the time we collect the information and pursuant to your consent for
-            the furtherance of any service being rendered on the Website/App.
+            Sharing for other disclosed purposes:
           </Text>
           <Text style={styles.paragraph}>
-            For instance, if you request for services as a customer, then we
-            will share only such personal information to facilitate and complete
-            the services.
+            If you request services as a customer, we will share only the information necessary to facilitate those services.
           </Text>
           <Text style={styles.subSectionTitle}>
-            Any access to third-party services, is done through the Website/App
-            to share information about your experience on the Website/App with
-            others;
+            Sharing via third-party services:
           </Text>
           <Text style={styles.paragraph}>
-            these services are outside the control of the Company. These
-            third-party services may be able to collect information about you,
-            including information about your activity on the Website/App, and
-            they may notify your connections on the third-party services about
-            your use of the Website/App, in accordance with their respective
-            privacy policies.
+            Third-party services accessed through the Website/App may collect your information in accordance with their own privacy policies.
           </Text>
           <Text style={styles.paragraph}>
-            User Information may also be shared with carefully selected partners
-            who may be specifically of interest to the User to fulfil their
-            requirements. These companies may contact the User by post, email,
-            telephone or fax for marketing or promotional purposes.
-          </Text>
-          <Text style={styles.paragraph}>
-            We will not sell or rent User Information to anyone other than as
-            specifically noted herein. Notwithstanding the foregoing, We may
-            share, and/or transfer Your User Information to an affiliate and/or
-            associate partner, as agreed by You in the Terms of Use and in
-            accordance with this policy. We will share User Information if We
-            have Your consent or deemed consent to do so or if We are compelled
-            by law (including court orders) to do so.
+            We do not sell or rent your information except as specifically provided herein. We may share or transfer your information to an affiliate or partner
+            under agreed terms and in accordance with this policy.
           </Text>
           <Text style={styles.subSectionTitle}>
             Legal obligations for processing Information:
           </Text>
           <Text style={styles.paragraph}>
-            The Website/App rely on a variety of legal bases to process data,
-            including:
+            The Website/App relies on various legal bases for processing data, including:
           </Text>
           <View>
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                as necessary to fulfil site Terms;
+                As necessary to fulfill site Terms;
               </Text>
             </View>
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                consistent with User consent, which the User can revoke at any
-                time;
+                Consistent with your consent, which can be withdrawn at any time;
               </Text>
             </View>
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                as necessary to comply with legal obligations;
+                As necessary to comply with legal obligations;
               </Text>
             </View>
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                to protect Users vital interests, or those of others;
+                To protect your vital interests or those of others;
               </Text>
             </View>
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                as necessary in the public interest; and
+                As necessary in the public interest; and
               </Text>
             </View>
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                as necessary for Website (or others) legitimate interests,
-                including any interests in providing an innovative personalized,
-                safe and profitable service to User and/or it's partners, unless
-                those interests are overridden by User interests or fundamental
-                rights or freedoms that require protection of personal data.
+                For our or third parties’ legitimate interests, unless overridden by your rights or freedoms.
               </Text>
             </View>
           </View>
           <Text style={styles.paragraph}>
-            Consent to these terms may be withdrawn at any time. Such withdrawal
-            of consent will not affect the lawfulness of processing based on
-            consent before its withdrawal.
+            You may withdraw consent at any time; however, this will not affect the lawfulness of processing based on your consent prior to withdrawal.
           </Text>
           <Text style={styles.paragraph}>
-            Under applicable laws, and in accordance to this policy User has
-            the:
+            Under applicable laws, you have the:
           </Text>
           <View>
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                Right to access, rectify, port, and erase the information
-                collected by the website,
+                Right to access, rectify, port, and erase your information,
               </Text>
             </View>
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                Right to restrict and object to certain processing of User
-                information.
+                Right to restrict or object to certain processing activities.
               </Text>
             </View>
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                Right to withdraw consent - where the processing of User
-                personal information by Website is based on consent, User has
-                the right to withdraw without detriment at any time.
+                Right to withdraw consent for processing of your personal data.
               </Text>
             </View>
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                Right to object to and restrict certain processing of data which
-                includes - the right to object to processing of their data for
-                direct marketing, which you can exercise by contacting{" "}
+                Right to object to processing for direct marketing by contacting{" "}
                 <Text
                   style={styles.linkText}
                   onPress={() => handleLinkPress("mailto:admin@mychits.co.in")}
@@ -648,213 +508,158 @@ const Privacy = ({ route, navigation }) => {
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                Right to object to processing of their data where the Company is
-                performing a task in the public interest or pursuing their own
-                legitimate interests or those of a third party, and
-              </Text>
-            </View>
-            <View style={styles.bulletPointContainer}>
-              <Text style={styles.bulletIcon}>•</Text>
-              <Text style={styles.bulletText}>
-                Right to opt out at any time from allowing further access to
-                User personal information and apply to delete the personal
-                information stored with Website.
+                Right to opt out of further access and deletion of your personal information.
               </Text>
             </View>
           </View>
           <Text style={styles.paragraph}>
-            User may delete their information at any time by contacting{" "}
+            You may delete your information at any time by contacting{" "}
             <Text
               style={styles.linkText}
               onPress={() => handleLinkPress("mailto:admin@mychits.co.in")}
             >
               admin@mychits.co.in
             </Text>
-            . All information collected by the Website such as information from
-            cookies and information collected with consent under this Policy
-            shall be deleted.
+            . All information collected (such as cookies and data given under this policy)
+            shall be deleted accordingly.
           </Text>
           <Text style={styles.sectionTitle}>Storage of Information</Text>
           <Text style={styles.subSectionTitle}>Data Storage:</Text>
           <Text style={styles.paragraph}>
-            User acknowledges and agrees that all information, content and data
-            entered into the website and/or application will be securely stored
-            by the Website/App at designated data centres. We shall use physical
-            and technical security measures to protect User Data, including, but
-            not limited to, encrypted data connections to designated data
-            centers, encrypted data storage, firewalls, and electronic
-            surveillance of designated data centers. We have put in place
-            appropriate physical, electronic, and managerial procedures to
-            safeguard and secure the information We collect online.
+            You acknowledge that all information, content and data entered into the Website/App will be securely stored at designated data centres.
+            We use physical and technical measures (including encrypted data connections and storage, firewalls, and surveillance) to protect your data.
           </Text>
           <Text style={styles.subSectionTitle}>Payment:</Text>
           <Text style={styles.paragraph}>
-            Payment details provided by the User will be encrypted using secure
-            sockets layer (SSL) technology before they are submitted to the
-            Website over the internet. Payments made on the Website/App are made
-            through Website payment gateway provider Hypto, a data processing
-            and payment firm. User will be providing credit or debit card
-            information directly to Website payment gateway provider, who
-            operate secure servers to process payment details, encrypting User
-            credit/debit card information and authorising payment(s).
-            Information which you supply to Website payment service providers is
-            not within Website control and is subject to the respective
-            providers’ own privacy policy and terms and conditions.
+            Payment details you provide will be encrypted using SSL technology when submitted to the Website.
+            Payments made on the Website/App are processed via our payment gateway provider Hypto.
           </Text>
           <Text style={styles.subSectionTitle}>Security Disclosure:</Text>
           <Text style={styles.paragraph}>
-            The security of User Personal Information is important to us;
-            However, User understands that no method of transmission over the
-            Internet, or method of electronic storage, is 100% secure. While we
-            strive to use commercially acceptable means to protect your Personal
-            Information, we cannot guarantee its absolute security.
+            While we strive to use commercially acceptable means to protect your data,
+            no method of transmission or electronic storage is 100% secure.
           </Text>
           <Text style={styles.sectionTitle}>Data Retention</Text>
           <Text style={styles.paragraph}>
-            The Website/App shall retain the personal data for:
+            The Website/App will retain your personal data:
           </Text>
           <View>
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                as long as user has an account on the Website/App in order to
-                meet contractual obligations to the User;
+                As long as your account is active to meet contractual obligations;
               </Text>
             </View>
             <View style={styles.bulletPointContainer}>
               <Text style={styles.bulletIcon}>•</Text>
               <Text style={styles.bulletText}>
-                for a period of 3 (three) months after termination of services
-                or closure of account by User in order to identify any issues
-                and resolve any legal proceedings. The information can be
-                retained for other legal or regulatory requirements.
+                For 3 months after termination or account closure to resolve any issues or legal proceedings.
               </Text>
             </View>
           </View>
           <Text style={styles.paragraph}>
-            We may also retain information beyond this time for research
-            purposes and to help us develop and improve our services with prior
-            permission and intimation.
+            We may retain information beyond this period for research purposes or service improvements with your consent.
           </Text>
           <Text style={styles.paragraph}>
-            The Website/App generally retains information until it is no longer
-            necessary to serve the purposes for which it was collected.
+            Generally, data is kept only as long as necessary to serve its original purpose.
           </Text>
           <Text style={styles.sectionTitle}>Data Transfers</Text>
           <Text style={styles.paragraph}>
-            Standard contract clauses are used as approved as per applicable
-            laws of the territory of service, for data transfers from one
-            country to another.
+            Standard contract clauses govern data transfers across countries in compliance with applicable laws.
           </Text>
           <Text style={styles.sectionTitle}>Amendments to Policy</Text>
           <Text style={styles.paragraph}>
-            Any changes made to this policy in future will be posted on this
-            page and, in relation to any substantive changes, the User shall be
-            notified by e-mail. We encourage you to periodically review this
-            policy for other latest information on our privacy practices.
+            Any future changes to this policy will be posted on this page and, for substantive changes, you will be notified via e-mail.
+            We encourage you to review this policy periodically for updates.
           </Text>
           <Text style={[styles.paragraph, styles.lastUpdated]}>
             This policy was last updated on 21/05/2025.
           </Text>
-          {/* New content ends here */}
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
-
 const styles = StyleSheet.create({
-  blueBackgroundContainer: {
+  violetBackgroundContainer: {
     flex: 1,
-    backgroundColor: "#053B90", // Primary, elegant brand blue for the very top and behind the main scrollable area
+    backgroundColor: "#6A0DAD", // Primary violet background for the safe area
     paddingTop: StatusBar.currentHeight || 0,
   },
-
   scrollViewStyle: {
     flex: 1,
-    backgroundColor: "#053B90", // Very light, airy blue-white background for the overall scroll view
+    backgroundColor: "#6A0DAD", // Same violet background for seamless integration
   },
-
   whiteContentContainer: {
-    backgroundColor: "#F5F9FF", // Matches scrollView background for seamless neumorphic look
-    borderRadius: 30, // Even softer, more inviting edges
-    marginHorizontal: width * 0.04, // Keep margin to float content from screen edges
+    backgroundColor: "#fff", // Light violet tone for the neumorphic card feel
+    borderRadius: 30,
+    marginHorizontal: width * 0.04,
     marginTop: height * 0.02,
-    marginBottom: height * 0.04, // Generous space at the bottom of the card
-
-    shadowColor: "rgba(174, 174, 192, 0.5)", // Lighter shadow, more opaque for the "light" source
-    shadowOffset: { width: -10, height: -10 }, // Top-left light source
+    marginBottom: height * 0.04,
+    shadowColor: "rgba(174, 174, 192, 0.5)",
+    shadowOffset: { width: -10, height: -10 },
     shadowOpacity: 1,
     shadowRadius: 12,
-    elevation: 10, // Android elevation for base shadow (often simulates one direction of neumorphism)
-    borderWidth: 0, // No border for neumorphic smoothness
+    elevation: 10,
     ...Platform.select({
       ios: {
-        shadowColor: "rgba(94, 104, 121, 0.5)", // Darker shadow, more opaque for the "dark" source
-        shadowOffset: { width: 10, height: 10 }, // Bottom-right dark source
+        shadowColor: "rgba(94, 104, 121, 0.5)",
+        shadowOffset: { width: 10, height: 10 },
         shadowOpacity: 1,
         shadowRadius: 12,
       },
       android: {},
     }),
   },
-
   innerContentPadding: {
-    paddingHorizontal: width * 0.06, // Increased horizontal padding for a more spacious feel
-    paddingTop: height * 0.04, // More padding at the top of the content
-    paddingBottom: height * 0.1, // Ample space at the bottom for comfortable scrolling
+    paddingHorizontal: width * 0.06,
+    paddingTop: height * 0.04,
+    paddingBottom: height * 0.1,
   },
-
   header: {
-    fontSize: width * 0.085, // Even larger and more dominant
-
-    fontWeight: "bold", // Fallback
-    color: "#0A4B9F", // Primary brand blue
-    marginBottom: height * 0.02, // Consistent space below titles
+    fontSize: width * 0.085,
+    fontWeight: "bold",
+    color: "#6A0DAD",
+    marginBottom: height * 0.02,
     textAlign: "center",
     textTransform: "uppercase",
-    letterSpacing: 2, // More impactful letter spacing
+    letterSpacing: 2,
   },
-
   sectionTitle: {
-    fontSize: width * 0.068, // Slightly larger, clear hierarchy
-
-    fontWeight: "600", // Fallback
-    color: "#0A4B9F", // Consistent primary blue
-    marginTop: height * 0.05, // More space above sections for clear breaks
-    marginBottom: height * 0.018, // Space below section titles
+    fontSize: width * 0.068,
+    fontWeight: "600",
+    color: "#6A0DAD",
+    marginTop: height * 0.05,
+    marginBottom: height * 0.018,
     textAlign: "left",
-    textTransform: "capitalize", // Capitalize each word, less aggressive than uppercase
+    textTransform: "capitalize",
     letterSpacing: 1.3,
-    borderBottomWidth: 2, // Slightly thicker, more pronounced bottom border
-    borderColor: "#D0E0FF", // Very light blue border
-    paddingBottom: height * 0.015, // More padding for border separation
+    borderBottomWidth: 2,
+    borderColor: "#D0E0FF",
+    paddingBottom: height * 0.015,
   },
-
   subSectionTitle: {
-    fontSize: width * 0.055, // Smaller than sectionTitle, larger than paragraph
-    fontWeight: "bold", // Bold for emphasis
-    color: "#0A4B9F", // Primary brand blue
-    marginTop: height * 0.03, // Space above sub-sections
-    marginBottom: height * 0.01, // Space below sub-sections
+    fontSize: width * 0.055,
+    fontWeight: "bold",
+    color: "#6A0DAD",
+    marginTop: height * 0.03,
+    marginBottom: height * 0.01,
     textAlign: "left",
   },
-
   paragraph: {
-    fontSize: width * 0.046, // Slightly larger for better readability
-    lineHeight: width * 0.075, // Optimized line height for very comfortable reading
-    color: "#333", // Even darker grey for strong contrast and readability
-    marginBottom: height * 0.025, // More space between paragraphs
-    textAlign: "justify", // Justify text for a clean, block-like appearance
-
-    fontWeight: "400", // Fallback
+    fontSize: width * 0.046,
+    lineHeight: width * 0.075,
+    color: "#333",
+    marginBottom: height * 0.025,
+    textAlign: "justify",
+    fontWeight: "400",
   },
   boldText: {
-    fontWeight: "bold", // Fallback for bolding important text
-    color: "#0A4B9F", // Make bold text the brand color for emphasis
+    fontWeight: "bold",
+    color: "#6A0DAD",
   },
   linkText: {
-    color: "#007AFF", // Standard blue for links
+    color: "#8E44AD",
     textDecorationLine: "underline",
   },
   lastUpdated: {
@@ -863,35 +668,32 @@ const styles = StyleSheet.create({
     marginTop: height * 0.04,
     color: "#666",
   },
-
   bulletPointContainer: {
     flexDirection: "row",
-    alignItems: "flex-start", // Align icon and text at the top
-    marginBottom: height * 0.015, // More space between bullet points
-    marginLeft: width * 0.02, // Initial indent for the bullet
+    alignItems: "flex-start",
+    marginBottom: height * 0.015,
+    marginLeft: width * 0.02,
   },
   bulletIcon: {
-    fontSize: width * 0.055, // Slightly larger bullet icon
-    color: "#FF8C00", // Vibrant orange for bullet icons
-    marginRight: width * 0.025, // More space between bullet icon and text
+    fontSize: width * 0.055,
+    color: "#8E44AD", // Violet accent for bullet icons
+    marginRight: width * 0.025,
   },
   bulletText: {
-    flex: 1, // Allows text to wrap within the available space
-    fontSize: width * 0.046, // Consistent with paragraph font size
-    lineHeight: width * 0.075, // Consistent with paragraph line height
-    color: "#444", // Slightly darker grey for clarity
-
+    flex: 1,
+    fontSize: width * 0.046,
+    lineHeight: width * 0.075,
+    color: "#444",
     fontWeight: "400",
   },
   nestedBulletContainer: {
-    marginLeft: width * 0.04, // Indent for nested lists
+    marginLeft: width * 0.04,
     marginTop: height * 0.01,
   },
   nestedBulletIcon: {
-    fontSize: width * 0.045, // Smaller icon for nested bullets
-    color: "#666", // Less vibrant color for nested bullets
+    fontSize: width * 0.045,
+    color: "#666",
     marginRight: width * 0.015,
   },
 });
-
 export default Privacy;

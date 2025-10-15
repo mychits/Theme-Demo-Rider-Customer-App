@@ -473,7 +473,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#053B90",
   },
   contentCard: {
-    flex: 1, // Crucial: Allow contentCard to take up remaining height in mainContentWrapper
+    flex: 1, // Crucial: Allow c
+    // tentCard to take up remaining height in mainContentWrapper
     width: "95%",
     backgroundColor: "#fff",
     borderRadius: 12,

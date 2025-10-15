@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useContext } from "react";
 import {
   View,
@@ -8,50 +9,44 @@ import {
   SafeAreaView,
   StatusBar,
   Linking, // For opening URLs
-  Platform, // For platform-specific styles like StatusBar
+  Platform, // For platform-specific styles
   Dimensions, // To make styles responsive
   Alert, // Using Alert instead of console.log for user feedback
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient"; // Import LinearGradient
-import { MaterialIcons, FontAwesome } from "@expo/vector-icons"; // Import MaterialIcons and FontAwesome for more icons
+import { LinearGradient } from "expo-linear-gradient"; // Import LinearGradient for gradient backgrounds
+import { MaterialIcons, FontAwesome } from "@expo/vector-icons"; // Import icons
 import { NetworkContext } from "../context/NetworkProvider"; // Assuming this context exists
 import Header from "../components/layouts/Header"; // Import the Header component
-import { useSafeAreaInsets } from "react-native-safe-area-context"; // Import useSafeAreaInsets for better padding
+import { useSafeAreaInsets } from "react-native-safe-area-context"; // To handle safe area insets
 import { ContextProvider } from "../context/UserProvider";
-
 const { width, height } = Dimensions.get("window");
-
+// Violet-themed colors configuration
 const Colors = {
-  primaryBlue: "#053B90", // Deep, vibrant blue
-  secondaryBlue: "#3498DB", // Lighter, sky blue
-  accentGreen: "#2ECC71", // Fresh green for success/positive
-  accentOrange: "#FFA000", // Warm orange for accents/warnings
-
-  backgroundLight: "#053B90", // Very light off-white for main background
-  cardBackground: "#FFFFFF", // Pure white for card elements
-  textDark: "#2C3E50", // Dark charcoal for primary text
+  primaryViolet: "#6A0DAD", // Main violet tone for primary elements
+  secondaryViolet: "#8E44AD", // Secondary violet shade
+  // Optionally, if you want to keep a contrasting accent for support actions,
+  // you might change accentGreen. Here, all buttons use the violet theme.
+  accentGreen: "#6A0DAD", // Overriding with violet tone for consistency
+  accentOrange: "#FFA000", // Warm orange can remain for accents if needed
+  backgroundLight: "#F3F0FF", // A very light violet background for the overall screen
+  cardBackground: "#FFFFFF", // White for card elements
+  textDark: "#2C3E50", // Dark grey for primary text
   textMedium: "#7F8C8D", // Medium grey for secondary text
-  textLight: "#BDC3C7", // Very light grey for subtle labels
-
-  buttonPrimary: "#0A4B9F",
+  textLight: "#BDC3C7", // Light grey for subtle labels
+  buttonPrimary: "#6A0DAD", // Violet for primary buttons
   buttonSecondary: "#95A5A6",
-  dangerRed: "#E74C3C", // Red for errors/danger
-  successGreen: "#2ECC71", // Green for success
-  linkBlue: "#3498DB", // Blue for hyperlinks
-
-  gradientStart: "#0A4B9F",
-  gradientEnd: "#062E61",
-
+  dangerRed: "#E74C3C",
+  successGreen: "#2ECC71",
+  linkBlue: "#6A0DAD", // Violet for hyperlinks
+  gradientStart: "#6A0DAD", // Gradient start color in violet
+  gradientEnd: "#8E44AD",  // Gradient end color in violet
   shadowColor: "rgba(0,0,0,0.15)", // Subtle shadow
 };
-
 const MoreInformation = ({ navigation }) => {
   const { isConnected, isInternetReachable } = useContext(NetworkContext);
-
   const [appUser, setAppUser] = useContext(ContextProvider);
   const userId = appUser.userId || {};
   const insets = useSafeAreaInsets(); // Get safe area insets
-
   const handleWebsiteLink = async () => {
     const websiteUrl = "https://www.mychits.co.in";
     if (!isConnected || !isInternetReachable) {
@@ -70,25 +65,24 @@ const MoreInformation = ({ navigation }) => {
       Alert.alert("Error", "Could not open website. Please try again.");
     }
   };
-
   return (
     <SafeAreaView
       style={[styles.fullScreenContainer, { paddingTop: insets.top }]}
     >
       <StatusBar
         barStyle="light-content"
-        backgroundColor={Colors.primaryBlue}
+        backgroundColor={Colors.primaryViolet}
       />
       <Header
         navigation={navigation}
         userId={userId}
         title="More Information"
-      />{" "}
+      />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.contentCard}>
-          <Text style={styles.mainTitle}>About MyChits</Text>
+          <Text style={styles.mainTitle}>About Demo Rider</Text>
           <Text style={styles.sectionText}>
-            Welcome to MyChits! We are dedicated to providing a seamless and
+            Welcome to Demo Rider! We are dedicated to providing a seamless and
             transparent platform for managing your chit funds. Our goal is to
             empower users with easy access to their chit details, payment
             history, and group information, all at their fingertips.
@@ -133,17 +127,18 @@ const MoreInformation = ({ navigation }) => {
               <MaterialIcons
                 name="language"
                 size={20}
-                color={Colors.primaryBlue} 
+                color={Colors.cardBackground}
               />
-              <Text style={styles.websiteLinkTextInWhiteContainer}>Visit Our Website</Text>
+              <Text style={styles.websiteLinkTextInWhiteContainer}>
+                Visit Our Website
+              </Text>
             </TouchableOpacity>
           </View>
-
         </View>
         <LinearGradient
-          colors={[Colors.gradientStart, Colors.gradientEnd]} // Using defined gradient colors
+          colors={[Colors.gradientStart, Colors.gradientEnd]}
           start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }} // Diagonal gradient for a dynamic look
+          end={{ x: 1, y: 1 }}
           style={styles.appInfoFooter}
         >
           <View style={styles.madeWithLoveContainer}>
@@ -164,24 +159,23 @@ const MoreInformation = ({ navigation }) => {
     </SafeAreaView>
   );
 };
-
 const styles = StyleSheet.create({
   fullScreenContainer: {
     flex: 1,
-    backgroundColor: Colors.backgroundLight, // Light background for the whole screen
+    backgroundColor: Colors.backgroundLight, // Light violet-toned background for the whole screen
   },
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: width * 0.05, // Responsive horizontal padding
-    paddingBottom: height * 0.03, // More padding at the bottom
-    justifyContent: "space-between", // Pushes footer to bottom
+    paddingBottom: height * 0.03, // Extra bottom padding
+    justifyContent: "space-between", // Ensures footer is pushed to the bottom
   },
   contentCard: {
     backgroundColor: Colors.cardBackground,
     borderRadius: 15,
     padding: width * 0.05,
     marginTop: height * 0.02,
-    marginBottom: height * 0.03, // Added some bottom margin to separate from the website container
+    marginBottom: height * 0.03,
     shadowColor: Colors.shadowColor,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.25,
@@ -193,19 +187,19 @@ const styles = StyleSheet.create({
     marginBottom: height * 0.02,
   },
   mainTitle: {
-    fontSize: width * 0.07, // Responsive font size
-    fontWeight: "800", // Extra bold
-    color: Colors.primaryBlue,
+    fontSize: width * 0.07,
+    fontWeight: "800",
+    color: Colors.primaryViolet,
     marginBottom: height * 0.02,
     textAlign: "center",
-    textShadowColor: "rgba(0,0,0,0.05)", // Subtle text shadow
+    textShadowColor: "rgba(0,0,0,0.05)",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
   sectionText: {
-    fontSize: width * 0.042, // Responsive font size
+    fontSize: width * 0.042,
     color: Colors.textDark,
-    lineHeight: width * 0.065, // Improved line height
+    lineHeight: width * 0.065,
     marginBottom: height * 0.015,
     textAlign: "justify",
   },
@@ -215,26 +209,26 @@ const styles = StyleSheet.create({
     borderTopColor: Colors.textLight,
     paddingTop: height * 0.02,
     alignItems: "center",
-    marginBottom: height * 0.02, // Added margin bottom to separate from website container
+    marginBottom: height * 0.02,
   },
   contactTitle: {
     fontSize: width * 0.05,
     fontWeight: "700",
-    color: Colors.primaryBlue,
+    color: Colors.primaryViolet,
     marginBottom: height * 0.015,
   },
   contactButton: {
     flexDirection: "row",
-    backgroundColor: Colors.accentGreen,
+    backgroundColor: Colors.primaryViolet, // Violet-themed call-to-action button
     paddingVertical: 12,
     paddingHorizontal: 25,
     borderRadius: 30,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 10,
-    width: "80%", // Make buttons a bit narrower
-    maxWidth: 250, // Max width for larger screens
-    shadowColor: Colors.accentGreen, // Shadow for call to action
+    width: "80%",
+    maxWidth: 250,
+    shadowColor: Colors.primaryViolet,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
@@ -246,57 +240,52 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginLeft: 10,
   },
-  // NEW STYLE FOR WHITE CONTAINER FOR WEBSITE LINK
   websiteContainer: {
-    backgroundColor: Colors.cardBackground, // White background
+    backgroundColor: Colors.cardBackground,
     borderRadius: 15,
-    // Increased padding for more internal space
-    paddingVertical: height * 0.025, // Adjusted from width * 0.05 for more vertical padding
+    paddingVertical: height * 0.025,
     paddingHorizontal: width * 0.05,
-    marginTop: height * 0.02, // Consistent space from contact section
-    marginBottom: height * 0.03, // Space from footer below
+    marginTop: height * 0.02,
+    marginBottom: height * 0.03,
     shadowColor: Colors.shadowColor,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.25,
     shadowRadius: 10,
     elevation: 8,
-    alignItems: "center", // Center content within the white container
-    // Added border for a more defined card-like appearance
+    alignItems: "center",
     borderWidth: 1,
-    borderColor: Colors.textLight, // Subtle border color
+    borderColor: Colors.textLight,
   },
-  // NEW STYLE FOR BUTTON INSIDE WHITE CONTAINER
   websiteLinkButtonInWhiteContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 30, // Slightly more rounded button inside white container
-    backgroundColor: Colors.backgroundLight, // Use primary blue for the button
-    width: "80%", // Match width of contact buttons
-    maxWidth: 250, // Match max width
-    shadowColor: Colors.primaryBlue,
+    borderRadius: 30,
+    backgroundColor: Colors.primaryViolet, // Violet-themed button inside the white container
+    width: "80%",
+    maxWidth: 250,
+    shadowColor: Colors.primaryViolet,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 6,
   },
-  // NEW STYLE FOR TEXT INSIDE WHITE CONTAINER BUTTON
   websiteLinkTextInWhiteContainer: {
     fontSize: width * 0.045,
-    color: Colors.cardBackground, // White text for contrast on blue button
+    color: Colors.cardBackground,
     fontWeight: "bold",
     marginLeft: 10,
   },
   appInfoFooter: {
     paddingVertical: height * 0.03,
     paddingHorizontal: width * 0.05,
-    borderRadius: 20, // More rounded corners
+    borderRadius: 20,
     alignItems: "center",
-    marginTop: height * 0.03, // Space from content above (now from the new website container)
+    marginTop: height * 0.03,
     shadowColor: Colors.shadowColor,
-    shadowOffset: { width: 0, height: 8 }, // Deeper shadow
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: 15,
     elevation: 12,
@@ -308,15 +297,14 @@ const styles = StyleSheet.create({
   },
   appInfoMadeWithLove: {
     fontSize: width * 0.038,
-    color: Colors.cardBackground, // White text
+    color: Colors.cardBackground,
     marginRight: 5,
   },
   madeInIndiaIcon: {},
   versionText: {
     fontSize: width * 0.035,
-    color: Colors.textLight, // Lighter text for version number
+    color: Colors.textLight,
     marginTop: 5,
   },
 });
-
 export default MoreInformation;

@@ -1,3 +1,4 @@
+
 import React, { useContext } from "react";
 import {
   ScrollView,
@@ -12,17 +13,29 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import { MaterialIcons } from "@expo/vector-icons"; // Already imported for MaterialIcons
-import { FontAwesome } from "@expo/vector-icons"; // Import FontAwesome for WhatsApp icon
+import { MaterialIcons } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
 import Header from "../components/layouts/Header";
 import { ContextProvider } from "../context/UserProvider";
-
+const Colors = {
+  primaryViolet: "#6E30CF",       // Main violet tone for headers & buttons
+  secondaryViolet: "#8E44AD",     // Complementary violet shade if needed
+  background: "#6E30CF",          // Background for the safe area and scrollView
+  cardBackground: "#FFFFFF",      // Card elements background (white)
+  textPrimary: "#333333",         // Dark text color for descriptions
+  textSecondary: "#555555",       // Secondary text color
+  sectionBackground: "#F0F8FF",   // Light background for section titles
+  borderColor: "#E0E0E0",         // Soft border color for cards
+  shadowColor: "rgba(0,0,0,0.15)", // General shadow color
+  gradientStart: "#EDE7F6",        // Gradient start for footer
+  gradientEnd: "#F3E5F5",          // Gradient end for footer
+  whatsappBg: "#EDE7F6",           // WhatsApp button background
+  whatsappText: "#6E30CF",         // WhatsApp button text color
+};
 const EligibilityScreen = ({ route, navigation }) => {
   const insets = useSafeAreaInsets();
-
-  const [appUser, setAppUser] = useContext(ContextProvider);
+  const [appUser] = useContext(ContextProvider);
   const userId = appUser.userId || {};
-
   const handleWebsiteLink = async () => {
     const websiteUrl = "https://mychits.co.in/";
     try {
@@ -30,21 +43,19 @@ const EligibilityScreen = ({ route, navigation }) => {
       if (supported) {
         await Linking.openURL(websiteUrl);
       } else {
-        console.warn(`Don't know how to open this URL: ${websiteUrl}`);
+        console.warn(`Can't open URL: ${websiteUrl}`);
       }
     } catch (error) {
       console.error("Error opening website:", error);
     }
   };
-
   const handleWhatsAppLink = async () => {
-    const whatsappNumber = "+919900088888"; // Example: +919876543210
+    const whatsappNumber = "+919900088888"; // Example number
     const whatsappMessage =
       "Hello, I have a question about chit fund eligibility.";
     const url = `whatsapp://send?phone=${whatsappNumber}&text=${encodeURIComponent(
       whatsappMessage
     )}`;
-
     try {
       const supported = await Linking.canOpenURL(url);
       if (supported) {
@@ -57,7 +68,6 @@ const EligibilityScreen = ({ route, navigation }) => {
       alert("Could not open WhatsApp. Please ensure it is installed.");
     }
   };
-
   return (
     <SafeAreaView
       style={[
@@ -68,101 +78,73 @@ const EligibilityScreen = ({ route, navigation }) => {
         },
       ]}
     >
-      <StatusBar barStyle="light-content" backgroundColor="#053B90" />
+      <StatusBar barStyle="light-content" backgroundColor={Colors.primaryViolet} />
       <Header userId={userId} navigation={navigation} />
-
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.mainContentContainer}>
           <Text style={styles.mainTitle}>Chit Fund Eligibility Criteria</Text>
           <Text style={styles.description}>
             To ensure a smooth and secure experience for all our subscribers,
-            please review the following eligibility requirements before joining
-            a chit group. Adherence to these guidelines ensures a transparent
-            and mutually beneficial arrangement for all participants.
+            please review the following eligibility requirements before joining a chit group.
+            Adherence to these guidelines ensures a transparent and mutually beneficial 
+            arrangement for all participants.
           </Text>
           <Text style={styles.sectionTitle}>1. Basic Eligibility Criteria</Text>
           <Text style={styles.sectionDescription}>
-            These are the fundamental requirements for all our potential
-            subscribers.
+            These are the fundamental requirements for all our potential subscribers.
           </Text>
           <View style={styles.listItem}>
             <Text style={styles.bullet}>•</Text>
             <Text style={styles.listItemText}>
-              <Text style={styles.listItemBold}>Age:</Text> Applicants must be
-              18 years of age or older.
+              <Text style={styles.listItemBold}>Age:</Text> Applicants must be 18 years or older.
             </Text>
           </View>
           <View style={styles.listItem}>
             <Text style={styles.bullet}>•</Text>
             <Text style={styles.listItemText}>
-              <Text style={styles.listItemBold}>Indian Resident:</Text>{" "}
-              Available only to Indian citizens residing in Karnataka.
+              <Text style={styles.listItemBold}>Indian Resident:</Text> Available only to Indian citizens residing in Karnataka.
             </Text>
           </View>
           <View style={styles.listItem}>
             <Text style={styles.bullet}>•</Text>
             <Text style={styles.listItemText}>
-              <Text style={styles.listItemBold}>Sound Mind:</Text> Applicants
-              must be of sound mind and capable of entering into a legal
-              contract.
+              <Text style={styles.listItemBold}>Sound Mind:</Text> Applicants must be of sound mind and capable of entering a legal contract.
             </Text>
           </View>
           <View style={styles.listItem}>
             <Text style={styles.bullet}>•</Text>
             <Text style={styles.listItemText}>
-              <Text style={styles.listItemBold}>
-                Not an Undischarged Insolvent:
-              </Text>{" "}
-              Applicants must not be an undischarged insolvent.
+              <Text style={styles.listItemBold}>Not an Undischarged Insolvent:</Text> Applicants must not be undischarged insolvents.
             </Text>
           </View>
-          <Text style={styles.sectionTitle}>
-            2. Financial Stability & Ability to Pay
-          </Text>
+          <Text style={styles.sectionTitle}>2. Financial Stability & Ability to Pay</Text>
           <Text style={styles.sectionDescription}>
-            Your ability to consistently make payments is crucial for the
-            success of the chit group.
+            Your ability to consistently make payments is crucial.
           </Text>
           <View style={styles.listItem}>
             <Text style={styles.bullet}>•</Text>
             <Text style={styles.listItemText}>
-              <Text style={styles.listItemBold}>Income Proof:</Text> Proof of
-              regular income (e.g., salary slips for the last 3-6 months, bank
-              statements, ITRs for businesspersons/professionals).
+              <Text style={styles.listItemBold}>Income Proof:</Text> Regular income proof (e.g., salary slips, bank statements, or ITRs).
             </Text>
           </View>
           <View style={styles.listItem}>
             <Text style={styles.bullet}>•</Text>
             <Text style={styles.listItemText}>
-              <Text style={styles.listItemBold}>Minimum Income:</Text> A minimum
-              monthly income of ₹10000 is generally required. (This will vary
-              based on your chosen chit plan).
+              <Text style={styles.listItemBold}>Minimum Income:</Text> A minimum monthly income of ₹10,000 is generally required.
             </Text>
           </View>
-
           <View style={styles.listItem}>
             <Text style={styles.bullet}>•</Text>
             <Text style={styles.listItemText}>
-              <Text style={styles.listItemBold}>
-                Comfortable Chit Installment:
-              </Text>{" "}
-              We recommend choosing a chit plan where the monthly installment is
-              comfortable for your budget. Ensure your balance available after
-              essential expenses can cover the installment.
+              <Text style={styles.listItemBold}>Comfortable Chit Installment:</Text> Ensure your post-expense balance comfortably covers the installment.
             </Text>
           </View>
-          <Text style={styles.sectionTitle}>
-            3. KYC (Know Your Customer) Documents
-          </Text>
+          <Text style={styles.sectionTitle}>3. KYC (Know Your Customer) Documents</Text>
           <Text style={styles.sectionDescription}>
-            To complete your application and comply with regulatory
-            requirements, please provide self-attested copies of the following
-            documents:
+            Provide self-attested copies of the following documents to complete your application:
           </Text>
           <View style={styles.subSection}>
-            <Text style={styles.subSectionTitle}>
-              Identity Proof (Any one):
-            </Text>
+            <Text style={styles.subSectionTitle}>Identity Proof (Any one):</Text>
             <View style={styles.listItem}>
               <Text style={styles.bullet}>•</Text>
               <Text style={styles.listItemText}>PAN Card (Mandatory)</Text>
@@ -181,154 +163,102 @@ const EligibilityScreen = ({ route, navigation }) => {
             <Text style={styles.listItemText}>Passport</Text>
           </View>
           <View style={styles.subSection}>
-            <Text style={styles.subSectionTitle}>
-              Address Proof (Any one, usually recent):
-            </Text>
+            <Text style={styles.subSectionTitle}>Address Proof (Any one, recent):</Text>
             <View style={styles.listItem}>
               <Text style={styles.bullet}>•</Text>
-              <Text style={styles.listItemText}>
-                Aadhar Card / Voter ID / Passport (if current address)
-              </Text>
+              <Text style={styles.listItemText}>Aadhar / Voter ID / Passport (if current address)</Text>
             </View>
             <View style={styles.listItem}>
               <Text style={styles.bullet}>•</Text>
-              <Text style={styles.listItemText}>
-                Latest Utility Bills (Electricity Bill, Gas Bill, Mobile Bill -
-                not older than 3 months)
-              </Text>
+              <Text style={styles.listItemText}>Latest Utility Bills (not older than 3 months)</Text>
             </View>
             <View style={styles.listItem}>
               <Text style={styles.bullet}>•</Text>
-              <Text style={styles.listItemText}>
-                Bank Statement (with current address)
-              </Text>
+              <Text style={styles.listItemText}>Bank Statement (with current address)</Text>
             </View>
             <View style={styles.listItem}>
               <Text style={styles.bullet}>•</Text>
-              <Text style={styles.listItemText}>
-                House Tax Receipt (for property owners)
-              </Text>
+              <Text style={styles.listItemText}>House Tax Receipt (for property owners)</Text>
             </View>
           </View>
           <View style={styles.listItem}>
             <Text style={styles.bullet}>•</Text>
-            <Text style={styles.listItemText}>
-              <Text style={styles.listItemBold}>
-                Recent Passport-sized Photograph
-              </Text>
-            </Text>
+            <Text style={styles.listItemText}><Text style={styles.listItemBold}>Recent Passport-sized Photograph</Text></Text>
           </View>
           <View style={styles.listItem}>
             <Text style={styles.bullet}>•</Text>
             <Text style={styles.listItemText}>
-              <Text style={styles.listItemBold}>Bank Account Details:</Text> For
-              monthly payments and prize money disbursement.
+              <Text style={styles.listItemBold}>Bank Account Details:</Text> For monthly payments and prize money disbursement.
             </Text>
           </View>
-          <Text style={styles.sectionTitle}>
-            4. Conditions for Prize Money Disbursement
-          </Text>
+          <Text style={styles.sectionTitle}>4. Conditions for Prize Money Disbursement</Text>
           <Text style={styles.sectionDescription}>
-            After winning an auction, certain conditions must be met to receive
-            your prize money:
+            After winning an auction, ensure the following before receiving your prize money:
           </Text>
           <View style={styles.listItem}>
             <Text style={styles.bullet}>•</Text>
             <Text style={styles.listItemText}>
-              <Text style={styles.listItemBold}>No Pending Dues:</Text> All your
-              previous installments must be paid up to date.
+              <Text style={styles.listItemBold}>No Pending Dues:</Text> All previous installments must be up to date.
             </Text>
           </View>
           <View style={styles.listItem}>
             <Text style={styles.bullet}>•</Text>
             <Text style={styles.listItemText}>
-              <Text style={styles.listItemBold}>Security Requirements:</Text>{" "}
-              You must fulfill the security requirements as per your chit
-              agreement. This may include providing post-dated cheques, or a
-              suitable guarantor.
+              <Text style={styles.listItemBold}>Security Requirements:</Text> Fulfill the security requirements as per your chit agreement.
             </Text>
           </View>
           <View style={styles.listItem}>
             <Text style={styles.bullet}>•</Text>
             <Text style={styles.listItemText}>
-              <Text style={styles.listItemBold}>Guarantor Eligibility:</Text> If
-              a guarantor is required, they must meet our eligibility criteria
-              (e.g., age, income proof, credit score, KYC documents).
+              <Text style={styles.listItemBold}>Guarantor Eligibility:</Text> Any guarantor must meet our eligibility criteria (e.g., age, income, credit score).
             </Text>
           </View>
           <View style={styles.listItem}>
             <Text style={styles.bullet}>•</Text>
             <Text style={styles.listItemText}>
-              <Text style={styles.listItemBold}>
-                Minimum Installments Paid:
-              </Text>{" "}
-              (If applicable) You must have paid a minimum of [X] installments
-              to be eligible to bid for the prize money.
+              <Text style={styles.listItemBold}>Minimum Installments Paid:</Text> (If applicable) You must have paid a minimum number of installments to qualify.
             </Text>
           </View>
-          <Text style={styles.sectionTitle}>
-            5. Important Disclaimers & Advice
-          </Text>
+          <Text style={styles.sectionTitle}>5. Important Disclaimers & Advice</Text>
           <View style={styles.listItem}>
             <Text style={styles.bullet}>•</Text>
             <Text style={styles.listItemText}>
-              <Text style={styles.listItemBold}>
-                Read Terms and Conditions:
-              </Text>{" "}
-              Please read the complete Terms and Conditions of our chit schemes
-              carefully before enrolling.
+              <Text style={styles.listItemBold}>Read Terms and Conditions:</Text> Please read the complete Terms and Conditions of our chit schemes carefully.
             </Text>
           </View>
           <View style={styles.listItem}>
             <Text style={styles.bullet}>•</Text>
             <Text style={styles.listItemText}>
-              <Text style={styles.listItemBold}>Financial Planning:</Text>{" "}
-              Choose a chit value and installment that comfortably aligns with
-              your financial capacity to avoid discontinuation.
+              <Text style={styles.listItemBold}>Financial Planning:</Text> Choose a chit value and installment plan aligned with your financial capacity.
             </Text>
           </View>
           <View style={styles.listItem}>
             <Text style={styles.bullet}>•</Text>
             <Text style={styles.listItemText}>
-              <Text style={styles.listItemBold}>
-                Consequences of Discontinuation:
-              </Text>{" "}
-              Be aware that defaulting on installments or discontinuing a chit
-              can have financial implications as per the chit agreement.
+              <Text style={styles.listItemBold}>Consequences of Discontinuation:</Text> Defaulting on installments or discontinuing participation may have financial implications.
             </Text>
           </View>
-
           <Text style={styles.footerText}>
-            Meeting these eligibility criteria is essential for a successful and
-            compliant participation in our chit fund schemes. For any further
-            clarifications or assistance, please contact our customer support.
+            Meeting these eligibility criteria is essential for compliant participation in our chit fund schemes. For further clarifications or assistance, please contact our customer support.
           </Text>
-
           <LinearGradient
-            colors={["#F0F8FF", "#F8F8F8"]}
+            colors={[Colors.gradientStart, Colors.gradientEnd]}
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
             style={styles.appInfoFooter}
           >
-            {/* WhatsApp Button */}
             <TouchableOpacity
               onPress={handleWhatsAppLink}
               style={styles.whatsappButton}
             >
-              <FontAwesome name="whatsapp" size={24} color="#25D366" />
-              <Text style={styles.whatsappButtonText}>
-                Chat with us on WhatsApp
-              </Text>
+              <FontAwesome name="whatsapp" size={24} color={Colors.whatsappText} />
+              <Text style={styles.whatsappButtonText}>Chat with us on WhatsApp</Text>
             </TouchableOpacity>
-
-            {/* Website Link */}
             <TouchableOpacity onPress={handleWebsiteLink}>
               <Text style={styles.appInfoWebsiteLink}>
-                Visit our Website:{" "}
-                <Text style={{ fontWeight: "bold" }}>mychits.co.in</Text>
+                Visit our Website: <Text style={{ fontWeight: "bold" }}>mychits.co.in</Text>
               </Text>
             </TouchableOpacity>
-
             <View style={styles.madeWithLoveContainer}>
               <Text style={styles.appInfoMadeWithLove}>
                 Made with <Text style={{ color: "#E53935" }}>❤️</Text> in India
@@ -336,7 +266,7 @@ const EligibilityScreen = ({ route, navigation }) => {
               <MaterialIcons
                 name="public"
                 size={16}
-                color="#4CAF50"
+                color={Colors.primaryViolet}
                 style={styles.madeInIndiaIcon}
               />
             </View>
@@ -346,49 +276,48 @@ const EligibilityScreen = ({ route, navigation }) => {
     </SafeAreaView>
   );
 };
-
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#6E30CF",
+    backgroundColor: Colors.primaryViolet,
   },
   scrollViewContent: {
     flexGrow: 1,
-    paddingHorizontal: 1,
+    paddingHorizontal: 10,
     paddingBottom: 30,
-    backgroundColor: "#6E30CF",
+    backgroundColor: Colors.background,
   },
   mainContentContainer: {
     flex: 1,
-    backgroundColor: "#bfa5eaff",
+    backgroundColor: Colors.cardBackground,
     borderRadius: 15,
     padding: 15,
     marginTop: 15,
     marginBottom: 10,
+    borderWidth: 1,
+    borderColor: Colors.borderColor,
     ...Platform.select({
       ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.15,
-        shadowRadius: 20,
+        shadowColor: Colors.shadowColor,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.2,
+        shadowRadius: 15,
       },
       android: {
-        elevation: 18,
+        elevation: 10,
       },
     }),
-    borderWidth: 5,
-    borderColor: "black",
   },
   mainTitle: {
     fontSize: 26,
     fontWeight: "bold",
-    color: "#6E30CF",
+    color: Colors.primaryViolet,
     marginBottom: 15,
     textAlign: "center",
   },
   description: {
     fontSize: 16,
-    color: "black",
+    color: Colors.textPrimary,
     marginBottom: 20,
     textAlign: "center",
     lineHeight: 24,
@@ -396,19 +325,17 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#6E30CF",
+    color: Colors.primaryViolet,
     marginTop: 25,
     marginBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E6EBF5",
     paddingBottom: 5,
     paddingLeft: 5,
-    backgroundColor: "#F0F8FF",
+    backgroundColor: Colors.sectionBackground,
     borderRadius: 8,
     paddingVertical: 5,
     ...Platform.select({
       ios: {
-        shadowColor: "#000",
+        shadowColor: Colors.shadowColor,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 3,
@@ -420,7 +347,7 @@ const styles = StyleSheet.create({
   },
   sectionDescription: {
     fontSize: 15,
-    color: "black",
+    color: Colors.textSecondary,
     marginBottom: 15,
     lineHeight: 22,
   },
@@ -432,7 +359,7 @@ const styles = StyleSheet.create({
   subSectionTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "black",
+    color: Colors.textPrimary,
     marginBottom: 8,
   },
   listItem: {
@@ -442,14 +369,14 @@ const styles = StyleSheet.create({
   },
   bullet: {
     fontSize: 16,
-    color: "#053B90",
+    color: Colors.primaryViolet,
     marginRight: 8,
     lineHeight: 22,
   },
   listItemText: {
     flex: 1,
     fontSize: 15,
-    color: "#444444",
+    color: Colors.textSecondary,
     lineHeight: 22,
   },
   listItemBold: {
@@ -457,7 +384,7 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 14,
-    color: "#777777",
+    color: Colors.textSecondary,
     marginTop: 30,
     textAlign: "center",
     fontStyle: "italic",
@@ -473,25 +400,27 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     borderRadius: 22,
     borderWidth: 1,
-    borderColor: "#EFEFEF",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.15,
-    shadowRadius: 20,
-    elevation: 18,
-    overflow: "hidden",
+    borderColor: Colors.borderColor,
+    ...Platform.select({
+      ios: {
+        shadowColor: Colors.shadowColor,
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.15,
+        shadowRadius: 20,
+      },
+      android: {
+        elevation: 10,
+      },
+    }),
   },
   appInfoWebsiteLink: {
     fontSize: 17,
-    color: "#004",
+    color: Colors.primaryViolet,
     textDecorationLine: "underline",
     marginBottom: 8,
     textAlign: "center",
     fontWeight: "500",
     letterSpacing: 0.5,
-    textShadowColor: "rgba(0,0,0,0.05)",
-    textShadowOffset: { width: 0.5, height: 0.5 },
-    textShadowRadius: 1,
   },
   madeWithLoveContainer: {
     flexDirection: "row",
@@ -501,9 +430,7 @@ const styles = StyleSheet.create({
   },
   appInfoMadeWithLove: {
     fontSize: 15,
-    color: "#4A4A4A",
-    fontStyle: "normal",
-    fontWeight: "normal",
+    color: Colors.textSecondary,
     letterSpacing: 0.3,
   },
   madeInIndiaIcon: {
@@ -512,23 +439,28 @@ const styles = StyleSheet.create({
   whatsappButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#E0F2F1",
+    backgroundColor: Colors.whatsappBg,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 25,
-    marginBottom: 15, // Added margin-bottom to separate from the website link
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    marginBottom: 15,
+    ...Platform.select({
+      ios: {
+        shadowColor: Colors.shadowColor,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
   },
   whatsappButtonText: {
     marginLeft: 10,
     fontSize: 16,
     fontWeight: "bold",
-    color: "#2E7D32",
+    color: Colors.whatsappText,
   },
 });
-
 export default EligibilityScreen;

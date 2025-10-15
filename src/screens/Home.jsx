@@ -787,11 +787,14 @@ const Home = ({ route, navigation }) => {
             {/* Social Icons Section */}
             
             <View style={styles.madeWithLoveContainer}>
-              <Text style={styles.appInfoMadeWithLove}>
-                Made with <Text style={{ color: '#E53935' }}>❤️</Text> in India
-              </Text>
-              <MaterialIcons name="public" size={16} color="#4CAF50" style={styles.madeInIndiaIcon} />
-            </View>
+  <Text style={styles.appInfoMadeWithLove}>
+    <Text style={{ fontWeight: '700', color: '#4B3BA8' }}>Powered by </Text>
+   <Text style={{ color: '#E53935' }}>⚙️ </Text>
+    <Text style={{ fontWeight: '700', color: '#4B3BA8' }}>MySoft Tech</Text>
+     
+  </Text>
+</View>
+
             
           </LinearGradient>
           <View style={styles.socialIconsContainer}>
@@ -866,69 +869,193 @@ const Home = ({ route, navigation }) => {
       </Modal>
       {/* Side Menu */}
       {isSideMenuVisible && (
-        <TouchableOpacity style={styles.modalOverlaySideMenu} activeOpacity={1} onPress={closeSideMenu}>
-          <Animated.View style={[styles.sideMenuContent, { transform: [{ translateX: slideAnim }] }]} {...panResponder.panHandlers}>
-            <TouchableOpacity onPress={closeSideMenu} style={styles.sideMenuCloseButton}>
-              <MaterialIcons name="close" size={24} color="#585858" />
-            </TouchableOpacity>
-            <ScrollView contentContainerStyle={styles.sideMenuScrollContent}>
-              <View style={styles.sideMenuHeader}>
-                <Image source={CityChits} style={styles.headerImage} resizeMode="contain" />
-                <View style={styles.headerTextContainer}>
-                  <Text style={styles.sideMenuUserName}>{userData.full_name || 'User'}</Text>
-                  <Text style={styles.sideMenuOnTrackText}>
-                    You're on track, {userData.full_name.split(' ')[0] || 'User'}!
-                  </Text>
-                </View>
-                {relationshipManagers.length > 0 && (
-                  <View style={styles.rmListBox}>
-                    {relationshipManagers.map((rm, index) => (
-                      <View key={index} style={styles.relationshipManagerCard}>
-                        <Text style={styles.rmGroupName}>{rm.groupName}</Text>
-                        <View style={styles.managerDetailsRow}>
-                          <Text style={styles.rmManagerName}>Manager: {rm.name}</Text>
-                          <Text style={styles.rmPhoneNumberText}>{rm.phoneNumber}</Text>
-                          <TouchableOpacity onPress={() => handleRelationshipManagerCall(rm.phoneNumber)} style={styles.inlineCallButton}>
-                            <MaterialIcons name="phone" size={16} color="#053B90" />
-                          </TouchableOpacity>
-                        </View>
-                      </View>
-                    ))}
+  <TouchableOpacity
+    style={styles.modalOverlaySideMenu}
+    activeOpacity={1}
+    onPress={closeSideMenu}
+  >
+    <Animated.View
+      style={[
+        styles.sideMenuContent,
+        { transform: [{ translateX: slideAnim }] },
+      ]}
+      {...panResponder.panHandlers}
+    >
+      <ScrollView
+        contentContainerStyle={styles.sideMenuScrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.sideMenuHeader}>
+          <Image source={CityChits} style={styles.headerImage} resizeMode="contain" />
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.sideMenuUserName}>
+              {userData.full_name || "User"}
+            </Text>
+            <Text style={styles.sideMenuOnTrackText}>
+              You're on track, {userData.full_name?.split(" ")[0] || "User"}!
+            </Text>
+          </View>
+
+          {relationshipManagers.length > 0 && (
+            <View style={styles.rmListBox}>
+              {relationshipManagers.map((rm, index) => (
+                <View key={index} style={styles.relationshipManagerCard}>
+                  <Text style={styles.rmGroupName}>{rm.groupName}</Text>
+                  <View style={styles.managerDetailsRow}>
+                    <Text style={styles.rmManagerName}>Manager: {rm.name}</Text>
+                    <Text style={styles.rmPhoneNumberText}>{rm.phoneNumber}</Text>
+                    <TouchableOpacity
+                      onPress={() => handleRelationshipManagerCall(rm.phoneNumber)}
+                      style={styles.inlineCallButton}
+                    >
+                      <MaterialIcons name="phone" size={16} color="#053B90" />
+                    </TouchableOpacity>
                   </View>
-                )}
-              </View>
-              {sideMenuItems.map((item, index) => (
-                <TouchableOpacity
-                  key={`side-menu-item-${index}`}
-                  style={styles.sideMenuItem}
-                  onPress={() => {
-                    closeSideMenu();
-                    if (item.onPress) item.onPress();
-                    else if (item.link) {
-                      navigation.navigate(item.link, { userId, featureTitle: item.featureTitle });
-                    }
-                  }}
-                >
-                  <Ionicons name={item.icon} size={24} color="#333" style={styles.sideMenuIcon} />
-                  <Text style={styles.sideMenuText}>{item.title}</Text>
-                </TouchableOpacity>
+                </View>
               ))}
-              <View style={styles.sideMenuSeparator} />
-              <TouchableOpacity style={styles.sideMenuItem} onPress={handleLogout}>
-                <Ionicons name="log-out-outline" size={24} color="red" style={styles.sideMenuIcon} />
-                <Text style={[styles.sideMenuText, { color: 'red' }]}>Sign Out</Text>
-              </TouchableOpacity>
-              <View style={styles.sideMenuFooter}>
-                <TouchableOpacity onPress={handleRateApp}>
-                  <Text style={styles.sideMenuFooterText}>
-                    Love us? Rate the app! <Ionicons name="star" size={16} color="#F7C641" />
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
-          </Animated.View>
+            </View>
+          )}
+        </View>
+
+        {sideMenuItems.map((item, index) => (
+          <TouchableOpacity
+            key={`side-menu-item-${index}`}
+            style={styles.sideMenuItem}
+            onPress={() => {
+              closeSideMenu();
+              if (item.onPress) item.onPress();
+              else if (item.link)
+                navigation.navigate(item.link, {
+                  userId,
+                  featureTitle: item.featureTitle,
+                });
+            }}
+          >
+            <Ionicons name={item.icon} size={24} color="#333" style={styles.sideMenuIcon} />
+            <Text style={styles.sideMenuText}>{item.title}</Text>
+          </TouchableOpacity>
+        ))}
+
+        <View style={styles.sideMenuSeparator} />
+
+        <TouchableOpacity style={styles.sideMenuItem} onPress={handleLogout}>
+          <Ionicons name="log-out-outline" size={24} color="red" style={styles.sideMenuIcon} />
+          <Text style={[styles.sideMenuText, { color: "red" }]}>Sign Out</Text>
         </TouchableOpacity>
-      )}
+
+        <View style={styles.sideMenuFooter}>
+          <TouchableOpacity onPress={handleRateApp}>
+            <Text style={styles.sideMenuFooterText}>
+              Love us? Rate the app! <Ionicons name="star" size={16} color="#F7C641" />
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+
+      <TouchableOpacity
+        onPress={closeSideMenu}
+        style={styles.sideMenuCloseButton}
+      >
+        <MaterialIcons name="close" size={24} color="#585858" />
+      </TouchableOpacity>
+    </Animated.View>
+  </TouchableOpacity>
+)}
+
+      {isSideMenuVisible && (
+  <TouchableOpacity
+    style={styles.modalOverlaySideMenu}
+    activeOpacity={1}
+    onPress={closeSideMenu}
+  >
+    <Animated.View
+      style={[
+        styles.sideMenuContent,
+        { transform: [{ translateX: slideAnim }] },
+      ]}
+      {...panResponder.panHandlers}
+    >
+      <ScrollView
+        contentContainerStyle={styles.sideMenuScrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.sideMenuHeader}>
+          <Image source={CityChits} style={styles.headerImage} resizeMode="contain" />
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.sideMenuUserName}>
+              {userData.full_name || "User"}
+            </Text>
+            <Text style={styles.sideMenuOnTrackText}>
+              You're on track, {userData.full_name?.split(" ")[0] || "User"}!
+            </Text>
+          </View>
+
+          {relationshipManagers.length > 0 && (
+            <View style={styles.rmListBox}>
+              {relationshipManagers.map((rm, index) => (
+                <View key={index} style={styles.relationshipManagerCard}>
+                  <Text style={styles.rmGroupName}>{rm.groupName}</Text>
+                  <View style={styles.managerDetailsRow}>
+                    <Text style={styles.rmManagerName}>Manager: {rm.name}</Text>
+                    <Text style={styles.rmPhoneNumberText}>{rm.phoneNumber}</Text>
+                    <TouchableOpacity
+                      onPress={() => handleRelationshipManagerCall(rm.phoneNumber)}
+                      style={styles.inlineCallButton}
+                    >
+                      <MaterialIcons name="phone" size={16} color="#053B90" />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+
+        {sideMenuItems.map((item, index) => (
+          <TouchableOpacity
+            key={`side-menu-item-${index}`}
+            style={styles.sideMenuItem}
+            onPress={() => {
+              closeSideMenu();
+              if (item.onPress) item.onPress();
+              else if (item.link)
+                navigation.navigate(item.link, {
+                  userId,
+                  featureTitle: item.featureTitle,
+                });
+            }}
+          >
+            <Ionicons name={item.icon} size={24} color="#333" style={styles.sideMenuIcon} />
+            <Text style={styles.sideMenuText}>{item.title}</Text>
+          </TouchableOpacity>
+        ))}
+
+        <View style={styles.sideMenuSeparator} />
+
+        <TouchableOpacity style={styles.sideMenuItem} onPress={handleLogout}>
+          <Ionicons name="log-out-outline" size={24} color="red" style={styles.sideMenuIcon} />
+          <Text style={[styles.sideMenuText, { color: "red" }]}>Sign Out</Text>
+        </TouchableOpacity>
+
+        <View style={styles.sideMenuFooter}>
+          <TouchableOpacity onPress={handleRateApp}>
+            <Text style={styles.sideMenuFooterText}>
+              Love us? Rate the app! <Ionicons name="star" size={16} color="#F7C641" />
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+
+      <TouchableOpacity
+        onPress={closeSideMenu}
+        style={styles.sideMenuCloseButton}
+      >
+        <MaterialIcons name="close" size={24} color="#585858" />
+      </TouchableOpacity>
+    </Animated.View>
+  </TouchableOpacity>
+)}
+
       <Toast />
     </SafeAreaView>
   );
@@ -943,7 +1070,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: '#6A0DAD',
   },
-  headerTitle: { color: '#FFD700', fontSize: 22, fontWeight: 'bold', marginLeft: 10, marginTop: 10 },
+  headerTitle: { color: '#F0E68C', fontSize: 22, fontWeight: 'bold', marginLeft: 10, marginTop: 10 },
   hamburgerIconContainer: { marginTop: 10, marginLeft: 7 },
   hamburgerLine: { width: 25, height: 3, backgroundColor: '#fff', borderRadius: 2, marginVertical: 3 },
   helpButton: { flexDirection: 'row', alignItems: 'center', paddingVertical: 5, paddingHorizontal: 10, backgroundColor: '#fff', borderRadius: 15, marginTop: 10 },
@@ -962,17 +1089,21 @@ const styles = StyleSheet.create({
   },
   searchInput: { flex: 1, fontSize: 16, color: '#333', paddingVertical: 8 },
   greetingSection: {
-    backgroundColor: '#F2F4F7',
-    marginHorizontal: 20,
-    marginTop: 15,
-    borderRadius: 10,
-    padding: 15,
-    borderWidth: 1,
-    borderColor: '#053B90',
-  },
+  backgroundColor: 'cement',
+  marginHorizontal: 25,
+  marginTop: 15,
+  borderRadius: 20,
+  padding: 8,
+  borderWidth: 1,
+  borderTopColor: 'gold',
+  borderRightColor: 'gold',
+  borderBottomColor: 'white',
+  borderLeftColor: 'white',
+},
+
   welcomeContainer: { alignItems: 'center' },
-  greetingText: { fontSize: 22, color: '#053B90', fontWeight: 'bold' },
-  userNameText: { fontSize: 20, color: '#053B90', marginTop: 4 },
+  greetingText: { fontSize: 25, color: '#FFC72C', fontWeight: 'bold' },
+  userNameText: { fontSize: 22, color: 'white', marginTop: 4 , fontStyle: 'italic'},
   errorTextSmall: { fontSize: 13, color: 'red', textAlign: 'center' },
   servicesSection: {
     marginTop: 25,
@@ -1004,7 +1135,7 @@ const styles = StyleSheet.create({
   },
   row: { justifyContent: 'space-around', marginVertical: 10 },
   gridItemBox: {
-    width: '28%',
+    width: '26%',
     alignItems: 'center',
     marginBottom: 12,
     paddingVertical: 8,
@@ -1014,7 +1145,7 @@ const styles = StyleSheet.create({
     borderColor: 'black',
   },
   iconCircle: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center', marginBottom: 4 },
-  serviceTitle: { fontSize: 11, textAlign: 'center', fontWeight: '600', color: '#053B90', marginTop: 2 },
+  serviceTitle: { fontSize: 11, textAlign: 'center', fontWeight: '600', color: 'black', marginTop: 2 },
   blueContainer: {
     backgroundColor: '#E8F0FE',
     borderRadius: 10,
@@ -1072,14 +1203,14 @@ const styles = StyleSheet.create({
   modalCallIcon: { marginRight: 12 },
   modalCallButtonText: { color: '#fff', fontSize: 18, fontWeight: '700' },
   modalOverlaySideMenu: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 10 },
-  sideMenuContent: { width: '80%', height: '100%', backgroundColor: '#FFFFFF', borderTopRightRadius: 30, borderBottomRightRadius: 30, paddingBottom: 20, borderWidth: 1, borderColor: '#EEE' },
-  sideMenuCloseButton: { position: 'absolute', right: 20, top: 50, zIndex: 1, backgroundColor: '#ccc', borderRadius: 20, padding: 8 },
+  sideMenuContent: { width: '80%', height: '100%', backgroundColor: '#FFFFFF', borderTopRightRadius: 30, borderBottomRightRadius: 30, paddingBottom: 20, borderWidth: 1, borderColor: '#EEE', paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight + 0 : 50, },
+  sideMenuCloseButton: { position: 'absolute', right: 20, top: 50, zIndex: 1, backgroundColor: '#ccc', borderRadius: 20, padding: 8,top: Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + 20 : 60, },
   sideMenuScrollContent: { paddingBottom: 30 },
-  sideMenuHeader: { width: '100%', backgroundColor: '#053B90', borderTopRightRadius: 30, paddingHorizontal: 25, justifyContent: 'center', paddingVertical: 20 },
+  sideMenuHeader: { width: '100%', backgroundColor: '#6A0DAD', borderTopRightRadius:0,addingHorizontal: 25, justifyContent: 'center', paddingVertical: 20 ,paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + 10 : 60},
   headerImage: { width: 200, height: 60, alignSelf: 'center', marginVertical: 15 },
   sideMenuUserName: { fontSize: 24, fontWeight: 'bold', color: '#FFD700', textAlign: 'center', marginBottom: 5 },
   sideMenuOnTrackText: { fontSize: 16, color: '#fff', textAlign: 'center' },
-  rmListBox: { backgroundColor: '#FFECB3', borderRadius: 10, borderWidth: 1, borderColor: '#FFD54F', marginTop: 15, padding: 8 },
+  rmListBox: { backgroundColor: '#FFECB3', borderRadius: 5, borderWidth: 1, borderColor: '#FFD54F', marginTop: 15, padding: 8 },
   relationshipManagerCard: { paddingVertical: 8, paddingHorizontal: 10, borderRadius: 8, marginBottom: 8, backgroundColor: '#fff' },
   rmGroupName: { fontSize: 15, fontWeight: 'bold', color: '#333', marginBottom: 4 },
   managerDetailsRow: { flexDirection: 'row', alignItems: 'center' },

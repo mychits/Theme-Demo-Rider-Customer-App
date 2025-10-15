@@ -1,3 +1,5 @@
+ 
+
 import React, { useState, useEffect, useCallback, useContext } from "react";
 import {
   View,
@@ -24,30 +26,28 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import NoGroupImage from "../../assets/Nogroup.png";
 import { ContextProvider } from "../context/UserProvider";
 import Modal from "react-native-modal";
-
 const Colors = {
-  primaryBlue: "#053B90",
-  lightBackground: "#F9FCFF",
+  primaryViolet: "#6A1B9A", // professional violet
+  lightBackground: "#F3F0FF",
   cardBackground: "#FFFFFF",
-  darkText: "#263238",
-  mediumText: "#546E7A",
-  lightText: "#B0BEC5",
+  darkText: "#2E2E2E",
+  mediumText: "#5D5D5D",
+  lightText: "#A09FA0",
   cardGradientStart: "#FFFFFF",
-  cardGradientEnd: "#F5F8FA",
-  excessBackgroundStart: "#E8F5E9",
-  excessBackgroundEnd: "#F2FAF2",
-  duesBackgroundStart: "#FBE9E7",
-  duesBackgroundEnd: "#FFF6F5",
+  cardGradientEnd: "#F2EFFF",
+  excessBackgroundStart: "#E1BEE7",
+  excessBackgroundEnd: "#CE93D8",
+  duesBackgroundStart: "#FFCDD2",
+  duesBackgroundEnd: "#EF9A9A",
   successColor: "#388E3C",
   warningColor: "#D32F2F",
-  payNowButtonBackground: "#007BFF",
+  payNowButtonBackground: "#6A1B9A",
   payNowButtonText: "#FFFFFF",
-  shadowColor: "rgba(0,0,0,0.08)",
-  borderColor: "#ECEFF1",
-  groupNameColor: "#1976D2",
+  shadowColor: "rgba(0,0,0,0.12)",
+  borderColor: "#E0E0E0",
+  groupNameColor: "#512DA8",
   logoBackgroundColor: "#FFFFFF",
 };
-
 const formatNumberIndianStyle = (num) => {
   if (num === null || num === undefined) {
     return "0";
@@ -60,7 +60,6 @@ const formatNumberIndianStyle = (num) => {
     isNegative = true;
     integerPart = integerPart.substring(1);
   }
-
   const lastThree = integerPart.substring(integerPart.length - 3);
   const otherNumbers = integerPart.substring(0, integerPart.length - 3);
   if (otherNumbers !== "") {
@@ -79,19 +78,13 @@ const formatNumberIndianStyle = (num) => {
     return (isNegative ? "-" : "") + lastThree + decimalPart;
   }
 };
-
 const PayYourDues = ({ navigation, route }) => {
   const insets = useSafeAreaInsets();
   const [appUser, setAppUser] = useContext(ContextProvider);
   const userId = appUser.userId || {};
-
   const [cardsData, setCardsData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [TotalToBepaid, setTotalToBePaid] = useState(0);
-  const [Totalpaid, setTotalPaid] = useState(0);
-  const [Totalprofit, setTotalProfit] = useState(0);
   const [groupOverviews, setGroupOverviews] = useState({});
-
   const [isModalVisible, setModalVisible] = useState(false);
   const [modalDetails, setModalDetails] = useState({
     groupId: null,
@@ -105,13 +98,11 @@ const PayYourDues = ({ navigation, route }) => {
     if (supported) {
       await Linking.openURL(paymentUrl);
     } else {
-      throw new Error("Failed to Open Url");
+      throw new Error("Failed to open URL");
     }
-  });
+  }, []);
   const fetchTicketsData = useCallback(async (currentUserId) => {
-    if (!currentUserId) {
-      return [];
-    }
+    if (!currentUserId) return [];
     try {
       const response = await axios.post(
         `${url}/enroll/get-user-tickets/${currentUserId}`
@@ -122,7 +113,6 @@ const PayYourDues = ({ navigation, route }) => {
       return [];
     }
   }, []);
-
   const fetchAllOverviewData = useCallback(async (currentUserId) => {
     if (!currentUserId) {
       return { totalToBePaid: 0, totalPaid: 0, totalProfit: 0 };
@@ -132,7 +122,6 @@ const PayYourDues = ({ navigation, route }) => {
         `${url}/enroll/get-user-tickets-report/${currentUserId}`
       );
       const data = response.data;
-
       const totalToBePaidAmount = data.reduce(
         (sum, group) =>
           sum +
@@ -158,7 +147,6 @@ const PayYourDues = ({ navigation, route }) => {
       return { totalToBePaid: 0, totalPaid: 0, totalProfit: 0 };
     }
   }, []);
-
   const fetchIndividualGroupOverview = useCallback(
     async (currentUserId, card) => {
       try {
@@ -168,13 +156,9 @@ const PayYourDues = ({ navigation, route }) => {
           !card.group_id._id ||
           !card.tickets
         ) {
-          console.warn(
-            "Skipping individual overview fetch due to missing data:",
-            card
-          );
+          console.warn("Skipping overview due to missing data:", card);
           return { key: null, data: null };
         }
-
         const response = await axios.get(
           `${url}/single-overview?user_id=${currentUserId}&group_id=${card.group_id._id}&ticket=${card.tickets}`
         );
@@ -197,35 +181,24 @@ const PayYourDues = ({ navigation, route }) => {
     },
     []
   );
-
   const fetchData = useCallback(async () => {
     if (!userId) {
       setLoading(false);
       setCardsData([]);
       setGroupOverviews({});
-      setTotalToBePaid(0);
-      setTotalPaid(0);
-      setTotalProfit(0);
       return;
     }
-
     setLoading(true);
     try {
       const [fetchedCards, overviewSummary] = await Promise.all([
         fetchTicketsData(userId),
         fetchAllOverviewData(userId),
       ]);
-
       setCardsData(fetchedCards);
-      setTotalToBePaid(overviewSummary.totalToBePaid);
-      setTotalPaid(overviewSummary.totalPaid);
-      setTotalProfit(overviewSummary.totalProfit);
-
       if (fetchedCards.length > 0) {
         const overviewPromises = fetchedCards.map((card) =>
           fetchIndividualGroupOverview(userId, card)
         );
-
         const results = await Promise.all(overviewPromises);
         const newGroupOverviews = {};
         results.forEach((result) => {
@@ -248,25 +221,20 @@ const PayYourDues = ({ navigation, route }) => {
     fetchAllOverviewData,
     fetchIndividualGroupOverview,
   ]);
-
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
   useFocusEffect(
     useCallback(() => {
       fetchData();
     }, [fetchData])
   );
-
   const filteredCardsToDisplay = cardsData.filter((card) => {
     const isLoanGroup = card.group_id?.group_name
       ? card.group_id.group_name.toLowerCase().includes("loan")
       : false;
-
     return card.group_id !== null && !isLoanGroup;
   });
-
   const handleViewDetails = (groupId, ticket) => {
     Vibration.vibrate(50);
     navigation.navigate("BottomTab", {
@@ -275,38 +243,29 @@ const PayYourDues = ({ navigation, route }) => {
         screen: "EnrollGroup",
         params: {
           userId: userId,
-          groupId: groupId,
-          ticket: ticket,
+          groupId,
+          ticket,
         },
       },
     });
   };
-
   const handlePayNow = (groupId, ticket, amount, groupName) => {
     Vibration.vibrate(50);
-    setModalDetails({
-      groupId,
-      ticket,
-      amount,
-      groupName,
-    });
+    setModalDetails({ groupId, ticket, amount, groupName });
     setPaymentAmount("");
     setModalVisible(true);
   };
-
   const handleModalClose = () => {
     setModalVisible(false);
   };
-
   const handlePaymentInitiate = async () => {
     Vibration.vibrate(50);
+    // Use the entered amount if provided or default to modal amount
     const amountToPay = parseFloat(paymentAmount || modalDetails.amount);
-
     if (amountToPay > 20000) {
       Alert.alert("Limit Reached", "You can pay up to ₹20,000 at a time.");
       return;
     }
-
     if (isNaN(amountToPay) || amountToPay < 0.1) {
       Alert.alert(
         "Invalid Amount",
@@ -324,14 +283,16 @@ const PayYourDues = ({ navigation, route }) => {
         expiry: "3600",
         amount: `${amountToPay}`,
         purpose: "Due Payment",
-        payment_group_tickets: [`chit-${modalDetails.groupId}|${modalDetails.ticket}`],
+        payment_group_tickets: [
+          `chit-${modalDetails.groupId}|${modalDetails.ticket}`,
+        ],
       });
       const data = response.data;
       Alert.alert(
         "Payment Initiated",
-        `A payment of ₹${formatNumberIndianStyle(amountToPay)} for ${
-          modalDetails.groupName
-        } is being processed.`,
+        `A payment of ₹${formatNumberIndianStyle(
+          amountToPay
+        )} for ${modalDetails.groupName} is being processed.`,
         [
           {
             text: "Cancel",
@@ -364,16 +325,13 @@ const PayYourDues = ({ navigation, route }) => {
         ]
       );
     } catch (error) {
-      Alert.alert("Failed to Initiate Payment", "Something Went Wrong");
+      Alert.alert("Failed to Initiate Payment", "Something went wrong.");
     } finally {
       setLoading(false);
     }
   };
-  // 9871234512
   const handleAmountChange = (text) => {
-    if (text.startsWith("0")) {
-      return;
-    }
+    if (text.startsWith("0")) return;
     const filteredText = text.replace(/[^0-9]/g, "");
     if (parseFloat(filteredText) > 20000) {
       Alert.alert("Limit Reached", "You can pay up to ₹20,000 at a time.");
@@ -381,24 +339,18 @@ const PayYourDues = ({ navigation, route }) => {
     }
     setPaymentAmount(filteredText);
   };
-
   return (
     <View style={[styles.screenContainer, { paddingTop: insets.top }]}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor={Colors.primaryBlue}
-      />
+      <StatusBar barStyle="light-content" backgroundColor={Colors.primaryViolet} />
       <Header userId={userId} navigation={navigation} />
       <View style={styles.outerBoxContainer}>
         <View style={styles.mainContentWrapper}>
           <Text style={styles.sectionTitle}>Pay Your Dues</Text>
-          <Text style={styles.subSectionTitle}>
-            Stay on top of your group payments!
-          </Text>
+          <Text style={styles.subSectionTitle}>Stay on top of your group payments!</Text>
           {loading ? (
             <ActivityIndicator
               size="large"
-              color={Colors.primaryBlue}
+              color={Colors.primaryViolet}
               style={styles.loader}
             />
           ) : filteredCardsToDisplay.length > 0 ? (
@@ -407,47 +359,28 @@ const PayYourDues = ({ navigation, route }) => {
               showsVerticalScrollIndicator={false}
             >
               {filteredCardsToDisplay.map((card, index) => {
-                const groupOverview =
-                  groupOverviews[`${card.group_id._id}_${card.tickets}`];
-                if (!groupOverview) {
-                  return null;
-                }
-
+                const groupOverview = groupOverviews[`${card.group_id._id}_${card.tickets}`];
+                if (!groupOverview) return null;
                 const totalToBePaidAmount = groupOverview?.totalInvestment || 0;
                 const totalPaid = groupOverview?.totalPaid || 0;
                 const totalProfit = groupOverview?.totalProfit || 0;
                 const balance = totalPaid - totalToBePaidAmount;
                 const isBalanceExcess = balance > 0;
-
                 const balanceBoxColors = isBalanceExcess
                   ? [Colors.excessBackgroundStart, Colors.excessBackgroundEnd]
                   : [Colors.duesBackgroundStart, Colors.duesBackgroundEnd];
-                const balanceIcon = isBalanceExcess
-                  ? "check-circle"
-                  : "credit-card-off";
-                const balanceIconColor = isBalanceExcess
-                  ? Colors.successColor
-                  : Colors.warningColor;
-                const balanceMessage = isBalanceExcess
-                  ? "You have an excess balance."
-                  : "Payment is due.";
-                const balanceAmountStyle = isBalanceExcess
-                  ? styles.excessAmountText
-                  : styles.duesAmountText;
-
+                const balanceIcon = isBalanceExcess ? "check-circle" : "credit-card-off";
+                const balanceIconColor = isBalanceExcess ? Colors.successColor : Colors.warningColor;
+                const balanceMessage = isBalanceExcess ? "Excess balance available." : "Payment due.";
+                const balanceAmountStyle = isBalanceExcess ? styles.excessAmountText : styles.duesAmountText;
                 return (
                   <TouchableOpacity
                     key={card._id || index}
-                    onPress={() =>
-                      handleViewDetails(card.group_id._id, card.tickets)
-                    }
+                    onPress={() => handleViewDetails(card.group_id._id, card.tickets)}
                     style={styles.groupCardEnhanced}
                   >
                     <LinearGradient
-                      colors={[
-                        Colors.cardGradientStart,
-                        Colors.cardGradientEnd,
-                      ]}
+                      colors={[Colors.cardGradientStart, Colors.cardGradientEnd]}
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 1 }}
                       style={styles.cardContentWrapper}
@@ -462,9 +395,7 @@ const PayYourDues = ({ navigation, route }) => {
                       </View>
                       <View style={styles.financialDetailsSection}>
                         <View style={styles.detailRow}>
-                          <Text style={styles.detailLabel}>
-                            Amount to be Paid:
-                          </Text>
+                          <Text style={styles.detailLabel}>Amount to be Paid:</Text>
                           <Text style={styles.detailAmount}>
                             ₹ {formatNumberIndianStyle(totalToBePaidAmount)}
                           </Text>
@@ -476,9 +407,7 @@ const PayYourDues = ({ navigation, route }) => {
                           </Text>
                         </View>
                         <View style={styles.detailRow}>
-                          <Text style={styles.detailLabel}>
-                            Profit/Dividend:
-                          </Text>
+                          <Text style={styles.detailLabel}>Profit/Dividend:</Text>
                           <Text style={styles.detailAmount}>
                             ₹ {formatNumberIndianStyle(totalProfit)}
                           </Text>
@@ -491,18 +420,9 @@ const PayYourDues = ({ navigation, route }) => {
                         style={styles.balanceStatusBox}
                       >
                         <View style={styles.balanceSummary}>
-                          <MaterialIcons
-                            name={balanceIcon}
-                            size={24}
-                            color={balanceIconColor}
-                            style={styles.balanceIcon}
-                          />
-                          <Text style={styles.balanceMessage}>
-                            {balanceMessage}
-                          </Text>
-                          <Text
-                            style={[styles.balanceAmount, balanceAmountStyle]}
-                          >
+                          <MaterialIcons name={balanceIcon} size={24} color={balanceIconColor} style={styles.balanceIcon} />
+                          <Text style={styles.balanceMessage}>{balanceMessage}</Text>
+                          <Text style={[styles.balanceAmount, balanceAmountStyle]}>
                             ₹ {formatNumberIndianStyle(Math.abs(balance))}
                           </Text>
                         </View>
@@ -535,16 +455,10 @@ const PayYourDues = ({ navigation, route }) => {
             </ScrollView>
           ) : (
             <View style={styles.noGroupsContainer}>
-              <Image
-                source={NoGroupImage}
-                style={styles.noGroupImage}
-                resizeMode="contain"
-              />
-              <Text style={styles.noGroupsText}>
-                No groups to display after filtering.
-              </Text>
+              <Image source={NoGroupImage} style={styles.noGroupImage} resizeMode="contain" />
+              <Text style={styles.noGroupsText}>No groups to display after filtering.</Text>
               <Text style={styles.noGroupsSubText}>
-                All groups with 'loan' in their name are excluded.
+                Groups with "loan" in their name are excluded.
               </Text>
             </View>
           )}
@@ -558,20 +472,12 @@ const PayYourDues = ({ navigation, route }) => {
         useNativeDriverForBackdrop={true}
       >
         <View style={styles.modalContent}>
-          {/* Company Logo and Name in a single horizontal line */}
           <View style={styles.companyHeader}>
-            <Image
-              source={require("../../assets/Group400.png")}
-              style={styles.logo}
-              resizeMode="contain"
-            />
+            <Image source={require("../../assets/Group400.png")} style={styles.logo} resizeMode="contain" />
             <Text style={styles.companyName}>MyChits</Text>
           </View>
-
           <Text style={styles.duePaymentText}>Complete Your Chit Payment</Text>
-          <Text style={styles.minAmountText}>
-            You can pay more than your due amount.
-          </Text>
+          <Text style={styles.minAmountText}>You can pay more than your due amount.</Text>
           <View style={styles.dueAmountBox}>
             <Text style={styles.dueAmountLabel}>Due Amount:</Text>
             <Text style={styles.dueAmountTextModal}>
@@ -592,25 +498,16 @@ const PayYourDues = ({ navigation, route }) => {
               />
             </View>
           </View>
-          <TouchableOpacity
-            style={styles.payNowButtonModal}
-            onPress={handlePaymentInitiate}
-            activeOpacity={0.8}
-          >
+          <TouchableOpacity style={styles.payNowButtonModal} onPress={handlePaymentInitiate} activeOpacity={0.8}>
             {loading ? (
-              <ActivityIndicator size={"large"} color={"white"} />
+              <ActivityIndicator size="large" color="white" />
             ) : (
               <Text style={styles.payNowButtonTextModal}>
-                Pay ₹
-                {formatNumberIndianStyle(paymentAmount || modalDetails.amount)}{" "}
-                Now
+                Pay ₹{formatNumberIndianStyle(paymentAmount || modalDetails.amount)} Now
               </Text>
             )}
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={handleModalClose}
-            style={styles.modalCloseButton}
-          >
+          <TouchableOpacity onPress={handleModalClose} style={styles.modalCloseButton}>
             <Text style={styles.modalCloseButtonText}>Cancel</Text>
           </TouchableOpacity>
         </View>
@@ -618,11 +515,10 @@ const PayYourDues = ({ navigation, route }) => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   screenContainer: {
     flex: 1,
-    backgroundColor: Colors.primaryBlue,
+    backgroundColor: Colors.primaryViolet,
   },
   outerBoxContainer: {
     flex: 1,
@@ -647,22 +543,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.cardBackground,
     paddingHorizontal: 25,
-    paddingTop: 5,
+    paddingTop: 10,
     paddingBottom: 20,
     borderBottomLeftRadius: 25,
     borderBottomRightRadius: 25,
   },
   sectionTitle: {
     fontWeight: "bold",
-    fontSize: 34,
+    fontSize: 32,
     color: Colors.darkText,
     textAlign: "center",
+    marginBottom: 5,
   },
   subSectionTitle: {
     fontSize: 18,
     color: Colors.mediumText,
     textAlign: "center",
-    marginBottom: 30,
+    marginBottom: 25,
   },
   groupListContentContainer: {
     paddingBottom: 30,
@@ -680,9 +577,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 10,
       },
-      android: {
-        elevation: 8,
-      },
+      android: { elevation: 8 },
     }),
   },
   cardContentWrapper: {
@@ -696,9 +591,8 @@ const styles = StyleSheet.create({
   },
   groupCardNameEnhanced: {
     fontWeight: "bold",
-    fontSize: 22,
+    fontSize: 20,
     color: Colors.groupNameColor,
-    marginBottom: 5,
   },
   groupCardTicketEnhanced: {
     fontSize: 16,
@@ -710,15 +604,11 @@ const styles = StyleSheet.create({
   detailRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
     marginBottom: 8,
   },
   detailLabel: {
-    fontWeight: "500",
-    color: Colors.mediumText,
-    flexShrink: 1,
-    marginRight: 10,
     fontSize: 15,
+    color: Colors.mediumText,
   },
   detailAmount: {
     fontSize: 16,
@@ -735,8 +625,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 10,
     flexWrap: "wrap",
+    marginBottom: 10,
   },
   balanceIcon: {
     marginRight: 8,
@@ -745,28 +635,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: Colors.darkText,
-    flexShrink: 1,
   },
   balanceAmount: {
     fontSize: 18,
     fontWeight: "bold",
     marginLeft: 10,
   },
-  excessAmountText: {
-    color: Colors.successColor,
-  },
-  duesAmountText: {
-    color: Colors.warningColor,
-  },
+  excessAmountText: { color: Colors.successColor },
+  duesAmountText: { color: Colors.warningColor },
   payNowButton: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
     backgroundColor: Colors.payNowButtonBackground,
     paddingVertical: 12,
     paddingHorizontal: 25,
     borderRadius: 25,
-    marginTop: 5,
     width: "80%",
     ...Platform.select({
       ios: {
@@ -775,9 +658,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 8,
       },
-      android: {
-        elevation: 6,
-      },
+      android: { elevation: 6 },
     }),
   },
   payNowButtonText: {
@@ -786,17 +667,15 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   loader: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
     minHeight: 200,
+    alignItems: "center",
   },
   noGroupsContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 25,
     paddingVertical: 50,
+    paddingHorizontal: 25,
     backgroundColor: Colors.lightBackground,
     borderRadius: 20,
     marginVertical: 20,
@@ -807,9 +686,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.15,
         shadowRadius: 10,
       },
-      android: {
-        elevation: 7,
-      },
+      android: { elevation: 7 },
     }),
   },
   noGroupImage: {
@@ -818,20 +695,19 @@ const styles = StyleSheet.create({
     marginBottom: 25,
   },
   noGroupsText: {
-    textAlign: "center",
-    color: Colors.darkText,
     fontSize: 24,
     fontWeight: "bold",
+    color: Colors.darkText,
+    textAlign: "center",
     marginBottom: 10,
   },
   noGroupsSubText: {
-    textAlign: "center",
-    color: Colors.mediumText,
     fontSize: 18,
+    color: Colors.mediumText,
+    textAlign: "center",
     lineHeight: 28,
     maxWidth: "90%",
   },
-  // Modal Styles
   modal: {
     justifyContent: "center",
     margin: 0,
@@ -841,8 +717,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.cardBackground,
     padding: 20,
     borderRadius: 20,
-    borderWidth: 3,
-    borderColor: "#053B90",
+    borderWidth: 2,
+    borderColor: Colors.primaryViolet,
     width: "90%",
     alignItems: "center",
     ...Platform.select({
@@ -852,9 +728,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 8,
       },
-      android: {
-        elevation: 5,
-      },
+      android: { elevation: 5 },
     }),
   },
   companyHeader: {
@@ -876,22 +750,22 @@ const styles = StyleSheet.create({
   duePaymentText: {
     fontSize: 20,
     color: Colors.mediumText,
-    marginBottom: 5,
     textAlign: "center",
+    marginBottom: 5,
   },
   minAmountText: {
     fontSize: 16,
     color: Colors.mediumText,
-    marginBottom: 20,
     textAlign: "center",
+    marginBottom: 20,
   },
   dueAmountBox: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 25,
     padding: 15,
     borderRadius: 10,
     backgroundColor: Colors.lightBackground,
+    marginBottom: 25,
   },
   dueAmountLabel: {
     fontSize: 16,
@@ -938,7 +812,6 @@ const styles = StyleSheet.create({
   payNowButtonModal: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
     backgroundColor: Colors.payNowButtonBackground,
     paddingVertical: 15,
     paddingHorizontal: 30,
@@ -960,5 +833,4 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 });
-
 export default PayYourDues;

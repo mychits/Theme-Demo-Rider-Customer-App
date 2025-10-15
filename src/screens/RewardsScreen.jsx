@@ -40,12 +40,17 @@ Don’t miss out—start your savings journey today! 🚀`;
     const encodedShareMessage = encodeURIComponent(shareMessage);
 
     const socialMediaOptions = [
-        { name: 'WhatsApp', icon: 'whatsapp', color: '#25D366' },
-        { name: 'Instagram', icon: 'instagram', color: '#C13584' },
+        { name: 'WhatsApp',icon: 'whatsapp', color: '#25D366' },
         { name: 'Facebook', icon: 'facebook', color: '#4267B2' },
         { name: 'Telegram', icon: 'telegram', color: '#0088CC' },
-        { name: 'Other Apps', icon: 'share-variant', color: VIBRANT_VIOLET },
+        { name: 'Gmail', icon: 'gmail', color: '#D44638' },
+        { name: 'SMS', icon: 'message', color: '#34B7F1' },
+        // { name: 'Google Pay', icon: 'google', color: '#4285F4' },
+        // { name: 'PhonePe', icon: 'phone', color: '#673AB7' },
+        // { name: 'Paytm', icon: 'wallet', color: '#0033A0' },
+        // { name: 'Other Apps', icon: 'share-variant', color: VIBRANT_VIOLET },
     ];
+    
 
     /**
      * Handles the sharing action for a specific platform using deep linking (where possible).
@@ -67,20 +72,37 @@ Don’t miss out—start your savings journey today! 🚀`;
                 // We'll use a generic URL that attempts to open the share dialog in a browser/app.
                 url = `https://www.facebook.com/sharer/sharer.php?quote=${encodedShareMessage}`;
                 break;
-            case 'Instagram':
-                // Instagram sharing is complex and usually requires media/stories API or the native Share sheet.
-                Alert.alert(
-                    "Action Required", 
-                    "Instagram does not support direct deep-linked text sharing. In a production app, use the native React Native `Share` API."
-                );
-                return;
-            case 'Other Apps':
-                // This option is designed for the native Share sheet.
-                Alert.alert(
-                    "Native Share", 
-                    "For 'Other Apps', please use the native React Native `Share` API in your production environment to open the system share menu."
-                );
-                return;
+            // case 'Instagram':
+            //     // Instagram sharing is complex and usually requires media/stories API or the native Share sheet.
+            //     Alert.alert(
+            //         "Action Required", 
+            //         "Instagram does not support direct deep-linked text sharing. In a production app, use the native React Native `Share` API."
+            //     );
+            
+                // return;
+                case 'Gmail':
+            url = `mailto:?subject=Join MyChits&body=${encodedShareMessage}`;
+            break;
+        case 'SMS':
+            url = `sms:?body=${encodedShareMessage}`;
+            break;
+        // case 'Google Pay':
+        // case 'PhonePe':
+        // case 'Paytm':
+        //     const upiId = "someone@upi"; // Replace with your business UPI
+        //     const name = "MyChits";
+        //     const amount = "0"; // Optional
+        //     const currency = "INR";
+        //     url = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&cu=${currency}`;
+        //     break;
+
+        //     case 'Other Apps':
+        //         // This option is designed for the native Share sheet.
+        //         Alert.alert(
+        //             "Native Share", 
+        //             "For 'Other Apps', please use the native React Native `Share` API in your production environment to open the system share menu."
+        //         );
+        //         return;
             default:
                 Alert.alert("Error", "Unsupported platform.");
                 return;
@@ -89,6 +111,7 @@ Don’t miss out—start your savings journey today! 🚀`;
         try {
             // Attempt to open the constructed URL
             const supported = await Linking.canOpenURL(url);
+            
 
             if (supported) {
                 await Linking.openURL(url);
@@ -137,6 +160,9 @@ Don’t miss out—start your savings journey today! 🚀`;
                 ))}
             </View>
         </View>
+
+
+
     );
 
     return (

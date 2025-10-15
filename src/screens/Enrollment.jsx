@@ -1,3 +1,4 @@
+
 // Enrollment.jsx
 import React, { useState, useEffect, useContext } from "react";
 import {
@@ -11,6 +12,7 @@ import {
   StatusBar,
   SafeAreaView,
   Image,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
@@ -19,7 +21,6 @@ import Header from "../components/layouts/Header";
 import { NetworkContext } from "../context/NetworkProvider";
 import { ContextProvider } from "../context/UserProvider";
 import Toast from "react-native-toast-message";
-
 // Format number Indian style
 const formatNumberIndianStyle = (num) => {
   if (num === null || num === undefined) return "0";
@@ -34,13 +35,15 @@ const formatNumberIndianStyle = (num) => {
   const lastThree = integerPart.substring(integerPart.length - 3);
   const otherNumbers = integerPart.substring(0, integerPart.length - 3);
   if (otherNumbers !== "") {
-    const formattedOtherNumbers = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",");
+    const formattedOtherNumbers = otherNumbers.replace(
+      /\B(?=(\d{2})+(?!\d))/g,
+      ","
+    );
     return (isNegative ? "-" : "") + formattedOtherNumbers + "," + lastThree + decimalPart;
   } else {
     return (isNegative ? "-" : "") + lastThree + decimalPart;
   }
 };
-
 // Theme
 const theme = {
   background: "#6A1B9A", // deep violet
@@ -52,13 +55,11 @@ const theme = {
   success: "#43A047",
   danger: "#E53935",
 };
-
 const Enrollment = ({ route, navigation }) => {
   const { groupFilter } = route.params || {};
   const [appUser] = useContext(ContextProvider);
-  const userId = appUser.userId || {};
+  const userId = appUser.userId || "";
   const { isConnected, isInternetReachable } = useContext(NetworkContext);
-
   const [cardsData, setCardsData] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState("AllGroups");
   const [isLoading, setIsLoading] = useState(true);
@@ -68,21 +69,28 @@ const Enrollment = ({ route, navigation }) => {
   const [moreFiltersModalVisible, setMoreFiltersModalVisible] = useState(false);
   const [enrollmentModalVisible, setEnrollmentModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
-
+  
+  // New state for join confirmation modal
+  const [joinConfirmModalVisible, setJoinConfirmModalVisible] = useState(false);
+  const [joinConfirmData, setJoinConfirmData] = useState(null);
+  
   const NoGroupsIllustration = require("../../assets/Nogroup.png");
-
+  // fetch number of vacant seats for a group
   const fetchVacantSeats = async (groupId) => {
     try {
-      const ticketsResponse = await axios.post(`${url}/enroll/get-next-tickets/${groupId}`);
+      const ticketsResponse = await axios.post(
+        `${url}/enroll/get-next-tickets/${groupId}`
+      );
       const fetchedTickets = Array.isArray(ticketsResponse.data.availableTickets)
         ? ticketsResponse.data.availableTickets
         : [];
       return fetchedTickets.length;
-    } catch {
+    } catch (err) {
+      // swallow error and return 0 seats when unable to fetch
       return 0;
     }
   };
-
+  // fetch groups list
   const fetchGroups = async () => {
     if (!isConnected || !isInternetReachable) {
       setIsLoading(false);
@@ -90,18 +98,17 @@ const Enrollment = ({ route, navigation }) => {
       Toast.show({ type: "error", text1: "Offline", text2: "Cannot load groups." });
       return;
     }
-
     setIsLoading(true);
     setError(null);
-
     let endpoint = `${url}/group/get-group`;
-    if (selectedGroup === "NewGroups") endpoint = `${url}/group/get-group-by-filter/NewGroups`;
-    else if (selectedGroup === "OngoingGroups") endpoint = `${url}/group/get-group-by-filter/OngoingGroups`;
-
+    if (selectedGroup === "NewGroups")
+      endpoint = `${url}/group/get-group-by-filter/NewGroups`;
+    else if (selectedGroup === "OngoingGroups")
+      endpoint = `${url}/group/get-group-by-filter/OngoingGroups`;
     try {
-      const response = await fetch(endpoint);
-      if (!response.ok) throw new Error("Failed to fetch groups.");
-      const data = await response.json();
+      const response = await axios.get(endpoint);
+      const data = Array.isArray(response.data) ? response.data : [];
+      // fetch vacant seats for each group in parallel
       const groupsWithVacantSeats = await Promise.all(
         data.map(async (group) => {
           const vacantSeats = await fetchVacantSeats(group._id);
@@ -109,17 +116,17 @@ const Enrollment = ({ route, navigation }) => {
         })
       );
       setCardsData(groupsWithVacantSeats);
-    } catch {
+    } catch (err) {
       setError("Error loading groups.");
+      setCardsData([]);
     } finally {
       setIsLoading(false);
     }
   };
-
   useEffect(() => {
     fetchGroups();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedGroup, isConnected, isInternetReachable]);
-
   useEffect(() => {
     if (groupFilter) {
       const normalizedFilter =
@@ -131,19 +138,16 @@ const Enrollment = ({ route, navigation }) => {
       setSelectedGroup(normalizedFilter);
     }
   }, [groupFilter]);
-
-  const formatDate = (date) => new Date(date).toLocaleDateString("en-GB");
-
-  const handleEnrollment = (card) => {
-    if (!isConnected || !isInternetReachable) {
-      setModalMessage("You are offline. Connect to internet to view details.");
-      setEnrollmentModalVisible(true);
-      return;
+  const formatDate = (date) => {
+    if (!date) return "";
+    try {
+      return new Date(date).toLocaleDateString("en-GB");
+    } catch {
+      return date;
     }
-    navigation.navigate("EnrollForm", { groupId: card._id, userId });
   };
-
-  const handleJoinNow = async (card) => {
+  // This function will trigger the join confirmation modal.
+  const promptJoinConfirmation = (card) => {
     if (!isConnected || !isInternetReachable) {
       Toast.show({ type: "error", text1: "No Internet Connection" });
       return;
@@ -152,7 +156,14 @@ const Enrollment = ({ route, navigation }) => {
       Toast.show({ type: "info", text1: "No Seats Available" });
       return;
     }
-
+    // Set the card data to show in the modal and show the modal
+    setJoinConfirmData(card);
+    setJoinConfirmModalVisible(true);
+  };
+  // Called when user confirms join (after checking group details and terms)
+  const confirmJoin = async () => {
+    const card = joinConfirmData;
+    setJoinConfirmModalVisible(false);
     setJoinGroupId(card._id);
     setIsJoining(true);
     const payload = {
@@ -161,11 +172,13 @@ const Enrollment = ({ route, navigation }) => {
       no_of_tickets: 1,
       chit_asking_month: Number(card?.group_duration) || 0,
     };
-
     try {
       await axios.post(`${url}/mobile-app-enroll/add-mobile-app-enroll`, payload);
       Toast.show({ type: "success", text1: "Enrollment Successful!" });
-      navigation.navigate("EnrollConfirm", { group_name: card.group_name, userId });
+      navigation.navigate("EnrollConfirm", {
+        group_name: card.group_name,
+        userId,
+      });
     } catch (err) {
       Toast.show({
         type: "error",
@@ -178,14 +191,24 @@ const Enrollment = ({ route, navigation }) => {
       fetchGroups();
     }
   };
-
+  // Existing enrollment handler (for viewing details)
+  const handleEnrollment = (card) => {
+    if (!isConnected || !isInternetReachable) {
+      setModalMessage("You are offline. Connect to internet to view details.");
+      setEnrollmentModalVisible(true);
+      return;
+    }
+    navigation.navigate("EnrollForm", { groupId: card._id, userId });
+  };
   const CardContent = ({ card }) => {
     const isCurrentCardJoining = isJoining && joinGroupId === card._id;
     return (
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <Text style={styles.cardTitle}>{card.group_name}</Text>
-          <Text style={styles.cardValue}>₹ {formatNumberIndianStyle(card.group_value)}</Text>
+          <Text style={styles.cardValue}>
+            ₹ {formatNumberIndianStyle(card.group_value)}
+          </Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Start: {formatDate(card.start_date)}</Text>
@@ -200,7 +223,9 @@ const Enrollment = ({ route, navigation }) => {
             style={[styles.outlineBtn, { borderColor: theme.violetLight }]}
             onPress={() => handleEnrollment(card)}
           >
-            <Text style={[styles.btnText, { color: theme.violetLight }]}>View Details</Text>
+            <Text style={[styles.btnText, { color: theme.violetLight }]}>
+              View Details
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[
@@ -208,7 +233,7 @@ const Enrollment = ({ route, navigation }) => {
               { backgroundColor: theme.violetLight },
               card.vacantSeats === 0 && { opacity: 0.6 },
             ]}
-            onPress={() => handleJoinNow(card)}
+            onPress={() => promptJoinConfirmation(card)}
             disabled={isCurrentCardJoining || card.vacantSeats === 0}
           >
             {isCurrentCardJoining ? (
@@ -223,10 +248,10 @@ const Enrollment = ({ route, navigation }) => {
       </View>
     );
   };
-
+  // If loading, show activity indicator (header remains visible)
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.safeContainer}>
         <StatusBar barStyle="light-content" backgroundColor={theme.background} />
         <Header userId={userId} navigation={navigation} />
         <View style={styles.centered}>
@@ -235,16 +260,18 @@ const Enrollment = ({ route, navigation }) => {
       </SafeAreaView>
     );
   }
-
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.safeContainer}>
       <StatusBar barStyle="light-content" backgroundColor={theme.background} />
       <Header userId={userId} navigation={navigation} />
-
       <View style={styles.inner}>
         {/* Filter Chips */}
         <View style={styles.filterContainer}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ alignItems: "center" }}
+          >
             {[
               { key: "AllGroups", label: "All", icon: "grid" },
               { key: "NewGroups", label: "New", icon: "sparkles" },
@@ -273,7 +300,6 @@ const Enrollment = ({ route, navigation }) => {
                 </TouchableOpacity>
               );
             })}
-
             <TouchableOpacity
               style={styles.chip}
               onPress={() => setMoreFiltersModalVisible(true)}
@@ -282,9 +308,11 @@ const Enrollment = ({ route, navigation }) => {
             </TouchableOpacity>
           </ScrollView>
         </View>
-
         {/* Cards */}
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 20 }}
+        >
           {cardsData.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Image source={NoGroupsIllustration} style={styles.noGroupsImage} />
@@ -292,12 +320,13 @@ const Enrollment = ({ route, navigation }) => {
               <Text style={styles.noGroupsText}>Please check back later.</Text>
             </View>
           ) : (
-            cardsData.map((card) => <CardContent key={card._id} card={card} />)
+            cardsData.map((card) => (
+              <CardContent key={card._id} card={card} />
+            ))
           )}
         </ScrollView>
       </View>
-
-      {/* Modals */}
+      {/* Enrollment Modal for offline message */}
       <Modal visible={enrollmentModalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -311,7 +340,7 @@ const Enrollment = ({ route, navigation }) => {
           </View>
         </View>
       </Modal>
-
+      {/* More Filters Modal */}
       <Modal visible={moreFiltersModalVisible} transparent animationType="slide">
         <View style={styles.moreFiltersModalOverlay}>
           <View style={styles.moreFiltersModalContent}>
@@ -337,18 +366,60 @@ const Enrollment = ({ route, navigation }) => {
           </View>
         </View>
       </Modal>
+      {/* Join Confirmation Modal */}
+      <Modal visible={joinConfirmModalVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {joinConfirmData && (
+              <>
+                <Text style={styles.modalTitle}>
+                  Confirm Join
+                </Text>
+                <Text style={{ marginVertical: 8, textAlign: "center" }}>
+                  Group: {joinConfirmData.group_name}
+                </Text>
+                <Text style={{ marginBottom: 8, textAlign: "center", fontSize: 12 }}>
+                  Group Value: ₹ {formatNumberIndianStyle(joinConfirmData.group_value)}
+                </Text>
+                <Text style={{ marginBottom: 8, textAlign: "center", fontSize: 12 }}>
+                  Vacant Seats: {joinConfirmData.vacantSeats}
+                </Text>
+                <Text style={{ marginBottom: 16, textAlign: "center", fontSize: 12 }}>
+                  By pressing OK, you agree to the Terms & Conditions.
+                </Text>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%" }}>
+                  <TouchableOpacity
+                    style={[styles.outlineBtn, { flex: 1, marginRight: 8 }]}
+                    onPress={() => setJoinConfirmModalVisible(false)}
+                  >
+                    <Text style={[styles.btnText, { color: theme.violetLight }]}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.filledBtn, { flex: 1, backgroundColor: theme.violetLight }]}
+                    onPress={confirmJoin}
+                  >
+                    <Text style={styles.filledBtnText}>OK</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
-
 // Styles
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.background },
-  inner: { flex: 1, paddingHorizontal: 12 },
+  safeContainer: {
+    flex: 1,
+    backgroundColor: theme.background,
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0,
+  },
+  inner: { flex: 1, paddingHorizontal: 12, paddingTop: 12 },
   centered: { flex: 1, justifyContent: "center", alignItems: "center" },
-
   // Filter Chips
-  filterContainer: { flexDirection: "row", marginVertical: 12 },
+  filterContainer: { flexDirection: "row", marginVertical: 6 },
   chip: {
     flexDirection: "row",
     alignItems: "center",
@@ -365,13 +436,17 @@ const styles = StyleSheet.create({
     borderColor: theme.violet,
   },
   chipText: { marginLeft: 6, fontSize: 14, fontWeight: "bold" },
-
   // Card
   card: {
     backgroundColor: theme.surface,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
   },
   cardHeader: {
     flexDirection: "row",
@@ -400,13 +475,11 @@ const styles = StyleSheet.create({
   },
   btnText: { fontSize: 14, fontWeight: "bold" },
   filledBtnText: { color: "#fff", fontSize: 14, fontWeight: "bold" },
-
   // Empty state
   emptyContainer: { justifyContent: "center", alignItems: "center", marginTop: 50 },
   noGroupsImage: { width: 180, height: 180, marginBottom: 12, resizeMode: "contain" },
   noGroupsTitle: { color: "black", fontWeight: "bold", fontSize: 18 },
   noGroupsText: { color: theme.textSecondary, fontSize: 14 },
-
   // Modals
   modalOverlay: {
     flex: 1,
@@ -429,7 +502,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   modalCloseButtonText: { color: "white", fontWeight: "bold", fontSize: 14 },
-
   moreFiltersModalOverlay: {
     flex: 1,
     justifyContent: "flex-end",
@@ -445,5 +517,4 @@ const styles = StyleSheet.create({
   moreFiltersOption: { paddingVertical: 12 },
   moreFiltersOptionText: { color: "black", fontSize: 16 },
 });
-
 export default Enrollment;
