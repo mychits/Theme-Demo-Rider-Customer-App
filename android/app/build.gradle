@@ -92,15 +92,15 @@ android {
         applicationId 'com.gagansk.cusapp'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 17
-        versionName "1.4.7"
+        versionCode 1
+        versionName "1.0.0"
     }
-     signingConfigs {
+    signingConfigs {
         debug {
-            storeFile file('customer-key.keystore')
-            storePassword 'Customer@2025'
-            keyAlias 'my-customer-keys'
-            keyPassword 'Customer@2025'
+            storeFile file('my-upload-key.keystore')
+            storePassword 'SuvarnaGold@2025*'
+            keyAlias 'my-key-alias'
+            keyPassword 'SuvarnaGold@2025*'
         }
     }
     buildTypes {
