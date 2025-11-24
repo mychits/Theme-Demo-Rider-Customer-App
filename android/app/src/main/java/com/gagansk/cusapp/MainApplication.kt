@@ -1,4 +1,4 @@
-package com.gagansk.cusapp
+package com.demorider.mychits.co.in
 
 import android.app.Application
 import android.content.res.Configuration

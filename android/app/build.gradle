@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.gagansk.cusapp'
+    namespace 'com.demorider.mychits.co.in'
     defaultConfig {
-        applicationId 'com.gagansk.cusapp'
+        applicationId 'com.demorider.mychits.co.in'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

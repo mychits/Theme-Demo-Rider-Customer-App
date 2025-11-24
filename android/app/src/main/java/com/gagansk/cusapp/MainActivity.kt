@@ -1,4 +1,4 @@
-package com.gagansk.cusapp
+package com.demorider.mychits.co.in
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

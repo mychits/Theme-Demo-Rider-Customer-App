@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.gagansk.cusapp"
+      "bundleIdentifier": "com.demorider.mychits.co.in"
     },
     "android": {
       "adaptiveIcon": {
@@ -24,7 +24,7 @@
       "android": {
         "buildType": "apk"
       },
-      "package": "com.gagansk.cusapp"
+      "package": "com.demorider.mychits.co.in"
     },
     "web": {
       "favicon": "./assets/favicon.png"

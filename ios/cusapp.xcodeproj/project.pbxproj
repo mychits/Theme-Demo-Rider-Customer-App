@@ -257,7 +257,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.gagansk.cusapp";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.demorider.mychits.co.in";
 				PRODUCT_NAME = "cusapp";
 				SWIFT_OBJC_BRIDGING_HEADER = "cusapp/cusapp-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -286,7 +286,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.gagansk.cusapp";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.demorider.mychits.co.in";
 				PRODUCT_NAME = "cusapp";
 				SWIFT_OBJC_BRIDGING_HEADER = "cusapp/cusapp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
