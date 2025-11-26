@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
-    "@react-native-community/datetimepicker": "8.3.0",
+    "@react-native-community/datetimepicker": "8.4.1",
     "@react-native-community/masked-view": "^0.1.11",
     "@react-native-community/netinfo": "11.4.1",
     "@react-native-community/slider": "4.5.6",
@@ -20,8 +20,9 @@
     "@react-navigation/native": "^7.0.13",
     "@react-navigation/native-stack": "^7.1.14",
     "axios": "^1.7.8",
-    "expo": "^53.0.23",
+    "expo": "~53.0.24",
     "expo-contacts": "~14.2.5",
+    "expo-font": "~13.3.2",
     "expo-linear-gradient": "~14.1.5",
     "expo-splash-screen": "~0.30.10",
     "expo-status-bar": "~2.2.3",
@@ -29,7 +30,7 @@
     "lottie-react-native": "7.2.2",
     "lucide-react-native": "^0.511.0",
     "react": "19.0.0",
-    "react-native": "0.79.3",
+    "react-native": "0.79.6",
     "react-native-date-picker": "^5.0.7",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-image-picker": "^8.2.1",
@@ -38,14 +39,12 @@
     "react-native-linear-gradient": "^2.8.3",
     "react-native-modal": "^14.0.0-rc.1",
     "react-native-particles": "^0.0.8",
-    "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
     "react-native-shadow-2": "^7.1.2",
     "react-native-svg": "15.11.2",
     "react-native-toast-message": "^2.3.0",
-    "react-native-vector-icons": "^10.2.0",
-    "react-native-voice": "^0.3.0"
+    "react-native-vector-icons": "^10.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
